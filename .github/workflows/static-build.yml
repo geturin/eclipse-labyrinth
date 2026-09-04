@@ -1,0 +1,57 @@
+name: Test and synchronize static game
+on:
+  push:
+    branches: ['**']
+    paths-ignore:
+      - 'dist/**'
+      - 'docs/**'
+      - '*.md'
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: static-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test
+      - run: npm run build
+      - name: Pull requests must include the exact rebuilt offline page
+        if: github.event_name == 'pull_request'
+        run: git diff --exit-code -- dist/index.html
+  synchronize:
+    needs: verify
+    if: github.event_name != 'pull_request' && github.repository == 'geturin/eclipse-labyrinth'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm run build
+      - name: Commit a stale static page without force-pushing
+        env:
+          TARGET_BRANCH: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          if git diff --quiet -- dist/index.html; then
+            echo 'Source and static HTML already match.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- dist/index.html
+          git commit -m 'build: synchronize self-contained static game'
+          # A concurrent push fails safely; it never overwrites newer work.
+          git push origin "HEAD:$TARGET_BRANCH"

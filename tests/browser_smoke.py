@@ -16,7 +16,7 @@ SHOTS = ROOT / 'docs' / 'screenshots'
 OUT.mkdir(exist_ok=True)
 SHOTS.mkdir(exist_ok=True)
 HTML = (ROOT / 'dist' / 'index.html').read_text()
-KEY = 'eclipse-labyrinth.run.v1'
+KEY = 'eclipse-labyrinth.run.v2'
 checks = []
 errors = []
 requests = []
@@ -132,6 +132,15 @@ with sync_playwright() as p:
     page.locator('[data-action="equip-bag"]').first.click()
     check('Inventory weapon can be swapped',page.locator('.inventory-weapon').count()==4)
     page.keyboard.press('Escape')
+    check('Comfort mode defaults on',state(page)['comfort'] is True)
+    page.locator('[data-action="menu"]').click()
+    page.locator('[data-action="comfort"]').click()
+    check('Comfort toggle persists',state(page)['comfort'] is False)
+    page.locator('[data-action="comfort"]').click()
+    page.keyboard.press('Escape')
+    before=state(page)['dungeon']['elapsed']
+    page.keyboard.press('Space')
+    check('Wait advances one world tick',state(page)['dungeon']['elapsed']==before+1)
     saved=state(page)
     page.locator('[data-action="menu"]').click()
     page.locator('[data-action="return-title"]').click()
@@ -149,7 +158,7 @@ with sync_playwright() as p:
     battle=node_state("const r=e.createRun(['knight','mage','shrine'],'FIRST-LIGHT');e.startBattle(r);console.log(e.serializeRun(r));")
     page=setup(browser,{'width':1440,'height':1100},battle)
     page.locator('[data-action="resume"]').click()
-    check('Saved battle resumes with active actor',page.locator('[data-action="skill"]').count()==5)
+    check('Saved battle resumes with active actor',page.locator('.tactical-skills .skill-button').count()==4)
     check('Enemy intent visible',page.locator('.enemy-intent').count()>0)
     no_overflow(page,'Desktop battle fits viewport')
     page.wait_for_timeout(600)
@@ -164,9 +173,10 @@ with sync_playwright() as p:
         if hero['job']=='shrine' and any(h['hp']/h['maxHp']<.55 for h in r['party']):chosen='mend'
         elif hero['job']=='knight':chosen='cleave'
         elif hero['job']=='mage':chosen='frost' if r['battle']['enemies'][0]['status'].get('burn') else 'fire'
-        elif hero['job']=='shrine':chosen='ray'
+        elif hero['job']=='shrine':chosen='attack'
         if not chosen or page.locator(f'[data-skill="{chosen}"]').is_disabled():chosen='attack'
-        act(page,chosen)
+        target=min((h for h in r['party'] if h['hp']>0), key=lambda h:h['hp']/h['maxHp'])['id'] if chosen=='mend' else None
+        act(page,chosen,target)
     check('UI combat reaches victory without boosted stats',state(page)['phase']=='reward')
     check('Victory counts battle',state(page)['battles']==1)
     page.locator('[data-action="reward"]').first.click()
@@ -177,11 +187,11 @@ with sync_playwright() as p:
     # Ally-target selection and cancellation on a real time-mage encounter.
     chrono=node_state("const r=e.createRun(['chrono'],'CLOCK-TEST');e.startBattle(r);console.log(e.serializeRun(r));")
     page=setup(browser,{'width':1440,'height':1000},chrono);page.locator('[data-action="resume"]').click()
-    page.locator('[data-skill="rewind"]').click()
+    page.locator('[data-skill="haste"]').click()
     check('Ally skill enters target selection',page.locator('.target-prompt').count()==1)
     page.locator('[data-action="cancel-target"]').click()
     check('Ally selection cancellation consumes no action',state(page)['rng']==chrono['rng'])
-    act(page,'rewind','hero-0')
+    act(page,'haste','hero-0')
     check('Ally skill applies through party click',state(page)['party'][0]['mp']<chrono['party'][0]['mp'])
     page.close()
 
@@ -208,10 +218,49 @@ with sync_playwright() as p:
         page.close()
         page=setup(browser,{'width':width,'height':844},battle);page.locator('[data-action="resume"]').click()
         no_overflow(page,f'{width}px battle fits')
-        check(f'{width}px five battle actions accessible',page.locator('[data-action="skill"]').count()==5)
+        check(f'{width}px two initial arts plus basic/guard accessible',page.locator('.tactical-skills .skill-button').count()==4)
         if width==390:page.screenshot(path=str(SHOTS/'battle-mobile.png'),full_page=True)
         act(page,'attack')
         check(f'{width}px touch battle action works',state(page)['rng']!=battle['rng'])
+        page.close()
+
+    # Qualitative progression through real reward buttons, not an in-game debug hook.
+    learning=node_state("const r=e.createRun(['mage'],'LEARNING');e.openRewards(r,'treasure');console.log(e.serializeRun(r));")
+    page=setup(browser,{'width':390,'height':844},learning);page.locator('[data-action="resume"]').click()
+    no_overflow(page,'Mobile advanced-art rewards fit')
+    index=next(i for i,c in enumerate(learning['rewards']) if c['type']=='learn')
+    skill=learning['rewards'][index]['skillId']
+    page.locator(f'[data-action="reward"][data-index="{index}"]').click()
+    check('New art acquired through reward UI',skill in state(page)['party'][0]['skills'])
+    page.close()
+
+    evolution=node_state("const r=e.createRun(['chrono'],'EVOLVE');r.party[0].ranks.haste=1;e.openRewards(r);r.rewards[0]={type:'evolve',heroId:r.party[0].id,skillId:'haste'};console.log(e.serializeRun(r));")
+    page=setup(browser,{'width':390,'height':844},evolution);page.locator('[data-action="resume"]').click()
+    check('Evolution explains group targeting', '全队' in page.locator('.evolution-card').first.inner_text())
+    page.locator('[data-action="reward"][data-index="0"]').click()
+    check('Evolution stored separately from numerical ranks',state(page)['party'][0]['evolutions']['haste'])
+    page.close()
+
+    omen=node_state("const r=e.createRun(['chrono','knight','shrine'],'BOSS-PREVIEW');r.dungeon.packs=[];r.party.forEach((h,i)=>h.spd=100-i);e.startBattle(r,'guardian');const b=r.battle.enemies[0];b.boss.hpTriggered=[0];b.boss.queued=[{key:'hp-0',hpIndex:0,name:'星锁仪式',counter:'dispel',source:'HP 70%'}];r.battle.queue=[];e.act(r,'guard');console.log(e.serializeRun(r));")
+    for width in [360,390,768,1440]:
+        page=setup(browser,{'width':width,'height':1000 if width==1440 else 844},omen);page.locator('[data-action="resume"]').click()
+        check(f'{width}px explicit boss omen visible',page.locator('.omen-panel').count()==1)
+        check(f'{width}px counterplay and deadline visible','驱散' in page.locator('.omen-panel').inner_text() and '本回合末' in page.locator('.omen-panel').inner_text())
+        no_overflow(page,f'{width}px boss counter panel fits')
+        if width in [390,1440]:page.screenshot(path=str(SHOTS/('boss-mobile.png' if width==390 else 'boss-desktop.png')),full_page=True)
+        act(page,'salt')
+        check(f'{width}px dispel updates omen progress immediately', '结界已解除' in page.locator('.omen-panel').inner_text())
+        check(f'{width}px dispel actually consumes shared supply',state(page)['supplies']['salt']==omen['supplies']['salt']-1)
+        page.close()
+
+    crowded=node_state("const r=e.createRun(['mage','knight','shrine'],'CROWD');r.party[0].skills.push(...JOBS.mage.advanced);r.party.forEach((h,i)=>h.spd=100-i);const p={id:'crowd',name:'test',troop:['wisp','moth','sentinel','revenant','briar','prism'],engaged:false,defeated:false,members:null};e.startBattle(r,'normal',null,[p]);console.log(e.serializeRun(r));")
+    for width in [360,390,768]:
+        page=setup(browser,{'width':width,'height':844},crowded);page.locator('[data-action="resume"]').click()
+        no_overflow(page,f'{width}px six enemies and seven learned commands fit')
+        check(f'{width}px advanced arts are available in battle',page.locator('.tactical-skills .skill-button').count()==7)
+        check(f'{width}px six enemy targets are reachable',page.locator('[data-action="target"]').count()==6)
+        page.locator('[data-action="target"]').last.click()
+        check(f'{width}px offscreen enemy can be selected',page.locator('[data-action="target"]').last.get_attribute('class').find('selected')>=0)
         page.close()
     browser.close()
 
