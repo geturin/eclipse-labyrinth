@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111426">
+<meta name="description" content="月蝕の迷宮：第一人称探索 × 职业联动 × Roguelike 构筑。每一轮，重新书写你的命运。">
+<title>月蝕の迷宮 · Eclipse Labyrinth</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='26' fill='%23a18ee0'/%3E%3Ccircle cx='43' cy='23' r='23' fill='%23111426'/%3E%3C/svg%3E">
+<style>
+:root{color-scheme:dark;--bg:#0e111c;--panel:#171c2b;--panel2:#1c2234;--line:#ffffff13;--line2:#aaa5d431;--text:#edeaf5;--muted:#969bb4;--faint:#69738c;--lav:#c1b0ee;--gold:#e4c591;--mint:#99d5bf;--rose:#e89bb0;--radius:15px;--sans:Inter,"Segoe UI","Noto Sans SC","Hiragino Kaku Gothic ProN","Microsoft YaHei",sans-serif;--serif:"Yu Mincho","Hiragino Mincho ProN","Noto Serif CJK SC","Songti SC",Georgia,serif}
+*{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;font:14px/1.6 var(--sans);color:var(--text);background:radial-gradient(ellipse at 78% 0,#28213a55 0,transparent 53%),var(--bg);min-height:100vh}button,input,select{font:inherit}button{color:inherit;cursor:pointer;touch-action:manipulation}button:disabled{cursor:not-allowed;opacity:.35}button,a,input,select{outline:none}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--lav);outline-offset:4px}button{border:0}button svg{flex-shrink:0;vertical-align:middle}button,button::before{transition:background .2s,border-color .2s,transform .2s,opacity .2s}button:not(:disabled):active{transform:translateY(1px)}::selection{background:#b5a1df55}h1,h2,h3,h4,p{margin:0}svg{vertical-align:middle}img{max-width:100%;display:block}input,select{color:var(--text);background:#0f1422;border:1px solid var(--line2);border-radius:8px;padding:10px 12px;min-width:0}input::placeholder{color:#68748f}select{width:100%}button.primary{background:var(--lav);color:#211b32;font-weight:700;border:1px solid #dccffc;padding:15px 24px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 5px 26px #b6a2e51a}button.primary:hover:not(:disabled){background:#d4c4f8;box-shadow:0 6px 30px #b6a2e529}button.secondary{background:#ffffff06;border:1px solid var(--line2);padding:11px 18px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;gap:9px}button.secondary:hover{background:#ffffff0c;border-color:#c1b0ee60}.ghost{background:none;color:var(--muted);padding:8px 10px;display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:7px}.ghost:hover{background:#ffffff07;color:var(--text)}.icon-button{display:inline-grid;place-items:center;border:1px solid var(--line);background:#ffffff03;width:37px;height:37px;border-radius:9px;color:var(--muted)}.icon-button:hover{background:#c1b0ee12;color:var(--text)}.eyebrow{font-size:10px;letter-spacing:3px;font-weight:700;color:var(--lav);text-transform:uppercase}.muted{color:var(--muted)}.small{font-size:12px}.tiny{font-size:10px}.gold{color:var(--gold)}.tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;letter-spacing:.5px;border:1px solid var(--line2);border-radius:5px;padding:2px 7px;color:var(--lav);background:#c1b0ee08}.tag.gold{color:var(--gold);border-color:#e4c59133;background:#e4c59108}.divider{height:1px;background:var(--line);margin:18px 0}.loading{display:grid;place-items:center;gap:20px;padding-top:30vh;color:var(--lav)}.loading span{font:80px var(--serif);animation:float 4s ease-in-out infinite}.brand{display:flex;align-items:center;gap:11px}.brand-mark{width:34px;height:34px;border:1px solid #c1b0ee4a;display:grid;place-items:center;border-radius:10px;color:var(--lav);background:#c1b0ee09;transform:rotate(-6deg)}.brand-label{font:600 14px var(--serif);letter-spacing:3px}.brand-en{color:var(--muted);font-size:8px;letter-spacing:2.2px;margin-top:3px}.page-head{max-width:1376px;margin:auto;display:flex;align-items:center;justify-content:space-between;height:88px;padding:0 34px;border-bottom:1px solid var(--line)}.header-actions{display:flex;gap:9px;align-items:center}.edition{font-size:10px;letter-spacing:1.6px;color:var(--faint);margin-right:14px}.dot{display:inline-block;background:var(--mint);height:5px;width:5px;border-radius:50%;box-shadow:0 0 10px #99d5bf77;margin-right:6px}.landing{max-width:1376px;margin:0 auto;padding:0 34px 30px;overflow:hidden}.hero-intro{position:relative;display:flex;min-height:493px;align-items:center;border-bottom:1px solid var(--line)}.intro-copy{position:relative;z-index:2;width:55%;padding:42px 0 52px}.intro-copy .eyebrow{display:flex;align-items:center;gap:12px}.intro-copy .eyebrow:before{content:"";width:31px;height:1px;background:var(--lav)}.intro-copy h1{font:500 clamp(46px,5.1vw,75px)/1.5 var(--serif);letter-spacing:5px;margin:18px 0 0;text-shadow:0 2px 35px #b7a1e024}.intro-en{font-size:11px;letter-spacing:7px;color:#aea5c4;margin:0 0 24px}.intro-sub{font-family:var(--serif);font-size:19px;color:#c6bfd4;letter-spacing:2px;margin-bottom:13px}.intro-copy>p{color:var(--muted);font-size:13px;line-height:1.95;max-width:427px}.feature-line{display:flex;flex-wrap:wrap;gap:19px;margin-top:24px;color:#aab1c9;font-size:11px}.feature-line span{display:flex;gap:7px;align-items:center}.feature-line svg{color:var(--lav)}.hero-art{position:absolute;width:56%;height:100%;right:-3%;bottom:0;pointer-events:none}.hero-art:after{content:"";position:absolute;inset:60% 0 0;background:linear-gradient(transparent,#0e111c);z-index:4}.moon-disk{position:absolute;left:17%;top:10%;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ded1f419 0,#a791d921 50%,#b6a0d935 69%,#d8c5ff88 70%,#cab8e725 71%,transparent 72%);box-shadow:0 0 100px #a17dc717,inset 0 0 50px #c4a6e20a}.moon-disk:before{content:"";position:absolute;inset:-19px;border:1px solid #c1b0ee1f;border-radius:50%}.moon-disk:after{content:"";position:absolute;inset:-37px;border:1px dashed #c1b0ee19;border-radius:50%;transform:rotate(20deg)}.hero-art .lead{position:absolute;width:380px;height:494px;object-fit:contain;bottom:-40px;left:17%;z-index:3;filter:drop-shadow(0 5px 25px #18142d)}.hero-art .echo{position:absolute;width:280px;bottom:-30px;opacity:.4;filter:drop-shadow(0 0 20px #161224);z-index:1}.hero-art .echo.left{left:-4%;transform:rotate(-5deg)}.hero-art .echo.right{right:-1%;transform:rotate(7deg)}.vertical-jp{position:absolute;right:4%;top:15%;writing-mode:vertical-rl;font:15px var(--serif);letter-spacing:6px;color:#a69fb4;z-index:4}.star-orbit{position:absolute;color:#e3d0f5;left:12%;top:17%;font-size:23px;opacity:.7}.star-orbit.two{left:80%;top:67%;font-size:14px}.floating-note{position:absolute;left:8%;bottom:80px;z-index:5;padding:12px 17px;background:#1a1b2dd9;border:1px solid var(--line2);backdrop-filter:blur(12px);border-radius:9px;box-shadow:0 10px 20px #0003}.floating-note strong{font:15px var(--serif);letter-spacing:2px}.floating-note small{display:block;color:var(--muted);font-size:9px;letter-spacing:1.5px;margin-top:4px}.chapter-line{position:absolute;bottom:12px;left:0;display:flex;gap:10px;font-size:9px;letter-spacing:2px;color:var(--faint);z-index:5}.chapter-line b{color:var(--lav);font-weight:400}.roster-section{padding-top:28px}.section-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px}.section-heading h2{font-family:var(--serif);font-size:23px;font-weight:500;letter-spacing:2px;display:flex;align-items:center;gap:14px}.section-heading h2>small{font:9px var(--sans);letter-spacing:2px;color:var(--faint)}.roster-meta{display:flex;gap:12px;align-items:center;font-size:11px;color:var(--muted)}.roster-meta strong{color:var(--lav)}.job-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.job-card{position:relative;isolation:isolate;min-width:0;height:230px;background:linear-gradient(160deg,#252a3e,#171b28);border:1px solid var(--line2);border-radius:10px;overflow:hidden;text-align:left;padding:0}.job-card:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 60% 15%,var(--job-color),transparent 80%);opacity:.08}.job-card:after{content:"";position:absolute;inset:40% 0 0;z-index:2;background:linear-gradient(transparent,#141a28 74%)}.job-card img{position:absolute;width:95%;height:235px;object-fit:cover;object-position:center top;left:2%;top:-5px;transition:transform .35s;opacity:.73}.job-card:hover img{transform:scale(1.05);opacity:1}.job-card.selected{border-color:var(--job-color);box-shadow:0 0 0 1px color-mix(in srgb,var(--job-color) 12%,transparent),inset 0 0 24px #c1b0ee0a}.job-card.selected img{opacity:1}.job-card.selected:before{opacity:.15}.job-meta{position:absolute;bottom:14px;left:14px;right:9px;z-index:3}.job-meta strong{display:block;font:17px var(--serif);letter-spacing:1px}.job-meta .jp{font-size:9px;letter-spacing:1px;color:var(--job-color);margin-bottom:4px}.job-meta .role{font-size:10px;color:#9da5be;margin-top:5px}.job-number{position:absolute;z-index:5;left:12px;top:12px;font-size:9px;letter-spacing:2px;color:#e2dcef88}.job-check{position:absolute;top:10px;right:10px;z-index:5;width:21px;height:21px;border:1px solid #ffffff35;border-radius:50%;display:grid;place-items:center}.selected .job-check{background:var(--job-color);color:#29253b;border:0}.job-detail-button{position:absolute;bottom:12px;right:10px;z-index:6;color:#b3b4c8;font-size:11px;opacity:.7}.expedition-bar{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:25px 0 24px;flex-wrap:wrap}.party-description{min-width:250px;flex:1}.party-description b{font-size:13px;font-weight:500;color:#d3cadf}.party-description p{font-size:11px;color:var(--muted);margin-top:5px}.start-controls{display:flex;align-items:center;gap:12px}.seed-box{position:relative}.seed-box input{width:149px;font-size:11px;padding:13px 11px;letter-spacing:1px}.seed-box label{position:absolute;top:-10px;left:9px;background:var(--bg);padding:0 5px;color:var(--faint);font-size:9px;letter-spacing:1px}.start-controls .primary{min-width:185px;padding:14px 21px}.landing-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:19px 0 0;color:var(--faint);font-size:10px;letter-spacing:.6px}.landing-foot span:last-child{color:#8589a0}.resume-button{color:var(--mint);border-color:#99d5bf33!important}
+/* In-run interface */
+.game-shell{max-width:1510px;margin:auto;padding:0 28px 18px}.game-head{display:flex;align-items:center;justify-content:space-between;gap:16px;height:81px;border-bottom:1px solid var(--line);margin-bottom:21px}.head-run{display:flex;gap:25px;color:var(--muted);font-size:11px}.head-run span{display:flex;align-items:center;gap:7px}.head-run b{color:#d7cfe8;font-weight:500}.head-run .seed{font-size:9px;letter-spacing:1px}.game-grid{display:grid;grid-template-columns:minmax(0,1fr) 264px;grid-template-areas:"view side" "command side" "party side";gap:14px;align-items:start}.viewport-panel{grid-area:view;border:1px solid var(--line2);border-radius:var(--radius);overflow:hidden;background:#161b2c;position:relative}.stage{position:relative;height:clamp(330px,34vw,492px);isolation:isolate;overflow:hidden}.stage>canvas{width:100%;height:100%;display:block;position:absolute;inset:0}.stage:after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 55px #080d1755;z-index:2}.stage-hud{position:absolute;inset:0;z-index:3;pointer-events:none}.floor-heading{position:absolute;left:26px;top:23px;text-shadow:0 2px 10px #000}.floor-heading .eyebrow{font-size:9px;letter-spacing:2.4px;color:#c1b0eebb}.floor-heading h2{font:24px var(--serif);letter-spacing:3px;margin:4px 0}.floor-heading .jp{font-size:9px;letter-spacing:2px;color:#9495ae}.floor-number{position:absolute;top:24px;right:25px;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px}.floor-number strong{font:29px Georgia,var(--serif);color:#e2d7f0;letter-spacing:1px}.floor-number span{font-size:8px;letter-spacing:2px;color:#9ca0b8}.compass{position:absolute;top:23px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:15px;background:#11172888;border:1px solid #c1b0ee1f;padding:8px 15px;border-radius:30px;font-size:9px;color:#787e99;backdrop-filter:blur(8px)}.compass .north{font-size:13px;color:#d5c4ef;display:flex;align-items:center;gap:6px}.compass svg{width:12px;height:12px}.crosshair{position:absolute;left:50%;top:50%;width:3px;height:3px;background:#d8d0e5aa;border-radius:50%;box-shadow:0 0 7px #b7a6eb;transform:translate(-50%,-50%)}.explore-caption{position:absolute;left:25px;bottom:24px;max-width:70%;font:12px/1.8 var(--serif);letter-spacing:1px;color:#bac0d288;text-shadow:0 1px 5px #000}.position-label{position:absolute;bottom:23px;right:24px;display:flex;gap:10px;align-items:center;font-size:10px;letter-spacing:1px;color:#a4a9c2}.position-label i{height:4px;width:4px;border-radius:50%;background:var(--mint)}.interaction{position:absolute;bottom:53px;left:50%;transform:translateX(-50%);pointer-events:auto;display:flex;align-items:center;gap:12px;padding:11px 18px;border-radius:9px;border:1px solid #cdb9e260;background:#171b2beb;color:#e0d4ef;white-space:nowrap;font-size:12px;box-shadow:0 6px 35px #0006;backdrop-filter:blur(12px);animation:float 4s ease-in-out infinite}.interaction kbd{border:1px solid #c3b2e455;padding:2px 6px;border-radius:3px;font-size:10px;color:#bdb0d4}.interaction:hover{background:#2a263f}.stage-footer{height:43px;display:flex;align-items:center;justify-content:space-between;padding:0 19px;background:#141a2a;border-top:1px solid var(--line);font-size:10px;color:var(--muted);gap:12px}.stage-footer .path-label{display:flex;gap:7px;align-items:center;letter-spacing:1px}.danger-meter{display:flex;align-items:center;gap:9px}.danger-bars{display:flex;gap:3px}.danger-bars i{width:13px;height:3px;background:#ffffff12;display:block}.danger-bars i.on{background:#bda5da}.danger-bars.danger i.on{background:#e89bb0}.side-column{grid-area:side;display:flex;flex-direction:column;gap:14px}.side-card{border:1px solid var(--line);border-radius:12px;background:#171d2bcc;overflow:hidden}.card-title{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 0;font-size:11px;letter-spacing:1px}.card-title span{display:flex;align-items:center;gap:8px;color:#cec7e1}.card-title small{font-size:9px;letter-spacing:1px;color:var(--faint)}.map-wrapper{display:block;width:100%;background:none;text-align:center;padding:10px 13px 3px}.map-wrapper svg{width:100%;max-height:207px;aspect-ratio:1}.map-legend{display:flex;justify-content:space-between;gap:5px;color:var(--faint);font-size:9px;padding:5px 16px 13px}.map-legend span{display:flex;align-items:center;gap:4px}.map-legend i{display:inline-block;width:5px;height:5px;background:var(--lav)}.map-legend .treasure i{background:var(--gold)}.map-legend .rest i{background:var(--mint)}.objective{padding:15px 16px;background:linear-gradient(120deg,#c1b0ee09,transparent)}.objective .eyebrow{font-size:8px;letter-spacing:1.8px}.objective p{font-size:12px;color:#c5bfd8;margin-top:5px}.objective small{display:block;color:#767e99;font-size:10px;margin-top:5px}.journal{padding:12px 16px;max-height:205px;overflow:auto;scrollbar-width:thin;scrollbar-color:#494560 transparent}.log-entry{font-size:10px;line-height:1.75;color:#8a93ad;margin-bottom:8px;display:flex;gap:8px}.log-entry:before{content:"";width:3px;height:3px;background:#68738d;flex-shrink:0;margin-top:7px;border-radius:50%}.log-entry.special{color:#c7b3e6}.log-entry.special:before{background:#b7a1d4}.log-entry.heal{color:#9bbdab}.log-entry.loot{color:#c4b18f}.log-entry.danger,.log-entry.enemy{color:#d18ca0}.log-entry.player{color:#b0bed6}.boon-overview{padding:13px 14px;display:flex;gap:5px;flex-wrap:wrap;min-height:50px}.boon-chip{display:inline-flex;align-items:center;gap:5px;font-size:9px;padding:4px 7px;border:1px solid #c1b0ee24;border-radius:5px;color:#aaa4c4;background:#c1b0ee05}.boon-chip svg{width:12px;height:12px}.boon-chip b{font-size:8px;color:var(--gold)}.side-foot{font-size:9px;color:var(--faint);text-align:center;letter-spacing:1px}.command-panel{grid-area:command;min-height:102px;border-radius:12px;border:1px solid var(--line);background:#171d2b;overflow:hidden}.explore-command{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 19px}.command-copy{max-width:42%}.command-copy .eyebrow{font-size:8px;letter-spacing:2px;color:var(--faint)}.command-copy h3{font:16px var(--serif);font-weight:500;margin:3px 0 5px}.command-copy p{font-size:10px;color:var(--muted)}.dpad{display:grid;grid-template-columns:repeat(3,38px);grid-template-rows:repeat(2,32px);gap:4px}.dpad button{background:#22293b;border:1px solid #ffffff0d;border-radius:5px;color:#a6aec8;position:relative;display:flex;align-items:center;justify-content:center}.dpad button:hover{background:#31334d;color:#dfd3f0}.dpad button small{font-size:7px;position:absolute;right:3px;bottom:1px;color:#77809d}.dpad button svg{height:16px;width:16px}.dpad .move-forward{background:#37314d;border-color:#bca1df42;color:#d6c6ea}.command-shortcuts{display:flex;gap:7px}.command-shortcuts button{width:48px;height:57px;border:1px solid var(--line);background:#1d2333;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#adb1c7}.command-shortcuts button span{font-size:9px;color:var(--muted)}.command-shortcuts button:hover{border-color:var(--line2);background:#252b3d}.party-strip{grid-area:party;display:grid;grid-template-columns:repeat(var(--party-size,3),1fr);gap:11px}.party-card{position:relative;display:flex;gap:10px;align-items:stretch;min-width:0;background:linear-gradient(130deg,#212839,#181e2c);border:1px solid var(--line2);border-radius:11px;text-align:left;padding:12px 12px 11px 9px;overflow:hidden;min-height:128px}.party-card.active{border-color:var(--job-color);box-shadow:0 0 17px color-mix(in srgb,var(--job-color) 9%,transparent)}.party-card.active:before{content:"";height:2px;position:absolute;top:0;left:0;right:0;background:var(--job-color)}.party-card.downed{filter:grayscale(.8);opacity:.45}.party-card.targetable{border-color:var(--mint);box-shadow:0 0 0 2px #99d5bf22;cursor:crosshair}.party-face{position:relative;width:61px;flex-shrink:0;overflow:hidden;border-radius:6px;background:radial-gradient(ellipse at 50% 15%,color-mix(in srgb,var(--job-color) 22%,transparent),transparent 80%);align-self:stretch}.party-face img{position:absolute;width:124px;max-width:none;left:-30px;top:-26px}.party-face:after{content:"";position:absolute;inset:70% 0 0;background:linear-gradient(transparent,#1c2435)}.party-info{flex:1;min-width:0}.party-name{display:flex;justify-content:space-between;align-items:center;font:16px var(--serif);letter-spacing:1px;gap:4px;margin-bottom:1px}.party-name small{font:8px var(--sans);color:var(--job-color);letter-spacing:0;white-space:nowrap}.party-role{color:#858fa9;font-size:9px;margin-bottom:9px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.bar-line{display:flex;align-items:center;gap:6px;font-size:8px;line-height:1;margin-top:6px}.bar-line .label{color:#8993ac;width:14px;font-size:8px}.bar{position:relative;height:4px;border-radius:4px;flex:1;background:#ffffff0d;overflow:hidden}.bar>i{position:absolute;inset:0 auto 0 0;background:#9ccbb3;border-radius:4px;transition:width .35s}.bar.mp>i{background:#9ea1d5}.bar.low>i{background:#e394a4}.bar-line .value{font-size:8px;color:#c2c7d6;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:46px;text-align:right}.party-weapon{font-size:9px;color:#9298b2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:8px;display:flex;align-items:center;gap:4px}.party-weapon svg{width:10px;height:10px;color:#c8b38e}.status-list{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px}.status-badge{font-size:8px;border:1px solid color-mix(in srgb,var(--status-color) 30%,transparent);background:color-mix(in srgb,var(--status-color) 8%,transparent);color:var(--status-color);padding:1px 4px;border-radius:3px}.status-badge sup{font-size:7px;padding-left:2px}.game-foot{display:flex;justify-content:space-between;color:#626d87;font-size:9px;padding:15px 1px 0;letter-spacing:.6px}.xp-track{display:inline-flex;gap:8px;align-items:center}.xp-track>i{height:2px;width:100px;background:#c1b0ee15;display:inline-block}.xp-track>i>b{display:block;background:#9f90c0;height:2px}
+/* Battle view */
+.enemy-line{position:absolute;inset:102px 5% 75px;display:flex;align-items:center;justify-content:center;gap:clamp(10px,2.5vw,40px);pointer-events:none}.enemy-card{position:relative;width:min(29%,240px);height:100%;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;background:none;pointer-events:auto;transition:filter .2s;min-width:0}.enemy-card.boss{width:min(53%,350px)}.enemy-art{position:absolute;inset:0 0 37px;display:flex;align-items:flex-end;justify-content:center;pointer-events:none}.enemy-art img{width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 14px 18px #06081280);animation:enemyFloat 5s ease-in-out infinite}.enemy-card:nth-child(2) img{animation-delay:-1.8s}.enemy-card:nth-child(3) img{animation-delay:-3.2s}.enemy-card.selected .enemy-art img{filter:drop-shadow(0 0 14px #c9ace545) drop-shadow(0 12px 14px #06081266)}.enemy-caption{position:relative;width:90%;max-width:180px;text-align:center;padding:6px 10px 8px;border:1px solid #8e85a736;background:#141827cf;backdrop-filter:blur(7px);border-radius:7px;z-index:2}.selected .enemy-caption{border-color:#cdb9ef99;background:#282237ed}.enemy-caption strong{font:13px var(--serif);letter-spacing:1px;display:block;margin-bottom:5px}.enemy-caption .bar{display:block;flex:none;height:3px;margin-bottom:2px}.enemy-caption .bar i{background:#d99aae}.enemy-caption .hp-number{font-size:8px;color:#9a93ae}.enemy-caption .status-list{justify-content:center}.target-arrow{position:absolute;top:-7px;left:50%;transform:translateX(-50%);color:#d7bde9;font-size:13px;z-index:3}.enemy-intent{position:absolute;top:-16px;display:flex;gap:5px;align-items:center;color:#c7b4d6;background:#1b1827d9;border:1px solid #e5b6d335;font-size:9px;padding:4px 8px;border-radius:20px;white-space:nowrap;z-index:2}.enemy-intent svg{width:12px;height:12px;color:#e3a1b7}.enemy-intent.charged{background:#4f293eee;border-color:#ed98b3aa;color:#ffc3d5;animation:pulse 1.5s infinite}.enemy-weak{position:absolute;right:4%;top:17%;font-size:8px;color:#c1bdd6;padding:2px 5px;border:1px solid #b5b3d029;border-radius:4px;background:#1b213477}.battle-stage-bottom{position:absolute;bottom:19px;left:22px;right:22px;display:flex;align-items:center;justify-content:space-between;gap:10px}.turn-order{display:flex;align-items:center;gap:5px;color:var(--faint);font-size:8px;letter-spacing:.8px}.turn-order>span{margin-right:4px}.turn-token{height:24px;min-width:24px;display:grid;place-items:center;font-size:9px;border:1px solid #aaa1ce33;border-radius:5px;background:#23283ccc;color:#b9afd1}.turn-token.foe{color:#c99aad;border-color:#c184a33a}.turn-token.current{border-color:#cec0e5;color:#e2d2f6}.round-label{position:absolute;left:50%;top:30px;transform:translateX(-50%);text-align:center}.round-label small{display:block;color:#a695bd;font-size:8px;letter-spacing:3px}.round-label strong{font:25px Georgia,serif;color:#e2c9ec}.chain-pill{font-size:10px;color:var(--gold);border:1px solid #e2c08944;background:#372d2dbb;padding:4px 9px;border-radius:5px;letter-spacing:1px}.battle-command{padding:12px 14px}.battle-command-header{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:10px}.turn-title{display:flex;align-items:center;gap:8px;font:14px var(--serif);letter-spacing:.7px}.turn-title svg{color:var(--lav)}.turn-title small{font:8px var(--sans);color:var(--muted);letter-spacing:1px}.skill-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.skill-button{padding:10px 9px 8px;min-height:76px;text-align:left;border:1px solid #c1b0ee24;background:#232839;border-radius:7px;position:relative;min-width:0}.skill-button:hover:not(:disabled){border-color:#c1b0ee77;background:#2b2b43}.skill-top{display:flex;justify-content:space-between;align-items:center;color:#bbb4d2;margin-bottom:6px;gap:3px}.skill-top>span{font-size:9px;color:#a8a2c0;white-space:nowrap}.skill-button strong{display:block;font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.skill-button .hotkey{position:absolute;right:7px;bottom:4px;color:#616b86;font-size:8px}.skill-button .rank{font-size:9px;color:var(--gold);margin-left:2px}.skill-button small.description{display:block;font-size:8px;color:#7d87a2;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;max-width:90%;margin-top:3px}.skill-button.basic{background:#373146;border-color:#bda5dc44}.flee{font-size:9px;color:#9f96af;padding:2px 4px;background:none;display:flex;align-items:center;gap:4px}.flee svg{width:13px;height:13px}.target-prompt{display:flex;align-items:center;justify-content:space-between;min-height:71px;padding:10px 8px;color:var(--mint);font-size:12px}.target-prompt span{display:flex;align-items:center;gap:8px}.combat-note{font-size:9px;color:#8d83a1;letter-spacing:.3px}.damaged{animation:damageShake .35s ease-out!important}.healed{animation:healGlow .5s ease-out!important}.damage-pop{position:absolute;left:50%;top:30%;z-index:8;font:700 28px Georgia,serif;color:#f4d3de;text-shadow:0 2px 2px #29121e,0 0 10px #000;animation:floatNumber .9s forwards;pointer-events:none}.damage-pop.heal-number{color:#c4f4d8;font-size:21px}.party-card .damage-pop{top:20%;font-size:22px}
+/* Dialogs */
+.modal-backdrop{position:fixed;inset:0;z-index:100;background:#090c16bc;backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:25px;overflow:auto;animation:fadeIn .18s ease-out}.dialog{width:min(770px,100%);max-height:calc(100dvh - 50px);overflow:auto;scrollbar-width:thin;scrollbar-color:#574d70 transparent;border:1px solid #c9b4e443;border-radius:18px;background:radial-gradient(ellipse at 50% 0,#34294077,transparent 70%),#181d2d;box-shadow:0 30px 150px #0009;position:relative;padding:32px;outline:none}.dialog.wide{width:min(955px,100%)}.dialog.narrow{width:min(525px,100%)}.modal-close{position:absolute;top:16px;right:16px;z-index:2}.dialog-head{text-align:center;padding:6px 20px 25px}.dialog-head .eyebrow{font-size:9px;letter-spacing:3px}.dialog-head h2{font:30px var(--serif);letter-spacing:3px;margin:9px 0 9px}.dialog-head p{font-size:12px;color:var(--muted);max-width:570px;margin:auto;line-height:1.9}.reward-symbol{display:grid;place-items:center;width:62px;height:62px;margin:0 auto 19px;color:var(--gold);border:1px solid #e4c59144;transform:rotate(45deg);border-radius:10px;background:#e4c59107;box-shadow:0 0 40px #e4c59108}.reward-symbol svg{transform:rotate(-45deg);width:29px;height:29px}.reward-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.reward-card{border:1px solid #c1b0ee35;border-radius:12px;background:linear-gradient(150deg,#272b40,#1b2131);padding:23px 20px 18px;text-align:left;display:flex;flex-direction:column;align-items:flex-start;min-height:300px;position:relative;transition:transform .2s,border-color .2s,background .2s}.reward-card:hover{border-color:#c6ade688;background:linear-gradient(150deg,#323047,#25293b);transform:translateY(-4px)}.reward-card.legendary{border-color:#e4c59166;background:linear-gradient(150deg,#3b313d,#24232f)}.reward-art{height:75px;display:flex;align-items:center;justify-content:center;align-self:stretch;margin:8px 0 16px;color:var(--lav);position:relative}.reward-art:before{content:"";position:absolute;width:72px;height:72px;background:radial-gradient(#c1b0ee11,transparent 70%);border:1px solid #c1b0ee10;transform:rotate(45deg);border-radius:5px}.reward-art svg{width:39px;height:39px;z-index:1}.reward-card.legendary .reward-art{color:var(--gold)}.reward-card h3{font:20px var(--serif);letter-spacing:1px;margin:3px 0 7px}.reward-card p{font-size:11px;color:#a4aac0;line-height:1.9;margin-top:4px}.reward-card .reward-footer{padding-top:20px;margin-top:auto;display:flex;justify-content:space-between;align-items:center;width:100%;font-size:10px;color:var(--lav)}.reward-card .rarity{font-size:9px;letter-spacing:1px;display:flex;align-items:center;gap:7px}.weapon-stats{display:flex;gap:14px;color:#d3c9dc;font-size:11px;margin:6px 0 9px}.weapon-effect{margin-top:9px;border-top:1px solid var(--line);padding-top:10px;font-size:11px;color:#c5b7d7;line-height:1.8}.weapon-effect b{font-size:10px;font-weight:500;color:var(--gold);display:block;letter-spacing:1px;margin-bottom:3px}.modal-hint{text-align:center;font-size:10px;color:var(--faint);margin-top:22px}.equip-grid{display:grid;grid-template-columns:repeat(var(--party-size,3),1fr);gap:12px}.equip-card{padding:16px;text-align:left;border:1px solid var(--line2);background:#ffffff04;border-radius:11px}.equip-card:hover{background:#c1b0ee12;border-color:var(--lav)}.equip-card .equip-face{height:115px;overflow:hidden;margin:-7px 0 10px;position:relative}.equip-card img{width:153px;margin:-12px auto 0}.equip-card h3{font:20px var(--serif);margin-bottom:3px}.equip-card .replace{font-size:10px;color:var(--muted);margin-top:7px}.delta{font-size:10px;color:var(--mint)}.delta.negative{color:var(--rose)}.equip-card .weapon-stats{gap:10px;flex-wrap:wrap;font-size:10px}.choice-stack{display:flex;flex-direction:column;gap:11px}.event-choice{padding:17px 20px;border:1px solid var(--line2);border-radius:9px;background:#ffffff03;display:flex;align-items:center;gap:15px;text-align:left}.event-choice:hover{border-color:#c1b0ee88;background:#c1b0ee08}.event-choice>svg{color:var(--lav)}.event-choice .choice-copy{flex:1}.event-choice strong{display:block;font-weight:500;font-size:13px}.event-choice small{display:block;font-size:11px;color:var(--muted);margin-top:3px}.event-choice .cost{color:var(--gold);font-size:10px;white-space:nowrap}.event-art{height:150px;display:flex;align-items:center;justify-content:center;margin:-5px 0 6px}.event-art img{width:150px;height:150px;filter:drop-shadow(0 0 22px #bba3e822)}.result-icon{font:85px var(--serif);color:var(--lav);text-align:center;line-height:1.3;margin-bottom:9px;text-shadow:0 0 50px #c1b0ee44}.result-victory .result-icon{color:var(--gold)}.result-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:19px 0;margin:8px 0 24px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);text-align:center}.result-stats strong{display:block;font:25px Georgia,var(--serif);color:#d8c7e7}.result-stats small{font-size:9px;color:var(--muted)}.result-party{display:flex;justify-content:center;gap:14px;margin:5px 0 20px}.result-party img{width:74px;height:90px;object-fit:cover;object-position:top;background:#262b3d;border-radius:9px;border:1px solid var(--line2)}.center-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.modal-content{color:#b7bfd2;font-size:12px;line-height:1.9}.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.help-block h3{font:17px var(--serif);color:#dacbea;letter-spacing:1px;margin-bottom:7px}.help-block p{color:#969fb9;font-size:12px;line-height:1.95}.help-block kbd{background:#252a3e;border:1px solid #c1b0ee33;border-radius:3px;padding:1px 5px;font-size:10px;color:#c6b5df}.help-keys{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px}.help-note{padding:16px;margin-top:23px;border:1px solid #c1b0ee22;border-radius:9px;background:#c1b0ee05;font-size:11px;color:#a6a7bf;line-height:1.9}.large-map{max-width:450px;margin:auto;background:#121828;border-radius:9px;padding:15px;border:1px solid var(--line)}.large-map svg{width:100%}.inventory-heading{font-size:11px;color:#d5c8e1;letter-spacing:1px;margin:22px 0 12px;display:flex;align-items:center;justify-content:space-between}.inventory-heading small{color:var(--faint);font-size:9px}.inventory-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.inventory-weapon{padding:15px;border:1px solid var(--line2);background:#1d2434;border-radius:9px;text-align:left}.inventory-weapon h3{font:17px var(--serif);margin:5px 0}.inventory-weapon .weapon-effect{font-size:10px}.inventory-weapon .owner{display:flex;align-items:center;justify-content:space-between;font-size:9px;color:var(--muted)}.inventory-weapon .owner b{font-weight:400;color:var(--lav)}.inventory-weapon>p{font-size:10px;color:var(--faint);margin-top:10px}.empty-note{font-size:11px;padding:20px;color:var(--faint);text-align:center;border:1px dashed var(--line2);border-radius:8px;grid-column:1/-1}.all-boons{display:flex;flex-wrap:wrap;gap:7px}.all-boons .boon-chip{font-size:11px;padding:7px 10px}.hero-detail{display:grid;grid-template-columns:180px 1fr;gap:25px}.hero-detail-art{height:300px;position:relative;overflow:hidden;background:radial-gradient(ellipse at center,#ac94d31c,transparent 70%)}.hero-detail-art img{width:244px;max-width:none;position:absolute;left:-32px;top:-1px}.hero-detail-art:after{content:"";position:absolute;inset:75% 0 0;background:linear-gradient(transparent,#191e2e)}.hero-detail-copy h2{font:30px var(--serif);letter-spacing:2px;margin:6px 0}.hero-detail-copy .job-title{color:var(--lav);font-size:12px;letter-spacing:1px}.hero-detail-copy>p{font-size:12px;color:#a1aac0;line-height:1.9;margin:13px 0}.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:16px 0}.hero-stat{background:#ffffff04;padding:8px;border-radius:5px;font-size:9px;color:var(--faint)}.hero-stat b{display:block;color:#d3c9e2;font-size:15px;font-weight:400}.passive{font-size:11px;color:#a9b6c5;padding:11px;border:1px solid #99d5bf22;background:#99d5bf04;border-radius:7px;line-height:1.8}.passive b{color:var(--mint);font-weight:500;display:block;margin-bottom:3px}.skill-detail{display:flex;align-items:flex-start;gap:13px;padding:13px 0;border-bottom:1px solid var(--line)}.skill-detail:last-child{border:0}.skill-detail>svg{color:var(--lav);margin-top:2px;flex-shrink:0}.skill-detail strong{font-weight:500;font-size:12px;display:block}.skill-detail p{font-size:11px;color:var(--muted);margin-top:4px}.skill-detail .mp{font-size:10px;color:var(--lav);white-space:nowrap;margin-left:auto}.menu-choices{display:flex;flex-direction:column;gap:10px}.menu-choices>button{justify-content:flex-start;padding:15px 18px;font-size:12px}.danger-text{color:var(--rose)!important}#toast{position:fixed;z-index:200;bottom:30px;left:50%;transform:translate(-50%,20px);background:#2c263aef;border:1px solid #cdb3e35e;color:#e4d9ee;box-shadow:0 8px 35px #0006;padding:11px 20px;border-radius:9px;max-width:min(90vw,520px);font-size:12px;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;backdrop-filter:blur(9px)}#toast.visible{opacity:1;transform:translate(-50%,0)}.sr-only{position:absolute!important;clip:rect(1px,1px,1px,1px);clip-path:inset(50%);width:1px;height:1px;overflow:hidden;white-space:nowrap}
+@keyframes float{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-5px)}}@keyframes enemyFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes damageShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px);filter:brightness(1.7)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}@keyframes healGlow{0%,100%{filter:none}50%{filter:brightness(1.4) drop-shadow(0 0 8px #aad4be)}}@keyframes floatNumber{0%{transform:translate(-50%,10px);opacity:0}20%{opacity:1}100%{transform:translate(-50%,-30px);opacity:0}}@keyframes pulse{50%{box-shadow:0 0 15px #dd86a33a}}
+@media(min-width:1650px){.game-shell{padding-top:10px}.game-head{height:87px}.stage{height:525px}.party-card{min-height:138px}.journal{max-height:235px}.map-wrapper svg{max-height:215px}}
+@media(max-width:1150px){.game-grid{grid-template-columns:minmax(0,1fr) 226px;gap:11px}.game-shell{padding:0 19px 15px}.head-run{gap:13px}.head-run .seed{display:none}.stage{height:370px}.party-card{padding:10px 9px 10px 6px;gap:5px}.party-face{width:46px}.party-face img{left:-37px}.party-name{font-size:14px}.party-name small{font-size:7px}.bar-line .value{font-size:7px;min-width:42px}.party-role{font-size:8px}.party-weapon{font-size:8px}.map-wrapper svg{max-height:187px}.journal{max-height:177px}.job-grid{gap:9px}.job-card{height:208px}.job-card img{height:215px}.job-meta{left:10px}.job-meta strong{font-size:16px}.hero-intro{min-height:440px}.hero-art .lead{width:335px;height:436px;left:17%}.hero-art .echo{width:234px}.moon-disk{width:270px;height:270px;top:13%;left:18%}.hero-art{width:57%;right:-5%}.intro-copy h1{font-size:58px}.intro-copy{width:53%}.intro-copy>p{font-size:12px;max-width:360px}.intro-sub{font-size:17px}.vertical-jp{right:6%;font-size:12px}.command-copy{max-width:39%}.command-copy p{font-size:9px}.explore-command{padding:12px 14px}.command-shortcuts button{width:40px}.skill-button{padding:8px}.skill-button strong{font-size:10px}.skill-top svg{width:16px;height:16px}.skill-top>span{font-size:8px}.skill-grid{gap:5px}}
+@media(max-width:900px){.game-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"view" "command" "party" "side"}.side-column{display:grid;grid-template-columns:1fr 1fr;gap:12px}.side-column .map-card{grid-row:span 2}.side-column .journal-card{grid-row:span 2}.side-column .objective,.side-column .boon-card,.side-foot{display:none}.map-wrapper svg{max-height:198px}.journal{max-height:204px}.stage{height:420px}.party-face{width:58px}.party-face img{left:-30px}.party-card{min-height:132px}.party-name{font-size:16px}.party-weapon{font-size:9px}.game-head{height:74px;margin-bottom:14px}.game-shell{padding:0 18px 15px}.head-run .steps{display:none}.hero-intro{min-height:410px}.intro-copy h1{font-size:48px}.intro-en{font-size:9px;letter-spacing:4px}.hero-art .lead{width:303px;height:400px;left:12%}.hero-art .echo{width:210px}.hero-art .echo.left{display:none}.hero-art{width:51%;right:-6%}.moon-disk{width:245px;height:245px;top:17%;left:10%}.intro-copy{width:57%}.intro-copy>p{max-width:340px}.feature-line{gap:12px;font-size:9px}.job-grid{grid-template-columns:repeat(3,1fr)}.job-card{height:220px}.job-card img{width:155px;height:210px;object-fit:cover;left:auto;right:0}.job-card:after{inset:0;background:linear-gradient(90deg,#171c2f55,transparent 60%),linear-gradient(0deg,#151b29 4%,transparent 70%)}.job-meta{bottom:18px;left:18px}.job-meta strong{font-size:18px}.job-meta .jp{font-size:10px}.floating-note{display:none}.expedition-bar{padding:24px 0}.party-description{min-width:300px}.start-controls{width:100%;justify-content:flex-end}.section-heading h2{font-size:22px}.section-heading h2 small{display:none}.landing,.page-head{padding-left:25px;padding-right:25px}.landing-foot{font-size:9px}.landing-foot span:last-child{display:none}}
+@media(max-width:600px){body{font-size:13px}.page-head{height:69px;padding:0 19px}.edition{display:none}.brand-label{font-size:13px}.brand-en{font-size:7px;letter-spacing:1.5px}.brand-mark{height:30px;width:30px;border-radius:8px}.landing{padding:0 19px 25px}.hero-intro{min-height:429px;align-items:flex-start}.intro-copy{padding:39px 0 27px;width:100%}.intro-copy .eyebrow{font-size:8px;letter-spacing:2px}.intro-copy h1{font-size:41px;letter-spacing:2px;margin-top:17px}.intro-en{font-size:8px;letter-spacing:3.2px;margin-bottom:20px}.intro-sub{font-size:15px;max-width:200px;line-height:1.8;letter-spacing:1px}.intro-copy>p{font-size:10px;width:52%;line-height:1.95;min-height:94px}.hero-art{width:70%;height:75%;right:-14%;bottom:1px;opacity:.82}.hero-art .lead{width:262px;height:340px;left:0;bottom:-39px}.hero-art .echo{display:none}.hero-art:after{inset:55% 0 0}.moon-disk{width:206px;height:206px;left:1%;top:12%}.vertical-jp{font-size:10px;right:16%;top:5%;letter-spacing:4px}.star-orbit{left:3%;font-size:18px}.feature-line{max-width:60%;gap:6px 13px;font-size:9px;margin-top:14px}.feature-line svg{width:13px;height:13px}.chapter-line{font-size:7px;letter-spacing:1.4px;bottom:11px}.roster-section{padding-top:22px}.section-heading{align-items:flex-start;margin-bottom:15px}.section-heading h2{font-size:19px;letter-spacing:1px}.roster-meta{font-size:10px;gap:6px;padding-top:5px}.roster-meta .helper{display:none}.job-grid{gap:8px}.job-card{height:171px}.job-card img{height:171px;width:125px;right:-8px;top:0;opacity:.65}.job-meta{left:10px;bottom:11px}.job-meta strong{font-size:13px;letter-spacing:0}.job-meta .jp{font-size:8px}.job-meta .role{font-size:8px;margin-top:4px}.job-number{left:8px;top:9px;font-size:7px}.job-check{width:17px;height:17px;top:8px;right:7px}.job-check svg{height:12px;width:12px}.expedition-bar{gap:19px;padding:20px 0}.party-description{min-width:0;width:100%}.party-description b{font-size:12px}.party-description p{font-size:10px;line-height:1.8}.start-controls{flex-wrap:wrap;gap:10px}.start-controls .primary{flex:1;min-width:0;padding:13px 16px;font-size:13px}.seed-box input{width:135px;font-size:10px}.start-controls .resume-button{width:100%;font-size:11px;padding:8px}.landing-foot{font-size:8px;letter-spacing:0}.header-actions{gap:6px}.icon-button{width:32px;height:32px}.game-shell{padding:0 10px 16px}.game-head{height:64px;gap:8px;margin-bottom:11px}.game-head .brand{gap:7px}.game-head .brand-label{font-size:12px;letter-spacing:1px}.game-head .brand-en{font-size:6px;letter-spacing:1px}.game-head .brand-mark{width:26px;height:26px;border-radius:7px}.game-head .brand-mark svg{width:17px;height:17px}.head-run{gap:10px;font-size:10px}.head-run .level{display:none}.head-run svg{width:13px;height:13px}.game-head .header-actions{gap:4px}.game-head .icon-button{width:30px;height:30px}.game-head .icon-button svg{width:15px;height:15px}.game-grid{gap:9px}.stage{height:330px}.floor-heading{left:15px;top:17px}.floor-heading h2{font-size:18px;letter-spacing:1.7px}.floor-heading .eyebrow{font-size:7px;letter-spacing:1.3px}.floor-heading .jp{font-size:8px;letter-spacing:1px}.floor-number{top:18px;right:14px}.floor-number strong{font-size:22px}.floor-number span{font-size:6px;letter-spacing:1px}.compass{top:85px;font-size:8px;gap:10px;padding:4px 12px;background:#10172788}.compass .north{font-size:10px}.explore-caption{left:14px;bottom:18px;max-width:60%;font-size:10px}.position-label{right:14px;bottom:16px;font-size:8px;gap:6px}.interaction{bottom:70px;font-size:11px;padding:10px 13px;gap:8px}.interaction svg{width:16px;height:16px}.interaction kbd{display:none}.stage-footer{height:36px;padding:0 12px;font-size:8px;gap:8px}.stage-footer svg{width:12px;height:12px}.danger-bars{gap:2px}.danger-bars i{width:9px;height:3px}.danger-meter{gap:5px}.explore-command{padding:11px 12px;gap:10px;flex-wrap:wrap}.command-copy{width:100%;max-width:none;display:flex;align-items:center;justify-content:space-between;gap:7px}.command-copy .eyebrow{display:none}.command-copy h3{font-size:13px;margin:0}.command-copy p{font-size:9px;max-width:54%;text-align:right}.dpad{grid-template-columns:repeat(3,47px);grid-template-rows:repeat(2,34px);gap:4px}.dpad button svg{width:17px;height:17px}.command-shortcuts{gap:6px}.command-shortcuts button{width:43px;height:62px}.command-shortcuts button svg{height:18px;width:18px}.command-shortcuts button span{font-size:8px}.party-strip{gap:6px}.party-card{padding:9px 7px 9px;gap:0;display:block;min-height:141px}.party-face{position:absolute;width:100%;height:90px;left:0;top:0;opacity:.3;border-radius:0;pointer-events:none}.party-face img{width:121px;left:calc(50% - 60px);top:-26px}.party-face:after{inset:10% 0 0;background:linear-gradient(transparent,#1d2436)}.party-info{position:relative;z-index:2;padding-top:13px}.party-name{font-size:14px;display:block;margin-top:0}.party-name small{display:block;font-size:6px;letter-spacing:.3px;margin:0 0 2px}.party-role{font-size:8px;margin:2px 0 9px;letter-spacing:-.3px}.bar-line{gap:3px;margin-top:7px}.bar-line .label{font-size:6px;width:10px}.bar-line .value{font-size:6px;min-width:34px}.bar{height:3px}.party-weapon{font-size:7px;gap:3px;margin-top:9px;line-height:1.4}.party-weapon svg{width:9px;height:9px}.status-list{gap:2px}.status-badge{font-size:6px;padding:0 2px}.status-badge sup{font-size:6px}.side-column{gap:9px;grid-template-columns:1fr 1fr}.side-card{border-radius:10px}.card-title{padding:11px 11px 0;font-size:9px;letter-spacing:0}.card-title span{gap:5px}.card-title svg{width:12px;height:12px}.card-title small{font-size:7px}.map-wrapper{padding:9px 10px 0}.map-wrapper svg{max-height:158px}.map-legend{padding:3px 10px 11px;font-size:7px;gap:3px}.map-legend span{gap:3px}.map-legend i{height:4px;width:4px}.journal{padding:10px 11px;max-height:173px}.log-entry{font-size:8px;gap:5px;line-height:1.7;margin-bottom:7px}.log-entry:before{margin-top:5px}.game-foot{padding:12px 0 0;font-size:7px;letter-spacing:0;gap:6px}.game-foot .keyboard-tip{display:none}.xp-track>i{width:55px}.enemy-line{inset:111px 3% 62px;gap:5px}.enemy-card{width:32%}.enemy-card.boss{width:64%}.enemy-art{bottom:41px}.enemy-caption{width:100%;max-width:150px;padding:5px 5px 4px;border-radius:5px}.enemy-caption strong{font-size:10px;letter-spacing:0;margin-bottom:4px}.enemy-caption .hp-number{font-size:6px}.enemy-intent{font-size:7px;gap:3px;padding:3px 6px;top:-21px}.enemy-intent svg{height:9px;width:9px}.enemy-weak{display:none}.enemy-caption .status-list{margin-top:3px}.round-label{top:23px;left:56%}.round-label small{font-size:6px;letter-spacing:1.5px}.round-label strong{font-size:22px}.battle-stage-bottom{bottom:14px;left:13px;right:13px}.turn-order{gap:3px;font-size:6px}.turn-order>span{margin-right:2px}.turn-token{height:20px;min-width:20px;font-size:7px;border-radius:4px}.chain-pill{font-size:7px;padding:3px 6px;letter-spacing:.5px}.battle-command{padding:10px}.battle-command-header{margin-bottom:9px}.turn-title{font-size:12px;gap:5px}.turn-title small{font-size:6px;letter-spacing:.6px}.turn-title svg{width:15px;height:15px}.skill-grid{gap:4px}.skill-button{padding:9px 6px;min-height:78px;border-radius:6px}.skill-top{margin-bottom:5px}.skill-top svg{width:14px;height:14px}.skill-top>span{font-size:7px}.skill-button strong{font-size:9px;white-space:normal;line-height:1.4;min-height:23px}.skill-button small.description{display:none}.skill-button .hotkey{font-size:7px;right:5px;bottom:4px}.skill-button .rank{font-size:7px}.flee{font-size:8px}.combat-note{font-size:7px}.target-prompt{font-size:10px;min-height:72px;gap:7px}.target-prompt .secondary{font-size:10px;padding:6px 10px}.damage-pop{font-size:23px}.party-card .damage-pop{font-size:18px}.modal-backdrop{padding:13px;align-items:center}.dialog{padding:22px 17px;max-height:calc(100dvh - 26px);border-radius:14px}.dialog-head{padding:7px 13px 18px}.dialog-head h2{font-size:24px;letter-spacing:2px}.dialog-head p{font-size:11px;line-height:1.8}.dialog-head .eyebrow{font-size:8px;letter-spacing:2px}.modal-close{top:10px;right:10px}.reward-symbol{width:43px;height:43px;margin-bottom:19px;border-radius:7px}.reward-symbol svg{width:23px;height:23px}.reward-grid{grid-template-columns:1fr;gap:10px}.reward-card{min-height:0;padding:13px 15px;display:grid;grid-template-columns:48px 1fr;column-gap:13px}.reward-card .rarity{grid-column:2;font-size:8px;letter-spacing:.6px}.reward-art{grid-row:1/6;grid-column:1;height:100%;margin:0}.reward-art svg{width:29px;height:29px}.reward-art:before{width:42px;height:42px}.reward-card h3{grid-column:2;font-size:18px;margin:4px 0}.reward-card>p{grid-column:2;font-size:10px;margin-top:2px;line-height:1.8}.reward-card .weapon-stats{grid-column:2;font-size:9px;gap:12px;margin:4px 0}.reward-card .weapon-effect{grid-column:2;padding-top:6px;margin-top:5px;font-size:10px}.weapon-effect b{font-size:9px;margin-bottom:2px}.reward-card .reward-footer{grid-column:2;margin:0;padding-top:9px;font-size:9px}.reward-card .reward-footer svg{width:14px;height:14px}.modal-hint{margin-top:16px;font-size:9px}.equip-grid{gap:7px}.equip-card{padding:10px}.equip-card .equip-face{height:92px}.equip-card img{width:115px;margin:-11px auto 0}.equip-card h3{font-size:17px}.equip-card .small{font-size:9px}.equip-card .replace{font-size:8px;overflow-wrap:anywhere}.equip-card .weapon-stats{font-size:8px;gap:3px}.delta{font-size:8px}.event-choice{padding:13px 12px;gap:11px}.event-choice strong{font-size:12px}.event-choice small{font-size:10px}.event-choice .cost{font-size:9px}.event-art{height:116px}.event-art img{width:125px;height:125px}.help-grid{grid-template-columns:1fr;gap:17px}.help-block h3{font-size:17px}.help-block p{font-size:11px}.help-note{margin-top:18px;font-size:10px;padding:12px}.hero-detail{grid-template-columns:100px 1fr;gap:14px}.hero-detail-art{height:238px}.hero-detail-art img{width:198px;left:-50px;top:0}.hero-detail-copy h2{font-size:25px}.hero-detail-copy .job-title{font-size:10px}.hero-detail-copy>p{font-size:10px;margin:9px 0}.hero-detail-copy .eyebrow{font-size:8px}.hero-stats{gap:4px}.hero-stat{font-size:8px;padding:6px}.hero-stat b{font-size:13px}.passive{font-size:10px;padding:9px}.skill-detail{gap:9px}.skill-detail strong{font-size:11px}.skill-detail p{font-size:10px}.skill-detail .mp{font-size:8px}.skill-detail>svg{height:17px;width:17px}.inventory-grid{grid-template-columns:1fr;gap:9px}.inventory-weapon{padding:13px}.inventory-heading{font-size:10px;margin:18px 0 10px}.inventory-heading small{font-size:8px}.inventory-weapon h3{font-size:17px}.all-boons .boon-chip{font-size:9px;padding:5px 7px}.large-map{padding:10px}.result-stats{gap:5px}.result-stats strong{font-size:22px}.result-stats small{font-size:8px}.result-icon{font-size:60px}.result-party img{width:58px;height:77px}.center-actions button{font-size:12px}.center-actions .primary{padding:12px 19px}.result-stats{padding:15px 0}.menu-choices>button{font-size:11px}#toast{font-size:11px;bottom:22px;padding:10px 16px}.tag{font-size:8px;padding:1px 5px}}
+@media(max-width:359px){.intro-copy h1{font-size:35px}.intro-sub{font-size:13px}.job-meta strong{font-size:11px}.stage{height:300px}.command-shortcuts{gap:4px}.command-shortcuts button{width:36px}.dpad{grid-template-columns:repeat(3,43px)}.party-name{font-size:12px}.bar-line .value{min-width:30px;font-size:5px}.skill-button strong{font-size:8px}.head-run{display:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+.hero-intro{overflow:hidden}
+
+</style>
+</head>
+<body>
+<div id="app"><div class="loading"><span>☾</span><p>正在点亮迷宫的星灯…</p></div></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="modal-root"></div>
+<noscript>这个游戏需要启用 JavaScript。下载离线版本后可在浏览器中直接打开。</noscript>
+<script>
+(()=>{'use strict';const modules=Object.create(null);const cache=Object.create(null);function require(id){if(cache[id])return cache[id];if(!modules[id])throw Error('Unknown module '+id);const exports=cache[id]={};modules[id](exports,require);return exports;}
+modules['data']=(exports,require)=>{
+/** All gameplay content is declarative. No art or names from an existing franchise. */
+const VERSION = 1;
+const SAVE_KEY = 'eclipse-labyrinth.run.v1';
+const MAX_FLOOR = 5;
+const DIRECTIONS = [{ x: 0, y: -1, label: '北', short: 'N' }, { x: 1, y: 0, label: '东', short: 'E' }, { x: 0, y: 1, label: '南', short: 'S' }, { x: -1, y: 0, label: '西', short: 'W' }];
+const FLOORS = [
+  { name: '遗忘的回廊', jp: '忘却の回廊', color: '#8ca3ed', lore: '你再次醒来。只有月亮记得，你曾经来过这里。' },
+  { name: '磷光庭园', jp: '燐光の庭', color: '#67d8c4', lore: '没有阳光的庭园里，花依旧向着某个方向盛开。' },
+  { name: '绯色礼拜堂', jp: '緋の礼拝堂', color: '#e893a8', lore: '祈祷早已停息，钟声却还在回响。' },
+  { name: '坠星书库', jp: '墜星の書庫', color: '#c3a6f1', lore: '书页间夹着某个人未曾抵达的明天。' },
+  { name: '无月王座', jp: '月なき玉座', color: '#edc686', lore: '故事的最后一页，只为还在前进的人留白。' },
+];
+const JOBS = {
+  knight: { id:'knight', name:'星刃骑士', jp:'星剣士', person:'希露菲', roman:'SYLPHIE', role:'守护 · 破甲', color:'#9caef9', weapon:'moonblade', hp:118, mp:28, atk:18, mag:10, def:9, spd:9, skills:['cleave','aegis','starfall'], passive:'星纹护佑', passiveDesc:'受到的伤害减少 12%。攻击破甲目标时额外回复 4 MP。', synopsis:'将星光铸为剑锋。能独自守住阵线，也能为同伴击穿敌人的防御。' },
+  mage: { id:'mage', name:'焰咒魔导师', jp:'焔の魔導士', person:'莉瑟', roman:'LYS', role:'元素 · 爆发', color:'#eda58c', weapon:'emberstaff', hp:82, mp:48, atk:9, mag:23, def:4, spd:11, skills:['fire','frost','nova'], passive:'余烬循环', passiveDesc:'技能命中燃烧目标后回复 3 MP；普通攻击使用魔力计算。', synopsis:'冰与火，毁灭与重生。先点燃敌人，再用连锁魔法让火焰蔓延。' },
+  shrine: { id:'shrine', name:'祈星巫女', jp:'星詠みの巫女', person:'澪', roman:'MIO', role:'治疗 · 共鸣', color:'#9dd5c7', weapon:'bellwand', hp:92, mp:42, atk:10, mag:19, def:6, spd:10, skills:['ray','mend','revive'], passive:'祈愿回声', passiveDesc:'每次造成伤害，自动治疗生命比例最低的存活队友（伤害的 20%）。', synopsis:'祈祷不意味着等待救援。以光驱散阴影，让每一次攻击都成为治愈。' },
+  ninja: { id:'ninja', name:'影缝忍者', jp:'影縫い', person:'紫苑', roman:'SHION', role:'毒刃 · 追击', color:'#ccabea', weapon:'shadowfang', hp:88, mp:32, atk:19, mag:9, def:5, spd:18, skills:['venom','execute','veil'], passive:'猎影', passiveDesc:'攻击有负面状态的敌人，伤害提高 25%。', synopsis:'在破绽出现之前隐去身形。无论是毒、火，还是同伴留下的剑痕，都是信号。' },
+  chrono: { id:'chrono', name:'刻时术士', jp:'刻の術師', person:'伊欧', roman:'IO', role:'加速 · 延迟', color:'#e8c783', weapon:'clockstaff', hp:90, mp:40, atk:11, mag:18, def:6, spd:13, skills:['pulse','haste','rewind'], passive:'时间利息', passiveDesc:'每回合开始时回复 2 MP；普通攻击使用魔力计算。', synopsis:'让敌人的一秒变得漫长，让同伴的下一秒提早到来。' },
+  reaver: { id:'reaver', name:'血誓剑士', jp:'血誓の剣士', person:'绯音', roman:'AKANE', role:'吸血 · 背水', color:'#e389a3', weapon:'bloodedge', hp:126, mp:26, atk:22, mag:7, def:5, spd:12, skills:['rend','bloodpact','reap'], passive:'赤月誓约', passiveDesc:'生命低于 50% 时，造成的伤害提高 35%；所有伤害附带 10% 吸血。', synopsis:'以生命下注，把伤口化为力量。最危险的一刻，也离胜利最近。' },
+};
+const SKILLS = {
+  attack: { id:'attack', name:'普通攻击', icon:'sword', cost:0, power:1, target:'enemy', kind:'attack', desc:'造成武器伤害，回复 5 MP。' },
+  guard: { id:'guard', name:'防御', icon:'shield', cost:0, target:'self', kind:'guard', desc:'直到下次行动，受到伤害减半并回复 7 MP。' },
+  cleave: { id:'cleave', name:'碎星斩', icon:'sword', cost:6, power:1.35, target:'enemy', kind:'physical', status:'break', turns:3, desc:'135% 物理伤害，施加 3 回合破甲。破甲使物理伤害 +35%。' },
+  aegis: { id:'aegis', name:'星纹壁垒', icon:'shield', cost:8, power:1, target:'self', kind:'aegis', desc:'自身回复 30% 生命，为全队施加 2 回合守护（减伤 30%）。' },
+  starfall: { id:'starfall', name:'星陨剑阵', icon:'star', cost:13, power:1.05, target:'enemies', kind:'physical', desc:'对所有敌人造成 105% 物理伤害。' },
+  fire: { id:'fire', name:'绯焰', icon:'flame', cost:6, power:1.25, target:'enemy', kind:'magic', element:'fire', status:'burn', turns:3, desc:'125% 火焰伤害，附加 3 回合燃烧。燃烧每回合造成生命上限 7% 伤害。' },
+  frost: { id:'frost', name:'霜华', icon:'ice', cost:7, power:1.1, target:'enemy', kind:'magic', element:'ice', status:'slow', turns:2, desc:'110% 冰属性伤害并减速。击中燃烧目标触发融解，额外 +60% 伤害。' },
+  nova: { id:'nova', name:'红莲终曲', icon:'flame', cost:15, power:1.05, target:'enemies', kind:'magic', element:'fire', status:'burn', turns:2, desc:'对全体敌人造成 105% 火焰伤害，附加 2 回合燃烧。' },
+  ray: { id:'ray', name:'月光裁决', icon:'star', cost:5, power:1.3, target:'enemy', kind:'magic', element:'light', status:'marked', turns:2, desc:'130% 光属性伤害，留下 2 回合星标（受到所有伤害 +20%）。' },
+  mend: { id:'mend', name:'花雨祈愿', icon:'heart', cost:10, power:1, target:'allies', kind:'heal', desc:'治疗全队：魔力 × 1.5 + 生命上限的 12%，净化燃烧与中毒。' },
+  revive: { id:'revive', name:'晨星归还', icon:'heart', cost:14, power:1, target:'ally', kind:'revive', desc:'复活一名队友并恢复 40% 生命；目标存活时改为恢复 55%。' },
+  venom: { id:'venom', name:'紫雾双刃', icon:'venom', cost:5, power:1.1, target:'enemy', kind:'physical', status:'poison', turns:4, desc:'110% 物理伤害，附加 4 回合中毒。中毒每回合造成生命上限 6% 伤害。' },
+  execute: { id:'execute', name:'影缝·一闪', icon:'sword', cost:9, power:1.6, target:'enemy', kind:'physical', exploit:true, desc:'160% 物理伤害；每种负面状态额外 +20%（最高 +80%）。' },
+  veil: { id:'veil', name:'胧月步', icon:'moon', cost:7, power:1, target:'self', kind:'veil', desc:'恢复 25% 生命并获得 2 回合迅捷（速度 +50%，伤害 +15%）。' },
+  pulse: { id:'pulse', name:'时空脉冲', icon:'clock', cost:6, power:1.25, target:'enemy', kind:'magic', status:'slow', turns:3, desc:'125% 魔法伤害，使目标减速 3 回合。' },
+  haste: { id:'haste', name:'加速咏唱', icon:'clock', cost:9, power:1, target:'allies', kind:'haste', desc:'全队获得 3 回合迅捷（速度 +50%，伤害 +15%）。行动顺序下一回合生效。' },
+  rewind: { id:'rewind', name:'逆时针', icon:'heart', cost:8, power:1, target:'ally', kind:'rewind', desc:'治疗一名队友：魔力 × 2 + 15，解除所有负面状态。' },
+  rend: { id:'rend', name:'绯红裂刃', icon:'sword', cost:5, power:1.45, target:'enemy', kind:'physical', drain:0.35, desc:'145% 物理伤害，恢复造成伤害的 35% 生命。' },
+  bloodpact: { id:'bloodpact', name:'血之契约', icon:'heart', cost:0, power:1, target:'self', kind:'bloodpact', desc:'消耗当前生命 20%（不会自杀），恢复 12 MP，获得 3 回合狂热（伤害 +30%）。' },
+  reap: { id:'reap', name:'赤月收割', icon:'moon', cost:12, power:1.15, target:'enemies', kind:'physical', drain:0.2, desc:'对全体敌人造成 115% 物理伤害，恢复伤害的 20%。' },
+};
+const STATUS = {
+  burn:{name:'燃烧',color:'#ffb58b',negative:true}, poison:{name:'中毒',color:'#b8da83',negative:true},
+  break:{name:'破甲',color:'#e5a9b9',negative:true}, slow:{name:'迟缓',color:'#a8c9ef',negative:true},
+  marked:{name:'星标',color:'#efdb94',negative:true}, haste:{name:'迅捷',color:'#85dfd1'},
+  protect:{name:'守护',color:'#a9b9ff'}, fury:{name:'狂热',color:'#efa6ad'},
+};
+const WEAPONS = {
+  moonblade:{name:'未明之剑',type:'剑',atk:4,mag:1,effect:'guardbreak',effectName:'星痕',desc:'所有攻击有 30% 概率附加 2 回合破甲。',rarity:'common'},
+  emberstaff:{name:'余烬枝',type:'法杖',atk:0,mag:5,effect:'kindle',effectName:'余火',desc:'攻击有 25% 概率附加 2 回合燃烧。',rarity:'common'},
+  bellwand:{name:'初祈铃',type:'铃杖',atk:1,mag:4,effect:'lifewell',effectName:'祈愿',desc:'战斗中每次行动后，恢复自身 4% 生命。',rarity:'common'},
+  shadowfang:{name:'薄暮牙',type:'双刃',atk:5,mag:0,effect:'toxin',effectName:'蛇吻',desc:'攻击有 25% 概率附加 2 回合中毒。',rarity:'common'},
+  clockstaff:{name:'停摆的秒针',type:'时杖',atk:1,mag:4,effect:'mana',effectName:'滴答',desc:'每次行动后，额外回复 3 MP。',rarity:'common'},
+  bloodedge:{name:'朱誓',type:'大剑',atk:6,mag:0,effect:'vampire',effectName:'血契',desc:'造成的伤害附带 18% 吸血。',rarity:'common'},
+  eclipse:{name:'月蚀·无声',type:'剑',atk:11,mag:3,effect:'execution',effectName:'终幕',desc:'对生命低于 40% 的目标，伤害提高 50%。',rarity:'rare'},
+  winter:{name:'白夜之枝',type:'法杖',atk:2,mag:12,effect:'frostbite',effectName:'永冬',desc:'对迟缓目标伤害提高 40%，攻击有 30% 概率施加迟缓。',rarity:'rare'},
+  duet:{name:'双生誓言',type:'双刃',atk:9,mag:4,effect:'echo',effectName:'回响',desc:'攻击有 28% 概率追加一次 45% 伤害的回声。',rarity:'rare'},
+  aurora:{name:'极光咏叹',type:'铃杖',atk:3,mag:11,effect:'chorus',effectName:'合唱',desc:'每次行动后，治疗生命比例最低的存活队友 8 点。',rarity:'rare'},
+  sundial:{name:'第十三刻',type:'时杖',atk:5,mag:10,effect:'firstlight',effectName:'破晓',desc:'每场战斗的前两回合，伤害提高 40%。',rarity:'rare'},
+  thorn:{name:'绯棘王冠',type:'大剑',atk:14,mag:0,effect:'bloodmoon',effectName:'背水',desc:'生命低于 50% 时，伤害提高 45%。',rarity:'rare'},
+  comet:{name:'坠星裁决',type:'剑',atk:16,mag:7,effect:'cleave',effectName:'星屑',desc:'对单个目标造成伤害后，对其他敌人追加 25% 溅射伤害。',rarity:'legendary'},
+  grimoire:{name:'禁书·第零页',type:'法杖',atk:2,mag:20,effect:'overload',effectName:'超载',desc:'技能伤害提高 40%，技能 MP 消耗额外 +2。',rarity:'legendary'},
+  eternity:{name:'永恒的安可',type:'铃杖',atk:7,mag:16,effect:'phoenix',effectName:'返魂',desc:'每场战斗首次倒下时，立即以 35% 生命复活一次。',rarity:'legendary'},
+  obsidian:{name:'黒羽·绝影',type:'双刃',atk:19,mag:3,effect:'affliction',effectName:'蚀骨',desc:'每种目标负面状态使伤害提高 18%。',rarity:'legendary'},
+  genesis:{name:'创世时计',type:'时杖',atk:5,mag:18,effect:'economy',effectName:'零时',desc:'技能 MP 消耗降低 35%（向下取整，最低 1）。',rarity:'legendary'},
+  requiem:{name:'葬月挽歌',type:'大剑',atk:22,mag:0,effect:'soulsteal',effectName:'噬魂',desc:'击败一个敌人后，回复 18% 生命和 6 MP。',rarity:'legendary'},
+};
+const BOONS = [
+  {id:'vitality',name:'生命之露',icon:'heart',desc:'全队生命上限 +14，并恢复 14 生命。',type:'stat',stat:'maxHp',value:14},
+  {id:'power',name:'刃之记忆',icon:'sword',desc:'全队攻击力 +3。',type:'stat',stat:'atk',value:3},
+  {id:'wisdom',name:'星语残篇',icon:'star',desc:'全队魔力 +3。',type:'stat',stat:'mag',value:3},
+  {id:'armor',name:'银月鳞片',icon:'shield',desc:'全队防御 +2。',type:'stat',stat:'def',value:2},
+  {id:'spirit',name:'澄澈魔泉',icon:'drop',desc:'全队 MP 上限 +8，并恢复 8 MP。',type:'stat',stat:'maxMp',value:8},
+  {id:'swift',name:'流风羽',icon:'wind',desc:'全队速度 +2。',type:'stat',stat:'spd',value:2},
+  {id:'embers',name:'不灭余烬',icon:'flame',desc:'燃烧与中毒的持续伤害 +40%（可叠加）。',type:'boon'},
+  {id:'siphon',name:'赤色露珠',icon:'heart',desc:'全队所有伤害附带额外 7% 吸血。',type:'boon'},
+  {id:'victory',name:'凯旋花束',icon:'flower',desc:'每次战斗胜利，全队额外恢复 10% 生命。',type:'boon'},
+  {id:'focus',name:'静谧冥想',icon:'moon',desc:'全队每回合开始时，额外回复 2 MP。',type:'boon'},
+  {id:'critical',name:'猎星之眼',icon:'eye',desc:'全队暴击率 +8%。暴击造成 150% 伤害。',type:'boon'},
+  {id:'harmony',name:'共鸣之环',icon:'link',desc:'联携造成的伤害 +20%。不同角色连续攻击同一目标即可联携。',type:'boon'},
+];
+const ENEMY_TYPES = {
+  wisp:{name:'月灯灵',kind:'wisp',hp:43,atk:12,mag:13,def:2,spd:9,weak:'ice',tint:'#93a6ff',intent:['attack','hex','attack']},
+  slime:{name:'墨滴史莱姆',kind:'slime',hp:57,atk:12,mag:8,def:3,spd:6,weak:'fire',tint:'#ac98de',intent:['attack','poison','guard']},
+  moth:{name:'夜蝶',kind:'moth',hp:45,atk:14,mag:12,def:2,spd:16,weak:'fire',tint:'#d5aae8',intent:['attack','hex','heavy']},
+  sentinel:{name:'失心卫士',kind:'sentinel',hp:76,atk:16,mag:5,def:7,spd:7,weak:'light',tint:'#9fb7d3',intent:['guard','heavy','attack']},
+  revenant:{name:'无声的祈祷者',kind:'ghost',hp:58,atk:10,mag:20,def:3,spd:12,weak:'light',tint:'#c5b1e1',intent:['hex','drain','attack']},
+  guardian:{name:'月门守卫',kind:'sentinel',hp:140,atk:17,mag:12,def:6,spd:8,weak:'ice',tint:'#d1ba8e',intent:['charge','sweep','heavy','guard']},
+  sovereign:{name:'蚀月的圣女',kind:'sovereign',hp:350,atk:23,mag:23,def:9,spd:13,weak:'light',tint:'#d8b4f7',intent:['hex','charge','sweep','drain','heavy']},
+};
+const INTENTS = {attack:{name:'攻击',icon:'sword'},heavy:{name:'重击',icon:'sword'},hex:{name:'咒火',icon:'flame'},poison:{name:'毒雾',icon:'venom'},guard:{name:'防御',icon:'shield'},charge:{name:'蓄力',icon:'star'},sweep:{name:'全体攻击',icon:'wind'},drain:{name:'汲取',icon:'heart'}};
+const RARITIES = {common:{name:'初始',color:'#adb5d0'},rare:{name:'稀有',color:'#b69af6'},legendary:{name:'传说',color:'#e5c083'}};
+
+Object.assign(exports,{VERSION,SAVE_KEY,MAX_FLOOR,DIRECTIONS,FLOORS,JOBS,SKILLS,STATUS,WEAPONS,BOONS,ENEMY_TYPES,INTENTS,RARITIES});
+};
+modules['engine']=(exports,require)=>{
+const { VERSION, MAX_FLOOR, JOBS, SKILLS, STATUS, WEAPONS, BOONS, ENEMY_TYPES, DIRECTIONS, FLOORS }=require('data');
+// This module has no browser dependencies: game state can be replayed, saved and tested.
+function hashSeed(text) {
+  let h = 2166136261;
+  for (const c of String(text)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function random(state) {
+  state.rng = (state.rng + 0x6D2B79F5) >>> 0;
+  let t = state.rng;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function integer(state, min, max) { return Math.floor(random(state) * (max - min + 1)) + min; }
+function choose(state, items) { return items[integer(state, 0, items.length - 1)]; }
+function shuffled(state, values) {
+  const copy = [...values];
+  for (let i = copy.length - 1; i > 0; i--) { const j = integer(state, 0, i); [copy[i], copy[j]] = [copy[j], copy[i]]; }
+  return copy;
+}
+function cellKey(x, y) { return `${x},${y}`; }
+function walkable(dungeon, x, y) { return Number.isInteger(x) && Number.isInteger(y) && dungeon.tiles[y]?.[x] === 0; }
+function distances(dungeon, sx, sy) {
+  const result = { [cellKey(sx, sy)]: 0 }, queue = [{ x:sx, y:sy }];
+  for (let i = 0; i < queue.length; i++) {
+    const p = queue[i];
+    for (const d of DIRECTIONS) {
+      const x = p.x + d.x, y = p.y + d.y, key = cellKey(x,y);
+      if (walkable(dungeon,x,y) && result[key] === undefined) { result[key] = result[cellKey(p.x,p.y)] + 1; queue.push({x,y}); }
+    }
+  }
+  return result;
+}
+function generateDungeon(state, floor = 1) {
+  const size = floor >= 4 ? 19 : floor >= 2 ? 17 : 15;
+  const tiles = Array.from({length:size}, () => Array(size).fill(1));
+  const visited = Array.from({length:size}, () => Array(size).fill(false));
+  tiles[1][1] = 0;
+  const stack = [{x:1,y:1}];
+  while (stack.length) {
+    const p = stack[stack.length - 1];
+    const possible = DIRECTIONS.filter(d => p.x+d.x*2>0 && p.y+d.y*2>0 && p.x+d.x*2<size-1 && p.y+d.y*2<size-1 && tiles[p.y+d.y*2][p.x+d.x*2] === 1);
+    if (!possible.length) { stack.pop(); continue; }
+    const d = choose(state,possible);
+    tiles[p.y+d.y][p.x+d.x] = tiles[p.y+d.y*2][p.x+d.x*2] = 0;
+    stack.push({x:p.x+d.x*2,y:p.y+d.y*2});
+  }
+  // Loops and connected rooms prevent the maze from being a single perfect tree.
+  for (let i=0;i<7+floor;i++) {
+    const x=integer(state,2,size-3), y=integer(state,2,size-3);
+    if ((tiles[y][x-1]===0 && tiles[y][x+1]===0) || (tiles[y-1][x]===0 && tiles[y+1][x]===0)) tiles[y][x]=0;
+  }
+  for (let i=0;i<2;i++) {
+    const x=integer(state,1,(size-5)/2)*2+1, y=integer(state,1,(size-5)/2)*2+1;
+    for(let yy=y;yy<Math.min(size-1,y+3);yy++) for(let xx=x;xx<Math.min(size-1,x+3);xx++) tiles[yy][xx]=0;
+  }
+  const dungeon={size,tiles,visited,events:{},start:{x:1,y:1},stairs:null};
+  const dist=distances(dungeon,1,1);
+  const cells=Object.entries(dist).filter(([,n])=>n>4).sort((a,b)=>b[1]-a[1]);
+  const stairKey=cells[0][0], [sx,sy]=stairKey.split(',').map(Number);
+  dungeon.stairs={x:sx,y:sy};
+  dungeon.events[stairKey]={type:'stairs',used:false};
+  const pool=shuffled(state,cells.slice(1).map(([key])=>key));
+  const types=['chest','shrine','chest','fountain','altar','chest','elite','shrine'];
+  for(const type of types) { const key=pool.pop(); if(key) dungeon.events[key]={type,used:false}; }
+  // One early treasure is intentional: introduce a build choice before the first fight.
+  const early=Object.entries(dist).filter(([k,n])=>n>=2&&n<=4&&!dungeon.events[k]);
+  if(early.length) dungeon.events[choose(state,early)[0]]={type:'chest',used:false};
+  return dungeon;
+}
+function log(run,text,tone='info') { run.log.push({text,tone}); if(run.log.length>90) run.log.shift(); }
+function living(items) { return items.filter(p=>p.hp>0); }
+function clamp(value,min,max) { return Math.max(min,Math.min(max,value)); }
+function boonCount(run,id) { return run.boons[id] || 0; }
+function negativeCount(entity) { return Object.keys(entity.status).filter(k=>STATUS[k]?.negative).length; }
+function heroStats(hero) { return {atk:hero.atk+hero.weapon.atk,mag:hero.mag+hero.weapon.mag,def:hero.def,spd:hero.spd*(hero.status.haste?1.5:1)*(hero.status.slow?0.6:1)}; }
+function makeWeapon(id,floor=1,serial=0) {
+  const base=WEAPONS[id];
+  if(!base) throw new Error(`Unknown weapon: ${id}`);
+  const bonus=Math.max(0,floor-1)*2;
+  return {...base,id,uid:`${id}-${floor}-${serial}`,atk:base.atk+(base.atk>base.mag?bonus:Math.floor(bonus/2)),mag:base.mag+(base.mag>=base.atk?bonus:Math.floor(bonus/2)),floor};
+}
+function makeHero(id,index,solo) {
+  const j=JOBS[id], hp=Math.round(j.hp*(solo?1.45:1)), mp=Math.round(j.mp*(solo?1.3:1));
+  return {id:`hero-${index}`,job:id,name:j.person,maxHp:hp,hp,maxMp:mp,mp,atk:j.atk,mag:j.mag,def:j.def,spd:j.spd,weapon:makeWeapon(j.weapon),skills:[...j.skills],ranks:{},status:{},guard:false,phoenixUsed:false};
+}
+function createRun(jobIds,seed) {
+  if(!Array.isArray(jobIds)||jobIds.length<1||jobIds.length>3||new Set(jobIds).size!==jobIds.length||jobIds.some(j=>!JOBS[j])) throw new Error('请选择 1～3 个不同职业。');
+  const cleanSeed=String(seed||'MOON').trim().slice(0,48)||'MOON';
+  const run={version:VERSION,seed:cleanSeed,rng:hashSeed(cleanSeed),phase:'explore',floor:1,party:jobIds.map((j,i)=>makeHero(j,i,jobIds.length===1)),level:1,xp:0,nextXp:65,gold:0,boons:{},inventory:[],battles:0,kills:0,steps:0,danger:0,encounterAt:10,grace:0,guardianDefeated:false,log:[],battle:null,rewards:[],event:null,ending:null,fx:[],serial:0,solo:jobIds.length===1};
+  enterFloor(run,1);
+  log(run,run.solo?'独行誓约：生命 +45%、MP +30%、造成伤害 +25%。':'星灯已点亮。不同角色连续攻击同一敌人，将触发联携。','special');
+  return run;
+}
+function reveal(run) {
+  for(let y=run.y-1;y<=run.y+1;y++) for(let x=run.x-1;x<=run.x+1;x++) if(run.dungeon.visited[y]?.[x]!==undefined) run.dungeon.visited[y][x]=true;
+}
+function enterFloor(run,floor) {
+  run.floor=floor; run.dungeon=generateDungeon(run,floor); run.x=1;run.y=1;
+  run.dir=DIRECTIONS.findIndex(d=>walkable(run.dungeon,1+d.x,1+d.y));
+  run.guardianDefeated=false; run.phase='explore';run.battle=null;run.rewards=[];run.event=null;
+  run.danger=0;run.encounterAt=integer(run,9,14);run.grace=3;
+  for(const p of run.party) {p.status={};p.guard=false;}
+  reveal(run); log(run,`第 ${floor} 层 · ${FLOORS[floor-1].name}`,'special');
+}
+function turn(run,delta) { if(run.phase!=='explore')return false;run.dir=(run.dir+delta+4)%4;return true; }
+function move(run,kind='forward') {
+  if(run.phase!=='explore') return false;
+  const offset={forward:0,back:2,left:3,right:1}[kind];
+  if(offset===undefined) return false;
+  const d=DIRECTIONS[(run.dir+offset)%4], x=run.x+d.x,y=run.y+d.y;
+  if(!walkable(run.dungeon,x,y)) return false;
+  run.x=x;run.y=y;run.steps++;run.fx=[];reveal(run);
+  if(run.grace>0)run.grace--;else run.danger++;
+  if(run.danger>=run.encounterAt) {run.danger=0;run.encounterAt=integer(run,10,16);startBattle(run);}
+  return true;
+}
+function currentEvent(run) {
+  const event=run.dungeon.events[cellKey(run.x,run.y)];
+  return event&&!event.used?event:null;
+}
+function interact(run) {
+  if(run.phase!=='explore')return false;
+  const event=currentEvent(run);
+  if(!event)return false;
+  const key=cellKey(run.x,run.y);
+  if(event.type==='stairs') {
+    if(!run.guardianDefeated) startBattle(run,run.floor===MAX_FLOOR?'boss':'guardian',key);
+    else enterFloor(run,run.floor+1);
+  } else if(event.type==='chest') {
+    event.used=true;run.gold+=integer(run,15,32);openRewards(run,'treasure');log(run,'宝箱中藏着尚未被遗忘的星光。','loot');
+  } else if(event.type==='elite') {startBattle(run,'elite',key);}
+  else {run.phase='event';run.event={type:event.type,key};}
+  return true;
+}
+function resolveEvent(run,choice) {
+  if(run.phase!=='event'||!run.event) return false;
+  const {type,key}=run.event;
+  if(choice==='leave') {run.phase='explore';run.event=null;return true;}
+  if(type==='shrine'&&choice==='rest') {
+    for(const p of run.party){p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*0.45));p.mp=Math.min(p.maxMp,p.mp+Math.ceil(p.maxMp*0.5));p.status={};}
+    log(run,'在星灯下小憩。全队恢复 45% 生命、50% MP。','heal');
+  }else if(type==='fountain'&&choice==='drink'){
+    for(const p of run.party){p.mp=p.maxMp;p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*0.18));}log(run,'月之泉洗去了倦意。MP 完全恢复。','heal');
+  }else if(type==='altar'&&choice==='offer'){
+    if(run.gold<35)return false;run.gold-=35;run.dungeon.events[key].used=true;run.event=null;openRewards(run,'altar');log(run,'你将 35 星砂交给了无声的神像。','loot');return true;
+  }else if(type==='altar'&&choice==='blood'){
+    for(const p of living(run.party))p.hp=Math.max(1,p.hp-Math.ceil(p.maxHp*0.2));
+    run.dungeon.events[key].used=true;run.event=null;openRewards(run,'altar');log(run,'神像收下了全队 20% 上限的生命。','special');return true;
+  }else return false;
+  run.dungeon.events[key].used=true;run.phase='explore';run.event=null;return true;
+}
+function generateEnemies(run,type) {
+  const boss=type==='boss',guardian=type==='guardian',elite=type==='elite';
+  const partyFactor=run.party.length===1?0.8:run.party.length===2?1.12:1.5;
+  const factor=1+(run.floor-1)*0.24;
+  const pool=run.floor===1?['slime','wisp','moth']:['slime','wisp','moth','sentinel','revenant'];
+  let keys;
+  if(boss) keys=['sovereign'];
+  else if(guardian)keys=run.party.length>1&&run.floor>1?['guardian','wisp']:['guardian'];
+  else if(elite)keys=['sentinel',...(run.party.length>1?['revenant']:[])];
+  else keys=Array.from({length:run.party.length===1?integer(run,1,2):integer(run,2,3)},()=>choose(run,pool));
+  return keys.map((id,index)=>{
+    const base=ENEMY_TYPES[id];
+    const hp=Math.round(base.hp*factor*partyFactor*(elite?1.35:1));
+    return {...base,id:`enemy-${index}`,type:id,maxHp:hp,hp,atk:Math.round(base.atk*(1+(run.floor-1)*0.16)),mag:Math.round(base.mag*(1+(run.floor-1)*0.16)),def:base.def+run.floor-1,spd:base.spd,status:{},guard:false,intentIndex:boss||guardian?0:integer(run,0,base.intent.length-1),charged:false,phoenixUsed:true};
+  });
+}
+function startBattle(run,type='normal',origin=null) {
+  if(run.phase!=='explore') return false;
+  run.phase='battle';run.fx=[];
+  for(const p of run.party){p.guard=false;p.status={};p.phoenixUsed=false;}
+  run.battle={type,origin,enemies:generateEnemies(run,type),round:0,queue:[],active:null,serial:0,chainTarget:null,chainActor:null,chain:0,lastSkill:null,escaped:false};
+  log(run,type==='boss'?'蚀月的圣女睁开了双眼。':type==='guardian'?'月门守卫挡住了去路。':'阴影中传来了脚步声。','battle');
+  nextActor(run); return true;
+}
+function intentOf(enemy) { return enemy.intent[enemy.intentIndex%enemy.intent.length]; }
+function activeHero(run) {return run.battle?run.party.find(p=>p.id===run.battle.active&&p.hp>0)||null:null;}
+function skillCost(hero,skillId) {
+  const skill=SKILLS[skillId];if(!skill)return Infinity;
+  let cost=skill.cost;
+  if(cost&&hero.weapon.effect==='overload')cost+=2;
+  if(cost&&hero.weapon.effect==='economy')cost=Math.max(1,Math.floor(cost*0.65));
+  return cost;
+}
+function addStatus(run,target,id,turns,power=1) {
+  const existing=target.status[id];target.status[id]={turns:Math.max(turns,existing?.turns||0),power:Math.max(power,existing?.power||1),applied:run.battle?.serial||0};
+}
+function heal(run,target,amount) {
+  if(target.hp<=0)return 0;
+  const n=Math.min(target.maxHp-target.hp,Math.max(0,Math.round(amount)));target.hp+=n;
+  if(n)run.fx.push({id:target.id,type:'heal',amount:n});return n;
+}
+function revivePhoenix(run,target) {
+  if(target.hp<=0&&target.weapon?.effect==='phoenix'&&!target.phoenixUsed) {target.phoenixUsed=true;target.hp=Math.ceil(target.maxHp*0.35);target.status={};log(run,`${target.name} 的「返魂」发动，重新站了起来！`,'special');return true;}return false;
+}
+function hurt(run,target,amount,source=null) {
+  const n=Math.min(target.hp,Math.max(1,Math.round(amount)));target.hp=Math.max(0,target.hp-n);
+  run.fx.push({id:target.id,type:'damage',amount:n});
+  if(target.hp<=0&&!revivePhoenix(run,target)) {
+    log(run,`${target.name}${target.job?' 倒下了。':' 消散于月光中。'}`,target.job?'danger':'battle');
+    if(!target.job){run.kills++;if(source?.weapon?.effect==='soulsteal'){heal(run,source,source.maxHp*0.18);source.mp=Math.min(source.maxMp,source.mp+6);}}
+  }
+  return n;
+}
+function tickStart(run,entity) {
+  entity.guard=false;
+  for(const id of ['burn','poison'])if(entity.hp>0&&entity.status[id]) {
+    const dot=entity.status[id];const amount=entity.maxHp*(id==='burn'?0.07:0.06)*(dot.power||1);
+    const n=hurt(run,entity,amount);log(run,`${entity.name} 受到 ${n} 点${STATUS[id].name}伤害。`,'muted');
+  }
+  if(entity.job&&entity.hp>0)entity.mp=Math.min(entity.maxMp,entity.mp+(entity.job==='chrono'?2:0)+boonCount(run,'focus')*2);
+}
+function tickEnd(run,entity) {
+  for(const [id,s]of Object.entries(entity.status))if(s.applied!==run.battle.serial){s.turns--;if(s.turns<=0)delete entity.status[id];}
+}
+function newRound(run) {
+  const b=run.battle;b.round++;
+  const actors=[...living(run.party),...living(b.enemies)].map(e=>({id:e.id,speed:e.job?heroStats(e).spd:e.spd*(e.status.haste?1.5:1)*(e.status.slow?0.6:1),tie:random(run)}));
+  actors.sort((a,b)=>b.speed-a.speed||b.tie-a.tie);b.queue=actors.map(x=>x.id);
+}
+function checkFinish(run) {
+  if(!living(run.party).length){run.phase='ended';run.ending='defeat';run.battle.active=null;log(run,'星灯熄灭了。但月亮会记住你的名字。','danger');return true;}
+  if(!living(run.battle.enemies).length){finishBattle(run);return true;}return false;
+}
+function nextActor(run) {
+  // A bounded loop rather than recursion also covers poison deaths before acting.
+  for(let guard=0;guard<160&&run.phase==='battle';guard++) {
+    if(checkFinish(run))return;
+    const b=run.battle;if(!b.queue.length)newRound(run);
+    const id=b.queue.shift(), entity=[...run.party,...b.enemies].find(e=>e.id===id);
+    if(!entity||entity.hp<=0)continue;
+    b.serial++;b.active=id;tickStart(run,entity);if(checkFinish(run))return;
+    if(entity.hp<=0)continue;
+    if(entity.job)return;
+    enemyAct(run,entity);tickEnd(run,entity);if(checkFinish(run))return;
+  }
+  if(run.phase==='battle'&&!activeHero(run))throw new Error('Turn scheduler did not reach a player action.');
+}
+function lowestHp(party) {return living(party).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0];}
+function enemyAct(run,enemy) {
+  const intent=intentOf(enemy);enemy.intentIndex++;
+  if(intent==='guard'){enemy.guard=true;log(run,`${enemy.name} 架起防御。`,'muted');return;}
+  if(intent==='charge'){enemy.charged=true;log(run,`${enemy.name} 正在蓄力！下次攻击伤害翻倍。`,'danger');return;}
+  const targets=intent==='sweep'?living(run.party):[choose(run,living(run.party))];
+  for(const target of targets) {
+    const magic=['hex','drain'].includes(intent), base=magic?enemy.mag:enemy.atk;
+    let power=intent==='heavy'?1.65:intent==='sweep'?0.85:1;
+    if(enemy.charged)power*=1.9;
+    let damage=(base*power-target.def*(magic?0.25:0.6))*(0.9+random(run)*0.2);
+    if(target.guard)damage*=0.5;if(target.status.protect)damage*=0.7;if(target.job==='knight')damage*=0.88;
+    if(target.status.marked)damage*=1.2;
+    const dealt=hurt(run,target,Math.max(2,damage));
+    log(run,`${enemy.name} → ${target.name} · ${dealt} 伤害${intent==='heavy'?' / 重击':''}`,'enemy');
+    if(target.hp>0&&intent==='hex')addStatus(run,target,'burn',2);
+    if(target.hp>0&&intent==='poison')addStatus(run,target,'poison',2);
+    if(intent==='drain')heal(run,enemy,dealt*0.6);
+  }
+  enemy.charged=false;
+}
+function damageTarget(run,hero,target,skill,rank) {
+  const stats=heroStats(hero),magic=skill.kind==='magic'||(skill.kind==='attack'&&['mage','shrine','chrono'].includes(hero.job));
+  const offense=magic?stats.mag:stats.atk, negative=negativeCount(target), effect=hero.weapon.effect;
+  const factor=1+rank*0.22;
+  let damage=Math.max(2,offense*(skill.power||1)*factor-target.def*(magic?0.25:0.55));
+  damage*=0.91+random(run)*0.18;
+  if(run.solo)damage*=1.25;
+  if(hero.status.fury)damage*=1.3;if(hero.status.haste)damage*=1.15;
+  if(target.status.break&&!magic)damage*=1.35;if(target.status.marked)damage*=1.2;
+  if(hero.job==='ninja'&&negative)damage*=1.25;
+  if(hero.job==='reaver'&&hero.hp<hero.maxHp*0.5)damage*=1.35;
+  if(skill.exploit)damage*=1+Math.min(4,negative)*0.2;
+  if(skill.element&&skill.element===target.weak){damage*=1.4;log(run,'弱点命中 · 伤害 +40%','special');}
+  if(skill.element==='ice'&&target.status.burn){damage*=1.6;log(run,'元素联动「融解」· 伤害 +60%','special');}
+  if(effect==='execution'&&target.hp<target.maxHp*0.4)damage*=1.5;
+  if(effect==='frostbite'&&target.status.slow)damage*=1.4;
+  if(effect==='firstlight'&&run.battle.round<=2)damage*=1.4;
+  if(effect==='bloodmoon'&&hero.hp<hero.maxHp*0.5)damage*=1.45;
+  if(effect==='overload'&&skill.id!=='attack')damage*=1.4;
+  if(effect==='affliction')damage*=1+negative*0.18;
+  const b=run.battle;
+  if(b.chainTarget===target.id&&b.chainActor!==hero.id) {
+    b.chain=Math.min(4,b.chain+1);damage*=1+b.chain*0.12+boonCount(run,'harmony')*0.2;
+    log(run,`CHAIN ×${b.chain+1} · ${hero.name} 接上了同伴的攻击！`,'special');
+  } else if(b.chainActor===hero.id||b.chainTarget!==target.id) b.chain=0;
+  b.chainTarget=target.id;b.chainActor=hero.id;
+  const crit=random(run)<Math.min(0.8,0.06+boonCount(run,'critical')*0.08+(hero.job==='ninja'?0.07:0));
+  if(crit)damage*=1.5;if(target.guard)damage*=0.5;
+  const dealt=hurt(run,target,damage,hero);
+  log(run,`${hero.name} · ${skill.name} → ${target.name} ${dealt}${crit?' 暴击！':''}`,'player');
+  if(hero.job==='knight'&&target.status.break)hero.mp=Math.min(hero.maxMp,hero.mp+4);
+  if(hero.job==='mage'&&target.status.burn&&skill.kind!=='attack')hero.mp=Math.min(hero.maxMp,hero.mp+3);
+  const drain=(skill.drain||0)+(effect==='vampire'?0.18:0)+(hero.job==='reaver'?0.1:0)+boonCount(run,'siphon')*0.07;
+  if(drain)heal(run,hero,dealt*drain);
+  if(hero.job==='shrine'){const friend=lowestHp(run.party);if(friend)heal(run,friend,dealt*0.2);}
+  if(target.hp>0){
+    if(skill.status)addStatus(run,target,skill.status,skill.turns,1+boonCount(run,'embers')*0.4);
+    const procs={guardbreak:['break',0.3],kindle:['burn',0.25],toxin:['poison',0.25],frostbite:['slow',0.3]};
+    if(procs[effect]&&random(run)<procs[effect][1])addStatus(run,target,procs[effect][0],2,1+boonCount(run,'embers')*0.4);
+    if(effect==='echo'&&random(run)<0.28){const n=hurt(run,target,dealt*0.45,hero);log(run,`「回响」追加 ${n} 伤害。`,'special');}
+  }
+  if(effect==='cleave'&&skill.target==='enemy')for(const other of living(b.enemies).filter(e=>e.id!==target.id)){const n=hurt(run,other,dealt*0.25,hero);log(run,`「星屑」溅射 ${other.name} ${n} 伤害。`,'special');}
+}
+function act(run,skillId,targetId=null) {
+  if(run.phase!=='battle')return {ok:false,error:'不在战斗中。'};
+  const hero=activeHero(run);
+  if(!hero)return {ok:false,error:'尚未轮到我方行动。'};
+  if(skillId==='escape')return escapeBattle(run,hero);
+  const skill=SKILLS[skillId];
+  if(!skill||!['attack','guard',...hero.skills].includes(skillId))return {ok:false,error:'无法使用此技能。'};
+  const cost=skillCost(hero,skillId);if(hero.mp<cost)return {ok:false,error:'MP 不足。普通攻击或防御可以恢复 MP。'};
+  const b=run.battle;
+  let targets=[];
+  if(skill.target==='enemy'){const e=b.enemies.find(e=>e.id===targetId&&e.hp>0);if(!e)return {ok:false,error:'请选择存活的敌人。'};targets=[e];}
+  else if(skill.target==='enemies')targets=living(b.enemies);
+  else if(skill.target==='self')targets=[hero];
+  else if(skill.target==='allies')targets=living(run.party);
+  else if(skill.target==='ally'){const p=run.party.find(p=>p.id===targetId&&(p.hp>0||skill.kind==='revive'));if(!p)return {ok:false,error:'请选择有效队友。'};targets=[p];}
+  hero.mp-=cost;run.fx=[];b.lastSkill=skillId;
+  const rank=hero.ranks[skillId]||0,scale=1+rank*0.22,stats=heroStats(hero);
+  if(['physical','magic','attack'].includes(skill.kind)) {
+    for(const target of targets)if(target.hp>0)damageTarget(run,hero,target,skill,rank);
+    if(skillId==='attack')hero.mp=Math.min(hero.maxMp,hero.mp+5);
+  }else if(skill.kind==='guard') {hero.guard=true;hero.mp=Math.min(hero.maxMp,hero.mp+7);log(run,`${hero.name} 防御，回复 7 MP。`,'heal');}
+  else if(skill.kind==='aegis') {heal(run,hero,hero.maxHp*0.3*scale);for(const p of living(run.party))addStatus(run,p,'protect',2);log(run,`${hero.name} 展开星纹壁垒。`,'heal');}
+  else if(skill.kind==='heal') {for(const p of targets){heal(run,p,(stats.mag*1.5+p.maxHp*0.12)*scale);delete p.status.burn;delete p.status.poison;}log(run,'花雨落下，全队得到治疗与净化。','heal');}
+  else if(skill.kind==='revive') {const p=targets[0];if(p.hp<=0){p.hp=Math.ceil(p.maxHp*0.4*scale);p.hp=Math.min(p.maxHp,p.hp);p.status={};run.fx.push({id:p.id,type:'heal',amount:p.hp});}else heal(run,p,p.maxHp*0.55*scale);log(run,`${hero.name} 将晨星还给了 ${p.name}。`,'heal');}
+  else if(skill.kind==='veil'){heal(run,hero,hero.maxHp*0.25*scale);addStatus(run,hero,'haste',2);log(run,`${hero.name} 隐入胧月，恢复生命并获得迅捷。`,'heal');}
+  else if(skill.kind==='haste'){for(const p of targets)addStatus(run,p,'haste',3+rank);log(run,'时间加速了。全队获得迅捷。','special');}
+  else if(skill.kind==='rewind'){heal(run,targets[0],(stats.mag*2+15)*scale);for(const id of Object.keys(targets[0].status))if(STATUS[id]?.negative)delete targets[0].status[id];log(run,`${hero.name} 逆转了 ${targets[0].name} 的伤势。`,'heal');}
+  else if(skill.kind==='bloodpact'){hero.hp=Math.max(1,hero.hp-Math.ceil(hero.hp*0.2));hero.mp=Math.min(hero.maxMp,hero.mp+12+rank*3);addStatus(run,hero,'fury',3);log(run,`${hero.name} 立下血誓，获得狂热。`,'special');}
+  if(hero.hp>0){
+    if(hero.weapon.effect==='lifewell')heal(run,hero,hero.maxHp*0.04);
+    if(hero.weapon.effect==='mana')hero.mp=Math.min(hero.maxMp,hero.mp+3);
+    if(hero.weapon.effect==='chorus'){const friend=lowestHp(run.party);if(friend)heal(run,friend,8);}
+  }
+  tickEnd(run,hero);if(!checkFinish(run))nextActor(run);
+  return {ok:true};
+}
+function escapeBattle(run,hero) {
+  if(['guardian','boss'].includes(run.battle.type))return {ok:false,error:'月门已经封闭，无法逃离这场战斗。'};
+  run.fx=[];
+  if(random(run)<0.65){log(run,'成功脱离战斗。','muted');run.battle=null;run.phase='explore';run.grace=6;for(const p of run.party){p.status={};p.guard=false;}return {ok:true};}
+  log(run,'逃离失败！行动机会已消耗。','danger');tickEnd(run,hero);nextActor(run);return {ok:true};
+}
+function finishBattle(run) {
+  const b=run.battle;run.battles++;run.grace=5;
+  const xp=22+run.floor*9+b.enemies.length*6+(b.type!=='normal'?20:0);
+  const coins=integer(run,12,25)*run.floor;run.xp+=xp;run.gold+=coins;
+  for(const p of run.party){
+    if(p.hp<=0)p.hp=Math.ceil(p.maxHp*0.15);
+    p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*(0.06+boonCount(run,'victory')*0.1)));
+    p.mp=Math.min(p.maxMp,p.mp+4);p.status={};p.guard=false;
+  }
+  while(run.xp>=run.nextXp){
+    run.xp-=run.nextXp;run.level++;run.nextXp=45+run.level*25;
+    for(const p of run.party){p.maxHp+=11;p.hp=Math.min(p.maxHp,p.hp+23);p.maxMp+=3;p.mp=Math.min(p.maxMp,p.mp+10);p.atk+=2;p.mag+=2;p.def+=1;if(run.level%2===0)p.spd++;}
+    log(run,`LEVEL UP · 全队 Lv.${run.level}，基础能力成长，恢复生命与 MP。`,'special');
+  }
+  log(run,`战斗胜利 · 经验 +${xp} · 星砂 +${coins}`,'loot');
+  if(b.origin&&run.dungeon.events[b.origin]) {
+    if(['guardian','boss'].includes(b.type))run.guardianDefeated=true;
+    else run.dungeon.events[b.origin].used=true;
+  }
+  if(b.type==='boss'){run.phase='ended';run.ending='victory';b.active=null;log(run,'月蚀结束。你终于见到了黎明。','special');return;}
+  run.battle=null;openRewards(run,b.type==='normal'?'battle':'elite');
+}
+function weaponReward(run,source) {
+  const rare=Object.keys(WEAPONS).filter(k=>WEAPONS[k].rarity==='rare'),legendary=Object.keys(WEAPONS).filter(k=>WEAPONS[k].rarity==='legendary');
+  const roll=random(run),legend=source==='altar'||(run.floor>=3&&roll<0.25)||(source==='elite'&&roll<0.4);
+  const id=choose(run,legend?legendary:rare);
+  run.serial++;return {type:'weapon',weapon:makeWeapon(id,run.floor,run.serial)};
+}
+function upgradeReward(run) {
+  const pairs=run.party.flatMap(p=>p.skills.filter(s=>(p.ranks[s]||0)<3).map(s=>({heroId:p.id,skillId:s})));
+  if(!pairs.length)return null;return {type:'skill',...choose(run,pairs)};
+}
+function openRewards(run,source='battle') {
+  run.phase='reward';run.rewardSource=source;run.event=null;
+  const boonPool=shuffled(run,BOONS);
+  const options=[{type:'boon',id:boonPool[0].id}];
+  options.push(source==='treasure'||source==='altar'||random(run)<0.5?weaponReward(run,source):upgradeReward(run)||{type:'boon',id:boonPool[1].id});
+  options.push(source==='elite'?weaponReward(run,source):upgradeReward(run)||{type:'boon',id:boonPool[2].id});
+  if(options[1]?.type==='skill'&&options[2]?.type==='skill'&&options[1].heroId===options[2].heroId&&options[1].skillId===options[2].skillId)options[2]={type:'boon',id:boonPool[2].id};
+  run.rewards=shuffled(run,options);return run.rewards;
+}
+function takeReward(run,index,heroId=null) {
+  if(run.phase!=='reward'||!Number.isInteger(index)||!run.rewards[index])return {ok:false,error:'奖励无效。'};
+  const r=run.rewards[index];
+  if(r.type==='boon'){
+    const boon=BOONS.find(b=>b.id===r.id);run.boons[boon.id]=(run.boons[boon.id]||0)+1;
+    if(boon.type==='stat')for(const p of run.party){p[boon.stat]+=boon.value;if(boon.stat==='maxHp')p.hp+=boon.value;if(boon.stat==='maxMp')p.mp+=boon.value;}
+    log(run,`获得祝福「${boon.name}」。`,'loot');
+  }else if(r.type==='skill'){
+    const hero=run.party.find(p=>p.id===r.heroId);hero.ranks[r.skillId]=(hero.ranks[r.skillId]||0)+1;
+    log(run,`${hero.name} 的「${SKILLS[r.skillId].name}」强化至 +${hero.ranks[r.skillId]}。`,'loot');
+  }else if(r.type==='weapon'){
+    const hero=run.party.find(p=>p.id===heroId);if(!hero)return {ok:false,error:'选择装备此武器的角色。'};
+    run.inventory.push(hero.weapon);hero.weapon=r.weapon;
+    log(run,`${hero.name} 装备了「${r.weapon.name}」· ${r.weapon.effectName}。`,'loot');
+  }
+  run.phase='explore';run.rewards=[];return {ok:true};
+}
+function equipWeapon(run,heroId,weaponUid) {
+  if(run.phase!=='explore')return false;
+  const hero=run.party.find(p=>p.id===heroId),index=run.inventory.findIndex(w=>w.uid===weaponUid);
+  if(!hero||index<0)return false;
+  [hero.weapon,run.inventory[index]]=[run.inventory[index],hero.weapon];log(run,`${hero.name} 换上了「${hero.weapon.name}」。`,'loot');return true;
+}
+function serializeRun(run) {return JSON.stringify(run);}
+function restoreRun(text) {
+  let r;try{r=JSON.parse(text);}catch{throw new Error('存档无法读取。');}
+  if(!r||r.version!==VERSION||!['explore','battle','reward','event','ended'].includes(r.phase)||!Array.isArray(r.party)||r.party.length<1||r.party.length>3||!Number.isInteger(r.floor)||r.floor<1||r.floor>MAX_FLOOR)throw new Error('存档版本或结构不兼容。');
+  if(!Number.isInteger(r.rng)||!r.dungeon||!Number.isInteger(r.dungeon.size)||r.dungeon.size<5||r.dungeon.size>31||r.dungeon.tiles?.length!==r.dungeon.size||r.dungeon.tiles.some(row=>!Array.isArray(row)||row.length!==r.dungeon.size||row.some(v=>v!==0&&v!==1)))throw new Error('地图存档损坏。');
+  if(!walkable(r.dungeon,r.x,r.y)||!Number.isInteger(r.dir)||r.dir<0||r.dir>3)throw new Error('角色位置无效。');
+  if(!r.dungeon.visited||r.dungeon.visited.length!==r.dungeon.size||r.dungeon.visited.some(row=>!Array.isArray(row)||row.length!==r.dungeon.size)||!r.dungeon.events)throw new Error('地图记录损坏。');
+  for(const p of r.party) {
+    if(!JOBS[p.job]||!WEAPONS[p.weapon?.id]||!Array.isArray(p.skills)||p.skills.some(s=>!SKILLS[s])||!p.ranks||!p.status)throw new Error('角色存档损坏。');
+    for(const k of ['hp','maxHp','mp','maxMp','atk','mag','def','spd'])if(!Number.isFinite(p[k])||p[k]<0)throw new Error('角色数值损坏。');
+    if(p.maxHp<1||p.hp>p.maxHp||p.mp>p.maxMp)throw new Error('角色数值越界。');
+  }
+  if(!Array.isArray(r.log)||!Array.isArray(r.inventory)||!Array.isArray(r.rewards)||!r.boons)throw new Error('冒险记录损坏。');
+  if(r.phase==='battle'&&(!r.battle||!Array.isArray(r.battle.enemies)||!Array.isArray(r.battle.queue)||!r.party.some(p=>p.id===r.battle.active&&p.hp>0)))throw new Error('战斗记录损坏。');
+  if(r.phase==='event'&&(!r.event||!r.dungeon.events[r.event.key]))throw new Error('事件记录损坏。');
+  if(r.phase==='reward'&&(r.rewards.length!==3||r.rewards.some(x=>!['boon','weapon','skill'].includes(x.type))))throw new Error('奖励记录损坏。');
+  r.fx=[];return r;
+}
+
+Object.assign(exports,{hashSeed,random,integer,choose,shuffled,cellKey,walkable,distances,generateDungeon,boonCount,negativeCount,heroStats,makeWeapon,createRun,reveal,turn,move,currentEvent,interact,resolveEvent,startBattle,intentOf,activeHero,skillCost,act,openRewards,takeReward,equipWeapon,serializeRun,restoreRun});
+};
+modules['art']=(exports,require)=>{
+/** Original, self-contained vector artwork. No remote assets or third-party character art. */
+const ART_PALETTES={
+  knight:{hair:'#dddfee',shade:'#939bc4',light:'#fbfaff',eye:'#8b97e8',accent:'#bac6ff',cloth:'#263345',skin:'#f0d4d0',style:0},
+  mage:{hair:'#b75248',shade:'#592b42',light:'#ecb399',eye:'#e8ad68',accent:'#e7a685',cloth:'#402437',skin:'#efcebd',style:1},
+  shrine:{hair:'#243342',shade:'#142232',light:'#6a8e9d',eye:'#81c5c0',accent:'#a7d6ca',cloth:'#f3e8df',skin:'#f5d8cc',style:2},
+  ninja:{hair:'#796291',shade:'#392e54',light:'#b2a1d1',eye:'#d2a4cf',accent:'#c8ade7',cloth:'#282535',skin:'#ead1ce',style:3},
+  chrono:{hair:'#d9b98e',shade:'#8e6a55',light:'#f3dfb6',eye:'#70afa6',accent:'#e9cf95',cloth:'#37404d',skin:'#f0d3bc',style:4},
+  reaver:{hair:'#332735',shade:'#160f23',light:'#83617b',eye:'#e57b91',accent:'#e79aa9',cloth:'#34212f',skin:'#edccca',style:5},
+};
+function svgUri(svg) {return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;}
+function icon(name,size=20) {
+  const paths={
+    sword:'<path d="m5 19 3-3m1-1L19 5l-4 1-8 8M5 13l6 6M4 20l-1 1"/>',
+    shield:'<path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6z"/><path d="m8 12 3 3 5-6"/>',
+    star:'<path d="m12 2 2.8 6.2L22 10l-5.3 4.8.5 7.2L12 18l-5.2 4 .5-7.2L2 10l7.2-1.8z"/>',
+    flame:'<path d="M12 3c2 6-4 7-2 11 2 1 4-1 4-4 7 6 5 11-2 11S2 14 6 9c0 4 2 4 3 2 1-3 0-5 3-8Z"/>',
+    ice:'<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3M3 10l4-1-1-4M21 14l-4 1 1 4M6 19l1-4-4-1M18 5l-1 4 4 1"/>',
+    heart:'<path d="M20.8 4.6c-2-2-5.5-1.5-8.8 2-3.3-3.5-6.8-4-8.8-2C-1 9 5 15 12 21 19 15 25 9 20.8 4.6Z"/>',
+    venom:'<path d="M9 3h6m-5 0v6l-6 9a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-6-9V3M7 15h10"/><path d="M10 18h.1M14 17h.1"/>',
+    moon:'<path d="M20 15A9 9 0 0 1 9 3 9.5 9.5 0 1 0 20 15Z"/><path d="m17 3 1 2 2 1-2 1-1 2-1-2-2-1 2-1z"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>',
+    drop:'<path d="M12 2C10 7 4 10 4 15a8 8 0 0 0 16 0c0-5-6-8-8-13Z"/><path d="M8 14q-1 4 3 4"/>',
+    wind:'<path d="M3 8h12c5 0 5-6 1-5M3 12h16c5 0 5 7 0 7M3 16h7c5 0 5 6 1 5"/>',
+    flower:'<path d="M12 8C5-3 0 8 8 12c-11 7 0 12 4 4 7 11 12 0 4-4 11-7 0-12-4-4Z"/><circle cx="12" cy="12" r="2"/>',
+    eye:'<path d="M2 12S6 5 12 5s10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+    link:'<path d="m9 15 6-6M8 16l-2 2a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0m2 1 2-2a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0" transform="translate(1 0)"/>',
+    map:'<path d="m3 5 6-2 6 3 6-3v16l-6 2-6-3-6 3zM9 3v15m6-12v15"/>',
+    bag:'<path d="M7 7V5a5 5 0 0 1 10 0v2M4 7h16l1 14H3zM9 11h6"/>',
+    stairs:'<path d="M3 21v-6h6V9h6V3h6M4 4h6M4 4v6M4 4l8 8"/>',
+    chest:'<path d="M3 10V7c0-3 18-3 18 0v13H3zM3 10h18M9 10v4h6v-4M7 5v5m10-5v5"/>',
+    sound:'<path d="m3 9 4 0 6-5v16l-6-5H3zM17 8q5 4 0 8m2-11q8 7 0 14"/>',
+    mute:'<path d="m3 9 4 0 6-5v16l-6-5H3zM17 9l5 6m0-6-5 6"/>',
+    arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',
+    up:'<path d="m5 15 7-7 7 7"/>',
+    down:'<path d="m5 9 7 7 7-7"/>',
+    left:'<path d="m15 5-7 7 7 7"/>',
+    right:'<path d="m9 5 7 7-7 7"/>',
+    turnleft:'<path d="m8 4-5 5 5 5M3 9h11a6 6 0 0 1 0 12"/>',
+    turnright:'<path d="m16 4 5 5-5 5m5-5H10a6 6 0 0 0 0 12"/>',
+    close:'<path d="m6 6 12 12M6 18 18 6"/>',
+    check:'<path d="m4 12 5 5L20 6"/>',
+    menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+    help:'<circle cx="12" cy="12" r="9"/><path d="M9 8a3 3 0 0 1 6 0c0 3-3 2-3 5m0 4h.01"/>',
+    exit:'<path d="M9 3H3v18h6m5-15 6 6-6 6M8 12h12"/>',
+  };
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.star}</svg>`;
+}
+function portraitSvg(job='knight') {
+  const p=ART_PALETTES[job]||ART_PALETTES.knight;
+  const long=[0,1,2,5].includes(p.style);
+  const hairBack=long?`<path d="M113 157C92 230 110 338 58 446L116 421 98 483 162 446 246 458 302 486 293 421 344 458C294 338 313 257 290 158Z" fill="url(#hair)"/><path d="M126 227Q86 371 116 429M267 230q40 100 23 207" stroke="${p.shade}" stroke-width="8" fill="none"/>`:`<path d="M115 168 97 275l37-15-12 39 51-33 71 17 42 17-5-35 25 10-20-117Z" fill="url(#hair)"/>`;
+  const bangs=p.style===2?`<path d="M114 173Q129 77 201 98q101 0 92 94l-18 29-9-60-3 51-22-40-7 36-26-40-8 33-25-40-8 35-27-13-7 43-17-8Z" fill="url(#hair)"/>`:
+  p.style===4?`<path d="M111 173Q96 99 173 97L221 83l-10 17c58-7 99 32 76 110l-30-49-7 46-20-55-30 41-1-47-45 65 9-49-42 52Z" fill="url(#hair)"/>`:
+  `<path d="M114 183C101 125 137 91 185 95c79-21 121 27 103 104l-18 29-8-62-17 50-19-64-38 66 8-62-57 64 10-46-24 69Z" fill="url(#hair)"/><path d="m208 118-45 71 20-57m37-16-6 45 13-36" fill="${p.light}" opacity=".48"/>`;
+  let accessory='';
+  if(p.style===0)accessory=`<path d="m121 171-12-27 27 10 26-31-4 31 30-5-23 24z" fill="#c9b58d"/><path d="m137 156 12-13 4 16-12 10z" fill="${p.accent}"/><path d="M63 465 296 170l10 4L92 479Z" fill="#bcc3d4" stroke="#687c9d" stroke-width="2"/><path d="m264 195 56 40 6-10-57-40Z" fill="#d9c08d"/><path d="m301 176 29-36 8 6-29 34" fill="#525372"/>`;
+  if(p.style===1)accessory=`<path d="M87 149 154 102 190 21l66 84 72 58q-128-28-241-14Z" fill="#362b4a" stroke="#bb8a7c" stroke-width="2"/><path d="m151 108 113 9-9-16-95-8Z" fill="#c99a81"/><path d="m211 61 8 15 16 4-13 10-2 17-11-12-17 2 8-15Z" fill="#e2bf8d"/><path d="M315 487 331 239" stroke="#6e4159" stroke-width="12"/><circle cx="330" cy="218" r="28" stroke="#d4af85" stroke-width="6" fill="none"/><path d="m330 189 14 29-14 25-14-25Z" fill="#f3ac88"/>`;
+  if(p.style===2)accessory=`<path d="m111 168-34-38 7 52-10 16 41-13m173-17 34-38-7 52 10 16-41-13" fill="#ad5364"/><circle cx="114" cy="174" r="9" fill="#e9c492"/><circle cx="287" cy="174" r="9" fill="#e9c492"/><path d="m114 183-5 80m177-80 7 80" stroke="#d2ab7e" stroke-width="3"/><path d="M294 488 330 254" stroke="#936f69" stroke-width="9"/><circle cx="335" cy="229" r="25" fill="none" stroke="#cfae7f" stroke-width="5"/><path d="m330 252-19 45 19-10 5 17 11-49" fill="#f4e2d7"/>`;
+  if(p.style===3)accessory=`<path d="m117 157 14 12 145-7 16-15-4 31-160 9Z" fill="#4e4967"/><path d="m184 162 40-2 1 22-40 2Z" fill="#b6b6c8"/><path d="m195 172 9-8 10 7-10 8z" fill="#615873"/><path d="m269 178 52 60-5 24-43-66 15 80-19-17-11-79" fill="#a783aa"/><path d="m89 459 51-147 12 3-36 152Z" fill="#c3becf"/><path d="m128 347 31 8" stroke="#d4c199" stroke-width="6"/>`;
+  if(p.style===4)accessory=`<g fill="none" stroke="#d7bb8d" stroke-width="2"><ellipse cx="163" cy="215" rx="25" ry="18"/><ellipse cx="236" cy="215" rx="25" ry="18"/><path d="M188 211q10-5 23 0m-73 0-18-8m141 8 20-10"/></g><path d="M303 463V278" stroke="#7b6464" stroke-width="9"/><circle cx="303" cy="256" r="33" fill="#293547" stroke="#dfbf7e" stroke-width="5"/><path d="m303 233 0 24 16 10" stroke="#e0c891" stroke-width="3" fill="none"/><circle cx="303" cy="256" r="4" fill="#e0c891"/>`;
+  if(p.style===5)accessory=`<path d="m122 170-14-39 33 24 16-35 3 44-24 25Z" fill="#392130" stroke="#b96888" stroke-width="2"/><path d="M70 496 266 199l24 7L109 511Z" fill="#382d44" stroke="#bc829a" stroke-width="3"/><path d="m89 482 181-270" stroke="#e69ab8" stroke-width="3"/><path d="m246 230 63 44 4-14-60-46z" fill="#d2a995"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 520" fill="none">
+  <defs><linearGradient id="hair" x1="140" y1="100" x2="290" y2="448" gradientUnits="userSpaceOnUse"><stop stop-color="${p.light}"/><stop offset=".23" stop-color="${p.hair}"/><stop offset="1" stop-color="${p.shade}"/></linearGradient><linearGradient id="coat" x1="165" y1="300" x2="258" y2="517" gradientUnits="userSpaceOnUse"><stop stop-color="${p.cloth}"/><stop offset="1" stop-color="#131725"/></linearGradient><linearGradient id="face" x1="150" y1="172" x2="235" y2="274" gradientUnits="userSpaceOnUse"><stop stop-color="${p.skin}"/><stop offset="1" stop-color="#dcaeb0"/></linearGradient><linearGradient id="iris" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#34314d"/><stop offset=".6" stop-color="${p.eye}"/><stop offset="1" stop-color="${p.accent}"/></linearGradient></defs>
+  ${hairBack}
+  <path d="M164 282 150 314 95 336 55 487 136 520h140l68-43-49-141-60-24-8-34Z" fill="url(#coat)" stroke="#191b2b" stroke-width="2"/>
+  <path d="m156 297-8 21 51 48 46-50-12-20Z" fill="${p.skin}"/><path d="m161 286 1 21q33 20 65 0l-1-24" fill="#d1a6a9"/>
+  <path d="m150 311 45 34-28 74-42-91m119-17-45 34 28 74 39-91" fill="${p.cloth}" stroke="${p.accent}" stroke-width="2"/>
+  <path d="M197 351v162" stroke="${p.accent}" stroke-width="2" opacity=".6"/>
+  <path d="m116 337 14 149-24 34-42-32 29-129Zm162 0-6 163 39-13-13-120Z" fill="${p.cloth}" stroke="${p.accent}" stroke-width="1.5" opacity=".8"/>
+  <path d="m161 360 37 17 38-17-20 44h-35Z" fill="#424253" stroke="#d7bc89" stroke-width="2"/>
+  <path d="m198 365 12 19-12 20-12-20Z" fill="${p.accent}"/>
+  <path d="m139 434 137 0-1 19H133Z" fill="#3d3540" stroke="#b7a58a" stroke-width="2"/>
+  <path d="m191 433 27 0v24h-27Z" fill="#d8bd8f"/><path d="m197 439 14 0v12h-14Z" fill="#4b4151"/>
+  <path d="M124 192c-20-7-21 24-5 39l14 2m142-41c20-7 21 24 5 39l-14 2" fill="${p.skin}" stroke="#b68899" stroke-width="1.5"/>
+  <path d="M127 172C127 126 268 128 273 172l-7 66c-6 26-41 52-66 60-25-9-61-34-67-62Z" fill="url(#face)"/>
+  <path d="M133 191q60-32 133 0l-2-25c-27-35-99-37-132 0Z" fill="${p.shade}" opacity=".19"/>
+  <path d="m143 192 35-3m45 0 33 5" stroke="${p.shade}" stroke-width="3" stroke-linecap="round"/>
+  <path d="M140 211q16-16 40-1l-2 15q-20 8-34-3Zm80-1q22-15 40 1l-4 12q-17 11-34 1Z" fill="#fff5ee"/>
+  <ellipse cx="162" cy="215" rx="10" ry="15" fill="url(#iris)"/><ellipse cx="240" cy="215" rx="10" ry="15" fill="url(#iris)"/>
+  <ellipse cx="163" cy="216" rx="4" ry="10" fill="#292333"/><ellipse cx="239" cy="216" rx="4" ry="10" fill="#292333"/>
+  <circle cx="158" cy="207" r="4" fill="white"/><circle cx="236" cy="207" r="4" fill="white"/><circle cx="167" cy="224" r="2" fill="#fffbe3"/><circle cx="244" cy="224" r="2" fill="#fffbe3"/>
+  <path d="m137 207 5 4q16-15 38-1m-38 1-4-5m83 4q21-16 39 1l5-5" stroke="#3e3045" stroke-width="4" stroke-linecap="round"/>
+  <path d="M146 229q16 5 27 0m54 1q16 4 27-2" stroke="#bc8a99" stroke-width="1.2"/>
+  <path d="m199 222-4 19 6 2" stroke="#c99a9f" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="m188 262q11 4 22-1" stroke="#af7483" stroke-width="2" stroke-linecap="round"/>
+  <path d="m190 266 16 0" stroke="#f1c5c1" stroke-width="2"/>
+  <ellipse cx="146" cy="245" rx="15" ry="6" fill="#de93a3" opacity=".23"/><ellipse cx="251" cy="245" rx="15" ry="6" fill="#de93a3" opacity=".23"/>
+  ${bangs}
+  <path d="M126 188q-14 51 23 125l-11-68m130-67q23 72-13 137l13-64" fill="${p.hair}"/>
+  <path d="M146 116q-24 28-21 48m35-57q-11 4-14 9m94-8q33 10 39 36" stroke="${p.light}" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+  <path d="m140 237 3 24m117-24-3 24" stroke="#d9ba88" stroke-width="2"/><path d="m142 255 5 8-5 10-5-10m121-18 5 8-5 10-5-10" fill="${p.accent}"/>
+  ${accessory}
+  <path d="M90 473q-7-30 8-34 15-3 16 20l10 13-13 18Z" fill="${p.skin}" stroke="#b28391" stroke-width="1.5"/>
+  </svg>`;
+}
+function portraitUri(job) {return svgUri(portraitSvg(job));}
+function enemySvg(kind='slime',color='#b89cd9') {
+  const defs=`<defs><radialGradient id="body"><stop stop-color="${color}"/><stop offset="1" stop-color="#333049"/></radialGradient><linearGradient id="wing" x1="0" x2="1" y1="0" y2="1"><stop stop-color="${color}"/><stop offset="1" stop-color="#282639"/></linearGradient><radialGradient id="orb"><stop stop-color="#fffde1"/><stop offset=".35" stop-color="${color}"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></radialGradient></defs>`;
+  let body='';
+  if(kind==='slime')body=`<ellipse cx="160" cy="252" rx="118" ry="15" fill="#000" opacity=".25"/><path d="M42 232c-7-36 17-60 28-81 8-17 1-62 39-68 35-3 23 34 54 31 49-4 44 49 64 61 72 44 48 80-10 83H94c-24 0-45-5-52-26Z" fill="url(#body)" stroke="${color}" stroke-width="2"/><path d="M70 200q-4-41 33-50m-10 72-4 7" stroke="#daccec" stroke-width="7" stroke-linecap="round" opacity=".38"/><ellipse cx="135" cy="194" rx="13" ry="19" fill="#191825"/><ellipse cx="197" cy="194" rx="13" ry="19" fill="#191825"/><circle cx="138" cy="189" r="5" fill="#e7e0fa"/><circle cx="200" cy="189" r="5" fill="#e7e0fa"/><path d="M151 222q15 13 30 0" stroke="#292030" stroke-width="5" fill="none"/><path d="m92 94 5-45 25 29 19-28 15 57" fill="#8d77ad" stroke="${color}" stroke-width="2"/><circle cx="33" cy="185" r="6" fill="${color}" opacity=".4"/><circle cx="270" cy="153" r="9" fill="${color}" opacity=".4"/>`;
+  else if(kind==='wisp')body=`<circle cx="160" cy="158" r="128" fill="url(#orb)" opacity=".24"/><path d="M159 37c-3 41-58 49-55 84-3 21 4 30-17 55-33 53 9 101 67 101 85 1 99-45 80-92-5-19-31-29-21-49-33 11-15 41-33 42-32 0 21-61-21-141Z" fill="url(#body)" stroke="${color}" stroke-width="2"/><path d="M150 91c-24 36-9 42-31 59" stroke="#ddd8ff" stroke-width="6" opacity=".55"/><path d="m118 202 27 4-2 21-14-1Zm61 4 27-5-11 26-13-1Z" fill="#fff5d2"/><path d="m151 239 12 5 9-8" stroke="#48365c" stroke-width="3"/><ellipse cx="160" cy="281" rx="65" ry="8" fill="${color}" opacity=".16"/>`;
+  else if(kind==='moth')body=`<path d="M143 133C116 39 25 10 26 91c-9 55 45 80 91 85-48 0-106 49-56 94 51 35 87-51 99-66 23 39 57 79 88 45 42-57-4-68-43-78 56-19 104-61 75-100-25-51-83-5-106 61Z" fill="url(#wing)" stroke="${color}" stroke-width="2"/><path d="m136 150-77-76 51 84-60-14 75 24-44 69 63-50m40-37 61-76-33 84 52-24-63 44 25 48-45-35" stroke="#eacbe7" stroke-width="2" opacity=".6"/><ellipse cx="79" cy="107" rx="17" ry="24" transform="rotate(-30 79 107)" fill="#514461" stroke="#d0adc7" stroke-width="4"/><ellipse cx="242" cy="107" rx="17" ry="24" transform="rotate(30 242 107)" fill="#514461" stroke="#d0adc7" stroke-width="4"/><path d="M152 123q-4-38-27-50m42 50q7-34 31-42" stroke="${color}" stroke-width="5"/><ellipse cx="159" cy="178" rx="18" ry="51" fill="#47425d" stroke="${color}" stroke-width="2"/><circle cx="152" cy="145" r="5" fill="#fff4ca"/><circle cx="170" cy="145" r="5" fill="#fff4ca"/><path d="m147 176 26 0m-26 16h24" stroke="${color}" stroke-width="2"/>`;
+  else if(kind==='sentinel')body=`<ellipse cx="164" cy="289" rx="109" ry="9" fill="#0c0d14" opacity=".4"/><path d="m117 229-13 55h42l14-64 13 64h40l-12-61Z" fill="#484c60" stroke="${color}" stroke-width="2"/><path d="m103 129-28 28 15 70 47-3 27 22 35-24 39 3 9-72-26-25Z" fill="url(#body)" stroke="${color}" stroke-width="2"/><path d="m106 144 54 34 52-34-6 66-42 24-45-22Z" fill="#3e4157" stroke="${color}" stroke-width="2"/><path d="m160 166-13 25 14 28 13-28Z" fill="#dac393"/><path d="M121 124 116 70l24-34 47 2 25 32-11 53-41 26Z" fill="url(#body)" stroke="${color}" stroke-width="3"/><path d="m119 79 41 11 50-11-16 31-34 14-30-17Z" fill="#242633"/><path d="m136 91 17 5-2 8-14-4m36-4 18-5-3 11-15 2" fill="#e2cf9d"/><path d="m140 37-9-25 21 23m25 0 14-24-2 31" stroke="${color}" stroke-width="5"/><path d="M46 274 62 115l14-19 12 19-27 162Z" fill="#b4b9c9" stroke="#626d83" stroke-width="2"/><path d="m45 139 47 5" stroke="#d5bd8e" stroke-width="7"/><path d="m239 145 44 17-8 68-34 26-25-39Z" fill="#4b5063" stroke="${color}" stroke-width="4"/><path d="m239 165 21 14-5 44-16 12-12-29Z" fill="#86839a"/>`;
+  else if(kind==='ghost')body=`<ellipse cx="160" cy="284" rx="79" ry="10" fill="${color}" opacity=".15"/><path d="M106 113C89 203 111 213 65 276l50-13 11 22 34-14 29 14 16-22 44 17c-41-78-29-104-40-166Z" fill="url(#wing)" stroke="${color}" stroke-width="2"/><path d="M109 101c-2-83 107-73 102 1l-20 65h-60Z" fill="#413a59"/><path d="m126 95 69-1-9 47-27 19-27-20Z" fill="#cac1d5"/><path d="m131 110 17 0m24 0h17" stroke="#6c6089" stroke-width="4"/><path d="M100 136q53 27 119 0l-11 24q-57 27-102-3Z" fill="#aea0c6"/><path d="m123 210 28-28 10 8 14-9 27 31-17 12-24-21-25 21Z" fill="#c6bbd3"/><circle cx="161" cy="171" r="27" fill="url(#orb)"/><path d="M120 263q37-37 10-54m62 59q-41-29-4-52" stroke="${color}" stroke-width="3" opacity=".6"/>`;
+  else body=`<circle cx="160" cy="82" r="70" fill="none" stroke="#d5b9e6" stroke-width="2"/><circle cx="160" cy="82" r="63" fill="none" stroke="#a989c8" opacity=".5"/><path d="m65 84 16-13m165 13-17-13M160 0v17M90 11l14 18m128-17-16 18" stroke="#d2b6e5" stroke-width="3"/><path d="M119 71 76 259l33-16 19 27 32-15 36 15 14-26 38 16-48-190Z" fill="url(#wing)" stroke="#b99dce" stroke-width="2"/><path d="m96 128-57 6L8 212l68-35 23 55 43-42m81-58 59 2 31 78-67-35-23 54-43-43" fill="#4d375c" stroke="#b49ac4" stroke-width="2"/><path d="m38 147 49 6-21 34M282 147l-49 6 21 34" stroke="#d8b7d0" stroke-width="2"/><path d="M124 93q-7-53 34-57 51-4 43 59l-13 31-29 20-26-19Z" fill="#e3cbdc"/><path d="M120 91q-14-70 40-64 58-7 42 67l-20-45-22 47 4-46-39 54Z" fill="#e4d6ed"/><path d="m134 94 17 2m21 0 17-2" stroke="#7c4589" stroke-width="4"/><path d="m150 122 16 0" stroke="#b0769d" stroke-width="2"/><path d="m131 37 1-22 26 13 26-13 6 27" fill="#685174" stroke="#e5c096" stroke-width="2"/><path d="m143 146 17 17 18-17 15 66-34 24-34-24Z" fill="#2e253d" stroke="#d8b9c7" stroke-width="2"/><path d="m158 161-13 22 13 20 15-20Z" fill="#e1c1f4"/><path d="m95 154 43 34-12 13-37-21m134-26-43 34 12 13 37-21" fill="#dfc4d7"/><circle cx="160" cy="215" r="43" fill="url(#orb)" opacity=".8"/><path d="m160 193 9 16 18 6-18 5-9 17-9-17-18-5 18-6Z" fill="#f9e9fc"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 300">${defs}${body}</svg>`;
+}
+function enemyUri(kind,color) {return svgUri(enemySvg(kind,color));}
+function objectSvg(type,color='#bac0e9') {
+  const styles=`fill="none" stroke="${color}" stroke-width="3" stroke-linejoin="round"`;
+  const body=type==='chest'?`<path d="m45 91 88-20 38 22v70l-88 22-38-23Z" fill="#453744" stroke="#bfab88" stroke-width="3"/><path d="m45 107 88-19 38 20m-88-11v87m50-97v69" ${styles}/><path d="m47 92 16-24 71-16 35 26 2 16-87 21Z" fill="#64516a" stroke="#c3ac89" stroke-width="3"/><path d="m102 116 20-5v26l-20 5Z" fill="#dcc083"/><path d="m111 121 3-1v10l-3 1Z" fill="#695677"/>`:
+    type==='stairs'?`<path d="M46 179V63Q47 15 106 16q55-1 55 48v115Z" fill="#151a2a" stroke="#9890ac" stroke-width="9"/><path d="M57 177V65q0-37 49-37 42 0 42 37v112Z" fill="#686385" opacity=".5"/><path d="M56 177h93v-18H70v-18h62v-18H84v-18h39" ${styles}/><path d="m106 51-12 20 12 20 12-20Z" fill="${color}"/><path d="m22 188 158 0" ${styles}/>`:
+    type==='shrine'?`<path d="m43 173 127 0-12 15H53Zm25-20 73 0 13 20H54ZM92 87h26v65H92Z" fill="#5c637a" stroke="#a3abc0" stroke-width="2"/><path d="M62 91h84l-12 11H73Z" fill="#929bb5"/><path d="m86 61 18-28 18 28-18 28Z" fill="${color}"/><circle cx="104" cy="61" r="43" fill="${color}" opacity=".12"/><circle cx="104" cy="61" r="30" fill="none" stroke="${color}" stroke-width="1"/>`:
+    type==='fountain'?`<ellipse cx="104" cy="164" rx="71" ry="25" fill="#525774" stroke="#a8b6cd" stroke-width="4"/><ellipse cx="104" cy="155" rx="65" ry="16" fill="#76afc3" opacity=".7"/><path d="M95 153V74h19v79" fill="#8b95b0"/><ellipse cx="104" cy="74" rx="42" ry="12" fill="#788ba5" stroke="#bdc2d4" stroke-width="3"/><path d="m66 79 0 60m76-60 0 62M94 67q-5-30 10-45 17 16 9 42" stroke="#95d1dd" stroke-width="3" opacity=".8"/>`:
+    `<path d="m45 179 125 0-14-17H60Zm25-22 68 0-12-35H82ZM88 79 80 121h46l-9-42Z" fill="#777289" stroke="#b0a3b8" stroke-width="2"/><circle cx="104" cy="63" r="22" fill="#8c7e9c"/><path d="m78 53 7-29 22 16 19-16 6 30" fill="#a08aab"/><path d="m80 104-25 25 20 8 19-22m30-11 29 23-22 11-16-23" fill="#8b7e9c"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 210">${body}</svg>`;
+}
+
+Object.assign(exports,{svgUri,icon,portraitSvg,portraitUri,enemySvg,enemyUri,objectSvg});
+};
+modules['renderer']=(exports,require)=>{
+const { FLOORS }=require('data');
+const { objectSvg, enemySvg, svgUri }=require('art');
+/** Grid movement is rendered as a smooth first-person raycast, not a top-down imitation. */
+class DungeonRenderer {
+  constructor(canvas,getState) {
+    this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});this.getState=getState;
+    this.active=true;this.floor=0;this.x=1.5;this.y=1.5;this.angle=0;this.last=0;this.frame=0;this.images={};this.textures=[];this.flash=0;
+    for(const type of ['chest','stairs','shrine','fountain','altar','elite']) {
+      const img=new Image();img.src=svgUri(type==='elite'?enemySvg('sentinel','#c9a7bd'):objectSvg(type,type==='shrine'?'#bba7ec':'#b9cbea'));this.images[type]=img;
+    }
+    this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(canvas);this.resize();
+    this.loop=this.loop.bind(this);this.request=requestAnimationFrame(this.loop);
+  }
+  resize() {
+    const rect=this.canvas.getBoundingClientRect();
+    const ratio=Math.min(window.devicePixelRatio||1,1.5);
+    const w=Math.max(320,Math.min(1200,Math.round(rect.width*ratio))),h=Math.max(220,Math.round(rect.height*w/Math.max(1,rect.width)));
+    if(this.canvas.width!==w||this.canvas.height!==h){this.canvas.width=w;this.canvas.height=h;this.z=new Float32Array(w);}
+  }
+  destroy(){this.active=false;cancelAnimationFrame(this.request);this.resizeObserver.disconnect();}
+  pulse(){this.flash=0.2;}
+  makeTextures(floor) {
+    const palettes=[['#323750','#242a41','#48516b'],['#2c434b','#202f3d','#456171'],['#453346','#302739','#64465c'],['#3a344e','#292739','#555078'],['#443e4d','#302e3b','#625b6e']];
+    const [brick,mortar,edge]=palettes[floor-1];
+    this.textures=[];
+    for(let kind=0;kind<4;kind++){
+      const c=document.createElement('canvas');c.width=128;c.height=128;const t=c.getContext('2d');
+      t.fillStyle=mortar;t.fillRect(0,0,128,128);
+      for(let row=0;row<4;row++)for(let col=-1;col<3;col++) {
+        const xx=col*64+(row%2)*32,yy=row*32;t.fillStyle=brick;t.fillRect(xx+1,yy+1,62,30);
+        t.fillStyle=edge;t.globalAlpha=0.27;t.fillRect(xx+2,yy+2,60,2);t.fillRect(xx+2,yy+2,1,27);t.globalAlpha=1;
+        t.fillStyle='#000';t.globalAlpha=.18;t.fillRect(xx+2,yy+29,61,2);t.globalAlpha=1;
+        for(let i=0;i<16;i++){const n=(row*937+col*647+i*181+kind*31)>>>0;t.fillStyle=i%2?'#b1afd2':'#090b1a';t.globalAlpha=.06;t.fillRect(xx+4+(n%55),yy+5+(n%22),1+(n%4),1);t.globalAlpha=1;}
+      }
+      if(kind===1){t.fillStyle='#161c2c';t.fillRect(52,0,24,128);t.fillStyle=edge;t.fillRect(49,0,4,128);t.fillRect(76,0,3,128);t.fillStyle=brick;t.fillRect(55,0,18,128);}
+      if(kind===2){
+        t.fillStyle='#182133';t.fillRect(60,37,8,50);t.fillStyle='#909db5';t.fillRect(57,62,14,4);
+        const glow=t.createRadialGradient(64,40,2,64,40,45);glow.addColorStop(0,'#cfbadeaa');glow.addColorStop(1,'#8b78dd00');t.fillStyle=glow;t.fillRect(18,0,92,86);
+        t.fillStyle='#968ba8';t.beginPath();t.moveTo(53,33);t.lineTo(75,33);t.lineTo(70,60);t.lineTo(58,60);t.closePath();t.fill();
+        t.fillStyle='#e5d4ed';t.fillRect(59,35,10,19);t.fillStyle='#f5ecfa';t.fillRect(61,36,5,16);
+      }
+      if(kind===3){t.strokeStyle=FLOORS[floor-1].color;t.globalAlpha=.32;t.lineWidth=1.5;t.beginPath();t.moveTo(64,36);t.lineTo(81,62);t.lineTo(64,88);t.lineTo(47,62);t.closePath();t.moveTo(40,62);t.lineTo(88,62);t.moveTo(64,28);t.lineTo(64,96);t.stroke();t.globalAlpha=1;}
+      this.textures.push(c);
+    }
+  }
+  loop(time){
+    if(!this.active)return;this.request=requestAnimationFrame(this.loop);
+    if(time-this.last<30||document.hidden)return;this.last=time;
+    const run=this.getState();if(!run?.dungeon)return;
+    if(this.floor!==run.floor||this.dungeon!==run.dungeon){this.floor=run.floor;this.dungeon=run.dungeon;this.makeTextures(run.floor);this.x=run.x+.5;this.y=run.y+.5;this.angle=-Math.PI/2+run.dir*Math.PI/2;}
+    const target=-Math.PI/2+run.dir*Math.PI/2;
+    let delta=((target-this.angle+Math.PI*3)%(Math.PI*2))-Math.PI;
+    this.angle+=delta*.28;this.x+=(run.x+.5-this.x)*.3;this.y+=(run.y+.5-this.y)*.3;
+    this.draw(run,time);
+  }
+  floorTile(ctx,w,h,points,fill){
+    if(points.some(p=>p.z<.14))return;
+    ctx.beginPath();points.forEach((p,i)=>{const x=w/2+p.lateral/p.z*w/.66/2,y=h/2+h/p.z/2;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle='#a1a2c011';ctx.lineWidth=1;ctx.stroke();
+  }
+  draw(run,time) {
+    const ctx=this.ctx,w=this.canvas.width,h=this.canvas.height;
+    if(!w||!h)return;
+    const dx=Math.cos(this.angle),dy=Math.sin(this.angle),planeX=-dy*.66,planeY=dx*.66;
+    const floorGrad=ctx.createLinearGradient(0,h*.4,0,h);floorGrad.addColorStop(0,'#121727');floorGrad.addColorStop(1,'#292b40');ctx.fillStyle=floorGrad;ctx.fillRect(0,0,w,h);
+    const sky=ctx.createLinearGradient(0,0,0,h/2);sky.addColorStop(0,'#121724');sky.addColorStop(1,'#242639');ctx.fillStyle=sky;ctx.fillRect(0,0,w,h/2);
+    for(let y=Math.max(0,Math.floor(this.y)-9);y<Math.min(run.dungeon.size,Math.floor(this.y)+10);y++)for(let x=Math.max(0,Math.floor(this.x)-9);x<Math.min(run.dungeon.size,Math.floor(this.x)+10);x++){
+      if(run.dungeon.tiles[y][x]!==0)continue;
+      const ps=[[x,y],[x+1,y],[x+1,y+1],[x,y+1]].map(([xx,yy])=>({z:(xx-this.x)*dx+(yy-this.y)*dy,lateral:-(xx-this.x)*dy+(yy-this.y)*dx}));
+      this.floorTile(ctx,w,h,ps,(x+y)%2?'#262b3e':'#2b2e43');
+    }
+    for(let col=0;col<w;col+=2){
+      const cameraX=2*col/w-1,rx=dx+planeX*cameraX,ry=dy+planeY*cameraX;
+      let mapX=Math.floor(this.x),mapY=Math.floor(this.y);
+      const deltaX=Math.abs(1/rx),deltaY=Math.abs(1/ry),stepX=rx<0?-1:1,stepY=ry<0?-1:1;
+      let sideX=(rx<0?this.x-mapX:mapX+1-this.x)*deltaX,sideY=(ry<0?this.y-mapY:mapY+1-this.y)*deltaY,side=0;
+      for(let step=0;step<80;step++){
+        if(sideX<sideY){sideX+=deltaX;mapX+=stepX;side=0;}else{sideY+=deltaY;mapY+=stepY;side=1;}
+        if(run.dungeon.tiles[mapY]?.[mapX]!==0)break;
+      }
+      const dist=Math.max(.06,side===0?sideX-deltaX:sideY-deltaY);this.z[col]=dist;if(col+1<w)this.z[col+1]=dist;
+      let wallX=side===0?this.y+dist*ry:this.x+dist*rx;wallX-=Math.floor(wallX);
+      let texX=Math.floor(wallX*128);if(side===0&&rx>0||side===1&&ry<0)texX=127-texX;
+      const height=h/dist,top=h/2-height/2;
+      const code=Math.abs(mapX*13+mapY*7),type=code%9===0?2:code%7===0?3:code%5===0?1:0;
+      ctx.drawImage(this.textures[type],texX,0,1,128,col,top,2,height);
+      ctx.fillStyle=`rgba(8,12,25,${Math.min(.88,dist*.075+(side===1?.09:0))})`;ctx.fillRect(col,top,2,height);
+      if(dist<4){ctx.fillStyle=`rgba(167,163,207,${.035*(1-dist/4)})`;ctx.fillRect(col,top,2,height);}
+    }
+    const sprites=Object.entries(run.dungeon.events).filter(([,event])=>!event.used).map(([key,event])=>{
+      const [x,y]=key.split(',').map(Number),sx=x+.5-this.x,sy=y+.5-this.y;
+      return {event,z:sx*dx+sy*dy,lateral:-sx*dy+sy*dx};
+    }).filter(s=>s.z>.25&&s.z<10).sort((a,b)=>b.z-a.z);
+    for(const s of sprites){
+      const image=this.images[s.event.type];if(!image?.complete||!image.naturalWidth)continue;
+      const scale=s.event.type==='stairs'?.95:s.event.type==='elite'?.85:.65,sh=h/s.z*scale,sw=sh*(image.naturalWidth/image.naturalHeight);
+      const sx=w/2*(1+s.lateral/(s.z*.66))-sw/2,sy=h/2+h/s.z/2-sh;
+      ctx.globalAlpha=Math.max(.2,1-s.z*.065);
+      for(let col=Math.max(0,Math.floor(sx));col<Math.min(w,sx+sw);col+=2){if(s.z<this.z[col]+.08){const sourceX=Math.max(0,Math.min(image.naturalWidth-1,(col-sx)/sw*image.naturalWidth));const sourceW=Math.min(image.naturalWidth-sourceX,image.naturalWidth/sw*2.2);if(sourceW>0)ctx.drawImage(image,sourceX,0,sourceW,image.naturalHeight,col,sy,2.2,sh);}}
+      ctx.globalAlpha=1;
+    }
+    const vignette=ctx.createRadialGradient(w/2,h*.48,h*.12,w/2,h*.5,Math.max(w*.67,h*.8));vignette.addColorStop(0,'#10142a00');vignette.addColorStop(.65,'#090d1830');vignette.addColorStop(1,'#070915ee');ctx.fillStyle=vignette;ctx.fillRect(0,0,w,h);
+    const haze=ctx.createLinearGradient(0,h*.25,0,h*.8);haze.addColorStop(0,'#aaa0d000');haze.addColorStop(.45,'#909bd20c');haze.addColorStop(1,'#aba9d300');ctx.fillStyle=haze;ctx.fillRect(0,0,w,h);
+    ctx.fillStyle=FLOORS[run.floor-1].color;
+    for(let i=0;i<24;i++){const px=((i*157.7+time*.002*(i%3+1))%w),py=((i*97.4-time*.006+100000)%h);ctx.globalAlpha=.15+(Math.sin(time*.001+i)*.5+.5)*.32;ctx.beginPath();ctx.arc(px,py,i%6===0?1.8:.7,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
+    if(run.phase==='battle'){ctx.fillStyle='#07091577';ctx.fillRect(0,0,w,h);}
+    if(this.flash>0){ctx.fillStyle=`rgba(206,193,243,${this.flash})`;ctx.fillRect(0,0,w,h);this.flash*=.72;if(this.flash<.005)this.flash=0;}
+  }
+}
+
+Object.assign(exports,{DungeonRenderer});
+};
+modules['audio']=(exports,require)=>{
+/** A quiet generative score and SFX, synthesized locally after an explicit user gesture. */
+class AudioSystem {
+  constructor(){this.ctx=null;this.enabled=false;this.timer=null;this.step=0;}
+  async toggle(){
+    if(this.enabled){this.enabled=false;clearInterval(this.timer);if(this.ctx)await this.ctx.suspend();return false;}
+    const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext)return false;
+    if(!this.ctx)this.ctx=new AudioContext();await this.ctx.resume();this.enabled=true;this.tick();this.timer=setInterval(()=>this.tick(),1400);return true;
+  }
+  note(frequency,duration=.25,volume=.035,type='sine',delay=0){
+    if(!this.ctx||!this.enabled)return;
+    const start=this.ctx.currentTime+delay,o=this.ctx.createOscillator(),g=this.ctx.createGain();
+    o.type=type;o.frequency.setValueAtTime(frequency,start);g.gain.setValueAtTime(0,start);g.gain.linearRampToValueAtTime(volume,start+.025);g.gain.exponentialRampToValueAtTime(.0001,start+duration);o.connect(g);g.connect(this.ctx.destination);o.start(start);o.stop(start+duration+.05);o.onended=()=>{o.disconnect();g.disconnect();};
+  }
+  tick(){
+    if(document.hidden)return;
+    const progression=[[146.83,220,293.66],[130.81,196,261.63],[110,164.81,220],[130.81,196,293.66]];
+    const chord=progression[Math.floor(this.step/4)%4];for(const f of chord)this.note(f,2.8,.009);
+    const melody=[587.33,440,659.25,523.25,587.33,392,440,293.66];this.note(melody[this.step%melody.length],1.8,.02);this.step++;
+  }
+  sfx(name){
+    if(name==='move')this.note(100,.08,.013,'triangle');
+    else if(name==='select')this.note(660,.11,.03);
+    else if(name==='attack'){this.note(160,.16,.025,'sawtooth');this.note(90,.1,.025,'triangle',.03);}
+    else if(name==='magic'){this.note(523.25,.3,.025);this.note(783.99,.45,.025,'sine',.08);this.note(1046.5,.5,.02,'sine',.16);}
+    else if(name==='heal'){[392,493.88,587.33].forEach((f,i)=>this.note(f,.6,.022,'sine',i*.1));}
+    else if(name==='victory'){[293.66,369.99,440,587.33].forEach((f,i)=>this.note(f,.8,.03,'triangle',i*.12));}
+    else if(name==='battle'){this.note(146.83,.6,.03,'triangle');this.note(155.56,.5,.017,'triangle',.1);}
+  }
+}
+
+Object.assign(exports,{AudioSystem});
+};
+modules['app']=(exports,require)=>{
+const { SAVE_KEY, MAX_FLOOR, JOBS, SKILLS, STATUS, BOONS, INTENTS, RARITIES, DIRECTIONS, FLOORS }=require('data');
+const { createRun, move, turn, interact, currentEvent, resolveEvent, activeHero, act, intentOf, takeReward, equipWeapon, heroStats, skillCost, serializeRun, restoreRun, cellKey }=require('engine');
+const { icon, portraitUri, enemyUri, objectSvg, svgUri }=require('art');
+const { DungeonRenderer }=require('renderer');
+const { AudioSystem }=require('audio');
+const ROOT=document.getElementById('app'), MODAL=document.getElementById('modal-root');
+const AUDIO=new AudioSystem();
+const PORTRAITS=Object.fromEntries(Object.keys(JOBS).map(id=>[id,portraitUri(id)]));
+const ENEMY_IMAGES=new Map();
+let run=null,renderer=null,toastTimer=null,modalKey='',lastFocus=null;
+const ui={selection:['knight','mage','shrine'],modal:null,modalData:null,rewardIndex:null,selectedEnemy:null,pendingSkill:null,busy:false,seedDraft:'',screen:'landing',lastMove:0,storageError:false};
+const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const e=escapeHtml;
+function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),3200);}
+function readSave(){try{const text=localStorage.getItem(SAVE_KEY);return text?restoreRun(text):null;}catch(error){return null;}}
+function save(){if(!run)return;try{localStorage.setItem(SAVE_KEY,serializeRun(run));}catch(error){if(!ui.storageError){ui.storageError=true;toast('浏览器阻止了本地存档。此局仍可继续，但关闭页面会丢失进度。');}}}
+function seedCode(){try{const bytes=new Uint32Array(1);crypto.getRandomValues(bytes);return `MOON-${bytes[0].toString(36).toUpperCase().padStart(6,'0')}`;}catch{return `MOON-${Date.now().toString(36).toUpperCase()}`;}}
+function brand(){return `<div class="brand"><div class="brand-mark">${icon('moon',23)}</div><div><div class="brand-label">月蝕の迷宮</div><div class="brand-en">ECLIPSE LABYRINTH</div></div></div>`;}
+function soundButton(){return `<button class="icon-button" data-action="sound" aria-label="${AUDIO.enabled?'关闭音乐与音效':'开启音乐与音效'}" title="${AUDIO.enabled?'关闭声音':'开启声音（默认静音）'}">${icon(AUDIO.enabled?'sound':'mute',18)}</button>`;}
+function selectionDescription(){
+  const ids=ui.selection;
+  if(!ids.length)return ['旅程由你决定','选择一至三个职业。每个职业都有不同的战斗节奏。'];
+  if(ids.length===1)return ['独行者的誓约','单人：生命 +45%、MP +30%、伤害 +25%。敌人强度随队伍人数调整。'];
+  const synergies=[];
+  if(ids.includes('knight')&&(ids.includes('ninja')||ids.includes('reaver')))synergies.push('破甲 → 物理追击');
+  if(ids.includes('mage')&&ids.includes('ninja'))synergies.push('燃烧 → 猎影增伤');
+  if(ids.includes('shrine'))synergies.push('星标增伤与治疗续航');
+  if(ids.includes('chrono'))synergies.push('全队加速与时间支援');
+  if(!synergies.length)synergies.push('交替攻击同一敌人，叠加联携伤害');
+  return [ids.map(id=>JOBS[id].name).join(' / '),synergies.join('　·　')];
+}
+function renderLanding(){
+  ui.screen='landing';renderer?.destroy();renderer=null;
+  const saved=readSave(),canResume=saved&&saved.phase!=='ended';
+  const [line,sub]=selectionDescription();
+  ROOT.innerHTML=`<header class="page-head">${brand()}<div class="header-actions"><span class="edition"><i class="dot"></i>ROGUELIKE DRPG · 0.1</span>${soundButton()}<button class="icon-button" data-action="help" aria-label="游戏说明">${icon('help',18)}</button></div></header>
+  <main class="landing">
+    <section class="hero-intro">
+      <div class="intro-copy"><div class="eyebrow">A NEW MOON. A NEW BEGINNING.</div><h1>月蝕の迷宮</h1><div class="intro-en">E C L I P S E　L A B Y R I N T H</div><div class="intro-sub">以微小的星火，<br>踏入无月之夜。</div><p>在不断重生的迷宫中，编织属于你的职业、武器与祝福。<br>每一次坠落，都是另一段故事的开端。</p><div class="feature-line"><span>${icon('eye',15)} 第一人称探索</span><span>${icon('sword',15)} 回合制战斗</span><span>${icon('star',15)} 随机构筑</span></div></div>
+      <div class="hero-art" aria-hidden="true"><div class="moon-disk"></div><span class="star-orbit">✦</span><span class="star-orbit two">✧</span><img class="echo left" src="${PORTRAITS.mage}" alt=""><img class="echo right" src="${PORTRAITS.ninja}" alt=""><img class="lead" src="${PORTRAITS.knight}" alt=""><span class="vertical-jp">何度でも、星を灯せ。</span><div class="floating-note"><strong>希露菲 · 星剣士</strong><small>THE FIRST LIGHT IN THE DARK</small></div></div>
+      <div class="chapter-line"><b>CHAPTER 01</b><span>THE FORGOTTEN CORRIDOR</span></div>
+    </section>
+    <section class="roster-section"><div class="section-heading"><h2>选择你的同行者 <small>CHOOSE YOUR PARTY</small></h2><div class="roster-meta"><span class="helper">自由编队</span><strong>${ui.selection.length} / 3</strong><button class="ghost" data-action="classes" title="查看所有职业能力">${icon('help',14)}<span class="tiny">职业</span></button></div></div>
+      <div class="job-grid">${Object.values(JOBS).map((job,i)=>`<button class="job-card ${ui.selection.includes(job.id)?'selected':''}" style="--job-color:${job.color}" data-action="job" data-job="${job.id}" aria-pressed="${ui.selection.includes(job.id)}" aria-label="${job.name}，${job.role}，${ui.selection.includes(job.id)?'已选择，点击移除':'点击加入'}"><span class="job-number">0${i+1}</span><span class="job-check">${ui.selection.includes(job.id)?icon('check',14):''}</span><img src="${PORTRAITS[job.id]}" alt="${job.person}的原创角色立绘"><span class="job-meta"><span class="jp">${job.jp}</span><strong>${job.name}</strong><span class="role">${job.role}</span></span></button>`).join('')}</div>
+    </section>
+    <section class="expedition-bar"><div class="party-description"><b>${e(line)}</b><p>${e(sub)}</p></div><div class="start-controls">${canResume?`<button class="secondary resume-button" data-action="resume">${icon('clock',15)} 继续 · 第 ${saved.floor} 层</button>`:''}<div class="seed-box"><label for="seed-input">迷宫种子 · 可留空</label><input id="seed-input" maxlength="48" value="${e(ui.seedDraft)}" placeholder="RANDOM" autocomplete="off" spellcheck="false" aria-label="迷宫种子，留空随机生成"></div><button class="primary" data-action="start" ${!ui.selection.length?'disabled':''}>点亮星灯 · 出发 ${icon('arrow',18)}</button></div></section>
+    <footer class="landing-foot"><span>每一局从零开始 · 没有永久属性加成 · 本局自动保存</span><span>ORIGINAL VECTOR ART / OFFLINE READY</span></footer>
+  </main>`;
+  renderModal();
+}
+function mountGame(){
+  ui.screen='game';renderer?.destroy();
+  ROOT.innerHTML=`<main class="game-shell"><header class="game-head">${brand()}<div id="top-stats" class="head-run"></div><div class="header-actions"><span id="sound-button">${soundButton()}</span><button class="icon-button" data-action="help" aria-label="游戏说明">${icon('help',18)}</button><button class="icon-button" data-action="menu" aria-label="冒险菜单">${icon('menu',18)}</button></div></header>
+    <div class="game-grid"><section class="viewport-panel" aria-label="第一人称迷宫视图"><div class="stage" id="stage"><canvas id="dungeon-canvas" aria-label="第一人称三维迷宫"></canvas><div id="stage-hud" class="stage-hud"></div></div><div id="stage-footer" class="stage-footer"></div></section><section id="command-panel" class="command-panel" aria-label="行动指令"></section><section id="party-strip" class="party-strip" aria-label="冒险队伍"></section><aside class="side-column"><section class="side-card map-card"><div class="card-title"><span>${icon('map',14)} 探索地图</span><small id="exploration-percent"></small></div><button class="map-wrapper" id="minimap" data-action="map" aria-label="展开已探索地图"></button><div class="map-legend"><span><i></i> 月门</span><span class="treasure"><i></i> 宝箱</span><span class="rest"><i></i> 休息</span></div></section><section id="objective" class="side-card objective"></section><section class="side-card journal-card"><div class="card-title"><span>${icon('moon',14)} 旅途回响</span><small>JOURNAL</small></div><div id="journal" class="journal" aria-live="polite" aria-relevant="additions text"></div></section><section class="side-card boon-card"><div class="card-title"><span>${icon('star',14)} 星之祝福</span><button class="ghost" data-action="inventory" aria-label="查看全部祝福">${icon('arrow',12)}</button></div><div id="boon-overview" class="boon-overview"></div></section><div class="side-foot">YOU ARE NOT LOST. NOT YET.</div></aside></div><footer id="game-foot" class="game-foot"></footer></main>`;
+  renderer=new DungeonRenderer(document.getElementById('dungeon-canvas'),()=>run);
+  updateGame();
+}
+function mapSvg(large=false){
+  const d=run.dungeon,size=d.size,tile=12,pad=5,width=size*tile+pad*2;
+  let shapes='';
+  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+    const seen=d.visited[y][x],floor=d.tiles[y][x]===0;
+    shapes+=`<rect x="${pad+x*tile+1}" y="${pad+y*tile+1}" width="10" height="10" rx="1.5" fill="${seen?(floor?'#727a96':'#2c354d'):'#1e2639'}" opacity="${seen?1:.65}"/>`;
+    const ev=d.events[cellKey(x,y)];
+    if(seen&&floor&&ev&&!ev.used){const cx=pad+x*tile+6,cy=pad+y*tile+6;
+      if(ev.type==='stairs')shapes+=`<path d="m${cx-3},${cy-3}h6v6h-6Z" fill="${run.guardianDefeated?'#b4dbc6':'#c2a4e5'}"/><path d="m${cx-2},${cy-1} 2,3 2,-3" fill="none" stroke="#332b4c" stroke-width="1"/>`;
+      else if(ev.type==='chest')shapes+=`<rect x="${cx-3}" y="${cy-2.5}" width="6" height="5" rx="1" fill="#e2c18d"/>`;
+      else if(['shrine','fountain'].includes(ev.type))shapes+=`<path d="m${cx},${cy-4} 3,4 -3,4 -3,-4Z" fill="#9cd1bc"/>`;
+      else if(ev.type==='elite')shapes+=`<path d="m${cx-3},${cy-3} 6,6m0,-6 -6,6" stroke="#d68aa8" stroke-width="2"/>`;
+      else shapes+=`<circle cx="${cx}" cy="${cy}" r="2.5" fill="#b7acd9"/>`;
+    }
+  }
+  const px=pad+run.x*tile+6,py=pad+run.y*tile+6;
+  shapes+=`<circle cx="${px}" cy="${py}" r="8" fill="#ded0ef22"/><g transform="translate(${px} ${py}) rotate(${run.dir*90})"><path d="M0-5 4.5 4 0 2-4.5 4Z" fill="#f7e7ff" stroke="#514569" stroke-width=".8"/></g>`;
+  return `<svg viewBox="0 0 ${width} ${width}" role="img" aria-label="已探索地图；你在 ${run.x},${run.y}，面向${DIRECTIONS[run.dir].label}">${shapes}</svg>`;
+}
+function exploration(){let seen=0,total=0;for(let y=0;y<run.dungeon.size;y++)for(let x=0;x<run.dungeon.size;x++)if(run.dungeon.tiles[y][x]===0){total++;if(run.dungeon.visited[y][x])seen++;}return Math.round(seen/total*100);}
+function statusHtml(entity){return `<span class="status-list">${entity.guard?'<span class="status-badge" style="--status-color:#b9c6e1">防御</span>':''}${Object.entries(entity.status).filter(([id])=>STATUS[id]).map(([id,s])=>`<span class="status-badge" style="--status-color:${STATUS[id].color}" title="${STATUS[id].name}：剩余 ${s.turns} 次行动">${STATUS[id].name}<sup>${s.turns}</sup></span>`).join('')}</span>`;}
+function popHtml(entity){const effects=run.fx.filter(f=>f.id===entity.id);const damage=effects.filter(f=>f.type==='damage').reduce((s,f)=>s+f.amount,0),healing=effects.filter(f=>f.type==='heal').reduce((s,f)=>s+f.amount,0);return damage?`<span class="damage-pop">${damage}</span>`:healing?`<span class="damage-pop heal-number">+${healing}</span>`:'';}
+function effectClass(entity){return run.fx.some(f=>f.id===entity.id&&f.type==='damage')?'damaged':run.fx.some(f=>f.id===entity.id&&f.type==='heal')?'healed':'';}
+function eventLabel(event){if(!event)return '';return {chest:'打开遗落的宝箱',shrine:'在星灯下休息',fountain:'饮用月之泉',altar:'聆听神像的低语',elite:'挑战徘徊的精英',stairs:run.guardianDefeated?'走入下一层迷宫':run.floor===5?'面对蚀月的圣女':'挑战月门守卫'}[event.type];}
+function eventIcon(type){return {chest:'chest',shrine:'star',fountain:'drop',altar:'moon',elite:'sword',stairs:'stairs'}[type]||'star';}
+function renderExploreHud(){
+  const floor=FLOORS[run.floor-1],event=currentEvent(run),dir=DIRECTIONS[run.dir];
+  return `<div class="floor-heading"><div class="eyebrow">THE ${['FIRST','SECOND','THIRD','FOURTH','FINAL'][run.floor-1]} STRATUM</div><h2>${floor.name}</h2><div class="jp">${floor.jp}</div></div><div class="floor-number"><strong>B${String(run.floor).padStart(2,'0')}</strong><span>OF 05 FLOORS</span></div><div class="compass"><span>${DIRECTIONS[(run.dir+3)%4].short}</span><span class="north">${icon('up',12)} ${dir.short}</span><span>${DIRECTIONS[(run.dir+1)%4].short}</span></div><span class="crosshair"></span><p class="explore-caption">${floor.lore}</p><span class="position-label"><i></i> ${String(run.x).padStart(2,'0')} : ${String(run.y).padStart(2,'0')}</span>${event?`<button class="interaction" data-action="interact">${icon(eventIcon(event.type),18)}<span>${eventLabel(event)}</span><kbd>F</kbd></button>`:''}`;
+}
+function enemyImage(enemy){const key=`${enemy.kind}|${enemy.tint}`;if(!ENEMY_IMAGES.has(key))ENEMY_IMAGES.set(key,enemyUri(enemy.kind,enemy.tint));return ENEMY_IMAGES.get(key);}
+function renderBattleHud(){
+  const b=run.battle,alive=b.enemies.filter(p=>p.hp>0);
+  if(!alive.some(p=>p.id===ui.selectedEnemy))ui.selectedEnemy=alive[0]?.id||null;
+  const units=[...run.party,...b.enemies];
+  const order=[b.active,...b.queue.filter(id=>units.find(u=>u.id===id)?.hp>0)].slice(0,7);
+  return `<div class="floor-heading"><div class="eyebrow">${b.type==='boss'?'THE LAST ECLIPSE':b.type==='guardian'?'GATEKEEPER':'ENCOUNTER'}</div><h2>${b.type==='boss'?'无月的终章':b.type==='guardian'?'月门的试炼':'与暗影交锋'}</h2><div class="jp">${b.type==='boss'?'最後の祈り':'星火を、絶やすな。'}</div></div><div class="round-label"><small>ROUND</small><strong>${String(b.round).padStart(2,'0')}</strong></div><div class="floor-number"><strong>B${String(run.floor).padStart(2,'0')}</strong><span>${b.type==='boss'?'FINAL BOSS':'TURN-BASED'}</span></div><div class="enemy-line">${alive.map(enemy=>{const intent=INTENTS[intentOf(enemy)],weak={ice:'冰',fire:'火',light:'光'}[enemy.weak];return `<button class="enemy-card ${enemy.kind==='sovereign'?'boss':''} ${ui.selectedEnemy===enemy.id?'selected':''} ${effectClass(enemy)}" data-action="target" data-id="${enemy.id}" aria-pressed="${ui.selectedEnemy===enemy.id}" aria-label="选择目标：${e(enemy.name)}，生命${enemy.hp}/${enemy.maxHp}，意图${intent.name}"><span class="enemy-intent ${enemy.charged?'charged':''}">${icon(intent.icon,12)} ${enemy.charged?'蓄力 · ':''}${intent.name}</span><span class="enemy-art"><img src="${enemyImage(enemy)}" alt="${e(enemy.name)}"></span><span class="enemy-weak">弱点 · ${weak}</span><span class="enemy-caption">${ui.selectedEnemy===enemy.id?'<span class="target-arrow">▾</span>':''}<strong>${e(enemy.name)}</strong><span class="bar"><i style="width:${Math.max(0,enemy.hp/enemy.maxHp*100)}%"></i></span><span class="hp-number">${enemy.hp} / ${enemy.maxHp}</span>${statusHtml(enemy)}</span>${popHtml(enemy)}</button>`;}).join('')}</div><div class="battle-stage-bottom"><div class="turn-order"><span>TURN ORDER</span>${order.map((id,i)=>{const unit=units.find(p=>p.id===id);return unit?`<span class="turn-token ${unit.job?'':'foe'} ${i===0?'current':''}" title="${e(unit.name)}">${unit.job?e(unit.name[0]):icon('sword',12)}</span>`:'';}).join('')}</div>${b.chain>0?`<span class="chain-pill">CHAIN × ${b.chain+1}</span>`:'<span class="combat-note">点击怪物切换目标</span>'}</div>`;
+}
+function renderExploreCommands(){
+  const event=currentEvent(run);
+  return `<div class="explore-command"><div class="command-copy"><div class="eyebrow">EXPLORATION</div><h3>${event?eventLabel(event):'沿着星灯，继续前行。'}</h3><p>${run.guardianDefeated?'守卫已经倒下，月门已开启。':'寻找月门，击败守卫后深入下一层。'}</p></div><div class="dpad" aria-label="迷宫方向控制"><button data-action="turn-left" aria-label="向左转" title="左转 A / ←">${icon('turnleft',17)}<small>A</small></button><button class="move-forward" data-action="forward" aria-label="向前移动" title="前进 W / ↑">${icon('up',18)}<small>W</small></button><button data-action="turn-right" aria-label="向右转" title="右转 D / →">${icon('turnright',17)}<small>D</small></button><button data-action="strafe-left" aria-label="向左平移" title="左平移 Q">${icon('left',17)}<small>Q</small></button><button data-action="back" aria-label="向后移动" title="后退 S / ↓">${icon('down',18)}<small>S</small></button><button data-action="strafe-right" aria-label="向右平移" title="右平移 E">${icon('right',17)}<small>E</small></button></div><div class="command-shortcuts"><button data-action="interact" ${!event?'disabled':''}>${icon(event?eventIcon(event.type):'star',20)}<span>调查 F</span></button><button data-action="map">${icon('map',20)}<span>地图 M</span></button><button data-action="inventory">${icon('bag',20)}<span>行囊 I</span></button></div></div>`;
+}
+function renderBattleCommands(){
+  const hero=activeHero(run);if(!hero)return '';
+  const title=`<div class="battle-command-header"><span class="turn-title">${icon('star',16)} ${e(hero.name)} 的回合 <small>${JOBS[hero.job].roman}'S TURN</small></span><button class="flee" data-action="flee" ${['guardian','boss'].includes(run.battle.type)||ui.busy?'disabled':''} title="65% 概率脱离；失败消耗当前角色行动。守门战不可逃离。">${icon('exit',14)} 撤退</button></div>`;
+  if(ui.pendingSkill)return `<div class="battle-command">${title}<div class="target-prompt"><span>${icon('heart',22)} ${SKILLS[ui.pendingSkill].name}：点击下方队友作为目标。</span><button class="secondary" data-action="cancel-target">取消</button></div></div>`;
+  return `<div class="battle-command">${title}<div class="skill-grid">${['attack',...hero.skills,'guard'].map((id,i)=>{const skill=SKILLS[id],cost=skillCost(hero,id),rank=hero.ranks[id]||0;return `<button class="skill-button ${id==='attack'?'basic':''}" data-action="skill" data-skill="${id}" ${hero.mp<cost||ui.busy?'disabled':''} title="${e(skill.desc)}${rank?` 强化 +${rank}：效能提高 ${rank*22}%。`:''}" aria-label="${skill.name}${rank?' 强化'+rank:''}，消耗 ${cost} MP。${e(skill.desc)}"><span class="skill-top">${icon(skill.icon,18)}<span>${cost?`${cost} MP`:id==='attack'?'+5 MP':id==='guard'?'+7 MP':id==='bloodpact'?`+${12+rank*3} MP`:'0 MP'}</span></span><strong>${skill.name}${rank?`<span class="rank">+${rank}</span>`:''}</strong><small class="description">${skill.desc}</small><span class="hotkey">${i+1}</span></button>`;}).join('')}</div></div>`;
+}
+function renderParty(){
+  const active=activeHero(run),pending=ui.pendingSkill?SKILLS[ui.pendingSkill]:null;
+  return run.party.map(p=>{const job=JOBS[p.job];return `<button class="party-card ${active?.id===p.id?'active':''} ${p.hp<=0?'downed':''} ${pending&&(p.hp>0||pending.kind==='revive')?'targetable':''} ${effectClass(p)}" style="--job-color:${job.color}" data-action="party" data-id="${p.id}" aria-label="${e(p.name)}，${job.name}，生命 ${p.hp}/${p.maxHp}，MP ${p.mp}/${p.maxMp}${pending?'，点击选择为技能目标':'，查看角色信息'}"><span class="party-face"><img src="${PORTRAITS[p.job]}" alt=""></span><span class="party-info"><span class="party-name">${e(p.name)}<small>${active?.id===p.id?'YOUR TURN':job.jp}</small></span><span class="party-role">Lv.${run.level}　${job.name}</span><span class="bar-line"><span class="label">HP</span><span class="bar ${p.hp/p.maxHp<.3?'low':''}"><i style="width:${p.hp/p.maxHp*100}%"></i></span><span class="value">${p.hp}/${p.maxHp}</span></span><span class="bar-line"><span class="label">MP</span><span class="bar mp"><i style="width:${p.mp/p.maxMp*100}%"></i></span><span class="value">${p.mp}/${p.maxMp}</span></span><span class="party-weapon">${icon('sword',10)} ${e(p.weapon.name)}</span>${statusHtml(p)}</span>${popHtml(p)}</button>`;}).join('');
+}
+function boonChips(limit=Infinity){const entries=Object.entries(run.boons);if(!entries.length)return '<span class="tiny muted">未获得祝福。旅途才刚刚开始。</span>';return entries.slice(0,limit).map(([id,n])=>{const boon=BOONS.find(x=>x.id===id);return boon?`<span class="boon-chip" title="${e(boon.desc)} 已获取 ${n} 次">${icon(boon.icon,12)} ${boon.name}${n>1?`<b>×${n}</b>`:''}</span>`:'';}).join('')+(entries.length>limit?`<span class="boon-chip">+${entries.length-limit}</span>`:'');}
+function updateGame(){
+  if(!run)return;
+  const battle=run.phase==='battle';
+  document.getElementById('top-stats').innerHTML=`<span class="level">${icon('star',15)} LV.<b>${run.level}</b></span><span class="gold">${icon('drop',14)} <b>${run.gold}</b> 星砂</span><span class="steps">${run.steps} 步</span><span class="seed">SEED ${e(run.seed)}</span>`;
+  document.getElementById('stage-hud').innerHTML=battle?renderBattleHud():renderExploreHud();
+  const danger=Math.min(1,run.danger/run.encounterAt),event=currentEvent(run);
+  document.getElementById('stage-footer').innerHTML=battle?`<span class="path-label">${icon('sword',13)} 战斗进行中</span><span class="combat-note">${ui.pendingSkill?'选择我方目标':'负面状态 × 职业被动 × 武器特效'}</span>`:`<span class="path-label">${icon('moon',13)} ${run.guardianDefeated?'月门已开启':event?'发现了可以调查的事物':'迷宫探索中'}</span><span class="danger-meter"><span>${run.grace>0?'暂时安全':danger>.75?'气息迫近':'暗影气息'}</span><span class="danger-bars ${danger>.75?'danger':''}">${Array.from({length:8},(_,i)=>`<i class="${i<Math.ceil(danger*8)?'on':''}"></i>`).join('')}</span></span>`;
+  document.getElementById('command-panel').innerHTML=battle?renderBattleCommands():renderExploreCommands();
+  const partyEl=document.getElementById('party-strip');partyEl.style.setProperty('--party-size',run.party.length);partyEl.innerHTML=renderParty();
+  document.getElementById('minimap').innerHTML=mapSvg();document.getElementById('exploration-percent').textContent=`${exploration()}%`;
+  document.getElementById('objective').innerHTML=`<div class="eyebrow">${run.guardianDefeated?'GATE OPENED':'CURRENT OBJECTIVE'}</div><p>${run.guardianDefeated?'前往月门，深入下一层。':run.floor===5?'找到王座，结束这场月蚀。':'找到月门，击败本层守卫。'}</p><small>${run.guardianDefeated?'回到地图上的绿色月门标记。':'宝箱与星灯，可以让你走得更远。'}</small>`;
+  const journal=document.getElementById('journal');journal.innerHTML=run.log.slice(-9).map(l=>`<p class="log-entry ${['special','heal','loot','danger','enemy','player','muted','battle'].includes(l.tone)?l.tone:''}">${e(l.text)}</p>`).join('');journal.scrollTop=journal.scrollHeight;
+  document.getElementById('boon-overview').innerHTML=boonChips(5);
+  document.getElementById('game-foot').innerHTML=`<span>${run.solo?'独行誓约生效 · ':''}本局自动保存 · ${run.battles} 次战斗</span><span class="keyboard-tip">WASD 移动转向　Q/E 平移　F 调查　M 地图</span><span class="xp-track">LV.${run.level}<i><b style="width:${run.xp/run.nextXp*100}%"></b></i>${run.xp}/${run.nextXp}</span>`;
+  renderModal();
+}
+function setModal(name,data=null){ui.modal=name;ui.modalData=data;renderModal();}
+function closeModal(){
+  if(run&&['reward','event','ended'].includes(run.phase)){if(run.phase==='reward'&&ui.rewardIndex!==null){ui.rewardIndex=null;renderModal();}return;}
+  ui.modal=null;ui.modalData=null;renderModal();
+}
+function dialog(title,eyebrow,subtitle,body,{wide=false,narrow=false,closable=true,extra=''}={}){
+  return `<div class="modal-backdrop"><section class="dialog ${wide?'wide':''} ${narrow?'narrow':''} ${extra}" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1">${closable?`<button class="icon-button modal-close" data-action="close" aria-label="关闭">${icon('close',16)}</button>`:''}<header class="dialog-head"><div class="eyebrow">${eyebrow}</div><h2 id="dialog-title">${title}</h2>${subtitle?`<p>${subtitle}</p>`:''}</header>${body}</section></div>`;
+}
+function rewardCard(reward,index){
+  if(reward.type==='boon'){
+    const b=BOONS.find(x=>x.id===reward.id),stacks=run.boons[b.id]||0;
+    return `<button class="reward-card" data-action="reward" data-index="${index}"><span class="rarity">${icon('star',12)} 全队祝福${stacks?` · 已有 ×${stacks}`:''}</span><span class="reward-art">${icon(b.icon,42)}</span><h3>${b.name}</h3><p>${b.desc}</p><span class="reward-footer">将星光收入掌心 ${icon('arrow',17)}</span></button>`;
+  }
+  if(reward.type==='skill'){
+    const h=run.party.find(p=>p.id===reward.heroId),s=SKILLS[reward.skillId],rank=(h.ranks[s.id]||0)+1;
+    return `<button class="reward-card" data-action="reward" data-index="${index}"><span class="rarity">${icon('star',12)} 技能觉醒 · ${e(h.name)}</span><span class="reward-art">${icon(s.icon,42)}</span><h3>${s.name} <span class="gold">+${rank}</span></h3><p>${['haste','bloodpact'].includes(s.id)?s.id==='haste'?`全队迅捷持续时间增加至 ${3+rank} 回合。`:`契约额外回复 ${rank*3} MP。`:`此技能的伤害或治疗效能提高至基础的 ${100+rank*22}%。`}</p><p>${s.desc}</p><span class="reward-footer">强化这一段命运 ${icon('arrow',17)}</span></button>`;
+  }
+  const w=reward.weapon,r=RARITIES[w.rarity];
+  return `<button class="reward-card ${w.rarity}" data-action="reward" data-index="${index}"><span class="rarity" style="color:${r.color}">${icon('sword',12)} ${r.name}武器 · ${e(w.type)}</span><span class="reward-art">${icon(w.mag>w.atk?'star':'sword',42)}</span><h3>${e(w.name)}</h3><span class="weapon-stats"><span>攻击 +${w.atk}</span><span>魔力 +${w.mag}</span></span><span class="weapon-effect"><b>固有效果 · ${e(w.effectName)}</b>${e(w.desc)}</span><span class="reward-footer">选择持有这把武器的人 ${icon('arrow',17)}</span></button>`;
+}
+function equipChoices(weapon,action,index=null){
+  return `<div class="equip-grid" style="--party-size:${run.party.length}">${run.party.map(p=>{const da=weapon.atk-p.weapon.atk,dm=weapon.mag-p.weapon.mag;return `<button class="equip-card" data-action="${action}" data-id="${p.id}" ${index!==null?`data-index="${index}"`:''}><div class="equip-face"><img src="${PORTRAITS[p.job]}" alt=""></div><h3>${e(p.name)}</h3><span class="small muted">${JOBS[p.job].name}</span><p class="replace">替换 ${e(p.weapon.name)}</p><div class="weapon-stats"><span>攻击 <b class="delta ${da<0?'negative':''}">${da>=0?'+':''}${da}</b></span><span>魔力 <b class="delta ${dm<0?'negative':''}">${dm>=0?'+':''}${dm}</b></span></div></button>`;}).join('')}</div><p class="modal-hint">所有职业均可使用任意武器。旧武器会放入行囊，探索时可再次更换。</p>`;
+}
+function rewardModal(){
+  if(ui.rewardIndex!==null){
+    const reward=run.rewards[ui.rewardIndex];
+    if(!reward||reward.type!=='weapon'){ui.rewardIndex=null;return rewardModal();}
+    const w=reward.weapon;
+    return dialog(e(w.name),'CHOOSE A WIELDER',`固有效果「${e(w.effectName)}」：${e(w.desc)}`,`${equipChoices(w,'equip-reward',ui.rewardIndex)}<div class="center-actions" style="margin-top:17px"><button class="ghost" data-action="reward-back">${icon('left',13)} 重新选择祝福</button></div>`,{closable:false});
+  }
+  const source={battle:'VICTORY REWARD',treasure:'A FORGOTTEN TREASURE',elite:'A WORTHY TRIUMPH',altar:'A WHISPER FROM THE STARS'}[run.rewardSource]||'CHOOSE YOUR FATE';
+  return dialog('星光，回应了你。',source,'三份命运，选择其中一份。你获得的一切，只属于这一次旅程。',`<div class="reward-grid">${run.rewards.map(rewardCard).join('')}</div><p class="modal-hint">仅选择一项 · 祝福可叠加 · 技能最多强化至 +3</p>`,{wide:true,closable:false});
+}
+function eventModal(){
+  const type=run.event.type;
+  const data={shrine:{title:'一盏尚未熄灭的星灯',en:'A MOMENT OF SOLACE',text:'灯火微微摇曳。这里似乎没有黑暗能够靠近。',choices:[['rest','在此休息','全队恢复 45% 生命与 50% MP，倒下的同伴重新醒来。','免费 · 仅一次','heart']]},fountain:{title:'倒映着满月的泉水',en:'THE MOONWELL',text:'抬头是漆黑的穹顶。低头，却是一轮完整的月亮。',choices:[['drink','饮下月之泉','全队 MP 完全恢复，并恢复 18% 生命。','免费 · 仅一次','drop']]},altar:{title:'无名神像的低语',en:'A PRICE FOR A PROMISE',text:'神像没有眼睛，却似乎一直注视着你。它需要一份交换。',choices:[['offer','献上星砂','获得一次祝福选择，武器奖励保证为传说品质。','35 星砂','star'],['blood','以鲜血立誓','全队失去生命上限的 20%（最低剩余 1），换取一次祝福选择。','生命代价','heart']]}}[type];
+  const choices=data.choices.map(([choice,title,desc,cost,ico])=>`<button class="event-choice" data-action="event" data-choice="${choice}" ${choice==='offer'&&run.gold<35?'disabled':''}>${icon(ico,23)}<span class="choice-copy"><strong>${title}</strong><small>${desc}</small></span><span class="cost">${cost}</span></button>`).join('');
+  return dialog(data.title,data.en,data.text,`<div class="event-art"><img src="${svgUri(objectSvg(type,'#c2b0e8'))}" alt="${data.title}"></div><div class="choice-stack">${choices}<button class="ghost" data-action="event" data-choice="leave">暂时离开 ${icon('arrow',14)}</button></div>`,{narrow:true,closable:false});
+}
+function endModal(){const win=run.ending==='victory';return dialog(win?'终有黎明。':'星灯，暂时熄灭了。',win?'THE END OF THE ECLIPSE':'EVERY END IS A BEGINNING',win?'你走过没有月亮的夜晚，也把星光带到了故事的尽头。':'迷宫会改变形状，而你会带着新的想法，再一次出发。',`<div class="result-icon">${win?'☼':'☾'}</div><div class="result-party">${run.party.map(p=>`<img src="${PORTRAITS[p.job]}" alt="${e(p.name)}">`).join('')}</div><div class="result-stats"><span><strong>B${run.floor}</strong><small>最深抵达</small></span><span><strong>${run.level}</strong><small>队伍等级</small></span><span><strong>${run.battles}</strong><small>战斗胜利</small></span><span><strong>${run.steps}</strong><small>探索步数</small></span></div><div class="center-actions"><button class="primary" data-action="again">重新点亮星灯 ${icon('arrow',18)}</button><button class="secondary" data-action="return-title">回到序章</button></div><p class="modal-hint">SEED ${e(run.seed)} · 新一局将清空所有等级、武器、技能强化与祝福。</p>`,{closable:false,extra:win?'result-victory':''});}
+function helpModal(){return dialog('迷宫中的第一束光','FIELD GUIDE','不是沿途捡起最强的数值，而是让职业、武器与祝福彼此回应。',`<div class="help-grid"><section class="help-block"><h3>01 / 探索与目标</h3><div class="help-keys"><kbd>W / ↑</kbd> 前进 <kbd>S / ↓</kbd> 后退<br><kbd>A / D</kbd> 转向 <kbd>Q / E</kbd> 平移</div><p><kbd>F / Enter</kbd> 调查脚下事件，<kbd>M</kbd> 展开地图，<kbd>I</kbd> 查看行囊。手机可直接使用方向按钮。每层找到月门并击败守卫，再次调查月门进入下一层。第五层击败最终首领即通关。</p></section><section class="help-block"><h3>02 / 回合与续航</h3><p>按速度决定行动顺序。点击敌人选定目标，再点击技能；<kbd>1</kbd>～<kbd>5</kbd> 对应指令。普通攻击回复 5 MP，防御回复 7 MP、减伤 50%。守护和防御可以叠加。治疗单体技能需要点击下方队友。</p></section><section class="help-block"><h3>03 / 职业与联动</h3><p>不同角色连续攻击同一敌人会触发联携，逐次提高伤害。破甲使物理伤害 +35%；星标使全部伤害 +20%；冰打燃烧触发融解 +60%。忍者专门追击有负面状态的敌人。敌人的下一次行动会提前显示；看到蓄力时要准备防御。</p></section><section class="help-block"><h3>04 / 每次重新开始</h3><p>选择 1～3 个不同职业。单人获得独行誓约，敌人也会随人数调整。战胜敌人、开启宝箱后，从三项随机成长中选择一项。只装备武器，每把有且仅有一个固有效果。所有职业都能更换任意武器，战斗中不可更换。</p></section><section class="help-block"><h3>05 / 生与死</h3><p>全队倒下即结束本局。战后倒下的同伴以少量生命苏醒，胜利也会恢复少量生命和 MP。地图上的星灯与泉水是主要休整资源，各只能使用一次。普通战可用 65% 成功率撤退，失败消耗当前角色的行动；守门战不可撤退。</p></section><section class="help-block"><h3>06 / 种子与存档</h3><p>相同种子、编队和操作顺序会得到相同结果。游戏仅在当前浏览器保存这一局，没有永久升级或跨局属性。重新开始会覆盖旧局。存档损坏会拒绝读取；隐私模式下存档可能不可用。声音默认关闭，右上角手动开启。</p></section></div><div class="help-note">此版本包含 5 层随机迷宫、6 个职业、18 个职业技能、18 把武器、12 种祝福，以及原创矢量角色与合成音乐。探索不会持续流失生命；先规划好路线，再迈出下一步。</div>`,{wide:true});}
+function classesModal(){return dialog('六种星火，六种答案','JOB COMPENDIUM','每个职业都可独行；选择伙伴，是为了创造另一种战斗方式。',`<div class="choice-stack">${Object.values(JOBS).map(j=>`<button class="event-choice" data-action="class-detail" data-job="${j.id}"><span style="height:48px;width:48px;overflow:hidden;position:relative;border-radius:7px;background:${j.color}11;flex-shrink:0"><img src="${PORTRAITS[j.id]}" style="width:80px;max-width:none;position:absolute;left:-16px;top:-18px" alt=""></span><span class="choice-copy"><strong style="color:${j.color}">${j.name} · ${j.person}</strong><small>${j.role} / ${j.passiveDesc}</small></span>${icon('right',16)}</button>`).join('')}</div>`);}
+function heroModal(id,isClass=false){
+  const hero=isClass?null:run.party.find(p=>p.id===id),job=JOBS[isClass?id:hero.job],stats=hero?heroStats(hero):job;
+  const header=`<div class="hero-detail"><div class="hero-detail-art"><img src="${PORTRAITS[job.id]}" alt="${job.person}"></div><div class="hero-detail-copy"><div class="eyebrow">${job.roman} / ${job.jp}</div><h2>${job.person}</h2><div class="job-title">${job.name} · ${job.role}</div><p>${job.synopsis}</p><div class="hero-stats">${[['生命',hero?`${hero.hp}/${hero.maxHp}`:job.hp],['MP',hero?`${hero.mp}/${hero.maxMp}`:job.mp],['攻击',Math.floor(stats.atk)],['魔力',Math.floor(stats.mag)],['防御',stats.def],['速度',Math.floor(stats.spd)]].map(([label,value])=>`<span class="hero-stat">${label}<b>${value}</b></span>`).join('')}</div><div class="passive"><b>职业被动 · ${job.passive}</b>${job.passiveDesc}</div></div></div>`;
+  const skills=job.skills.map(id=>{const s=SKILLS[id],rank=hero?.ranks[id]||0;return `<div class="skill-detail">${icon(s.icon,21)}<span><strong>${s.name}${rank?` <span class="gold">+${rank}</span>`:''}</strong><p>${s.desc}${rank?` 当前强化 +${rank}。`:''}</p></span><span class="mp">${hero?skillCost(hero,id):s.cost} MP</span></div>`;}).join('');
+  return `<div class="modal-backdrop"><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1"><h2 id="dialog-title" class="sr-only">${job.person} 的职业信息</h2><button class="icon-button modal-close" data-action="close" aria-label="关闭">${icon('close',16)}</button>${header}<div class="divider"></div>${skills}${hero?`<div class="help-note">当前武器：${e(hero.weapon.name)}<br>「${e(hero.weapon.effectName)}」${e(hero.weapon.desc)}</div>`:'<p class="modal-hint">以上为职业基础数值，不含起始武器和独行誓约加成。</p>'}</section></div>`;
+}
+function weaponPanel(w,owner=null){const r=RARITIES[w.rarity];return `<${owner?'div':'button'} class="inventory-weapon" ${!owner?`data-action="choose-bag-weapon" data-uid="${e(w.uid)}" ${run.phase!=='explore'?'disabled':''}`:''}><span class="owner"><span style="color:${r.color}">${r.name} · ${e(w.type)}</span>${owner?`<b>${e(owner)} / 已装备</b>`:'<b>备用武器</b>'}</span><h3>${e(w.name)}</h3><span class="weapon-stats"><span>攻击 +${w.atk}</span><span>魔力 +${w.mag}</span></span><div class="weapon-effect"><b>固有效果 · ${e(w.effectName)}</b>${e(w.desc)}</div>${!owner?`<p>${run.phase==='explore'?'点击选择装备者':'战斗中不可更换武器'}</p>`:''}</${owner?'div':'button'}>`;}
+function inventoryModal(){return dialog('沿途拾起的星光','THE TRAVELER’S INVENTORY',`只有武器，没有护甲或饰品槽。现在拥有 ${run.gold} 星砂。`,`<div class="inventory-heading">当前武器 <small>每人只装备一把</small></div><div class="inventory-grid">${run.party.map(p=>weaponPanel(p.weapon,p.name)).join('')}</div><div class="inventory-heading">行囊中的武器 <small>${run.inventory.length} 把</small></div><div class="inventory-grid">${run.inventory.length?run.inventory.map(w=>weaponPanel(w)).join(''):'<p class="empty-note">旧武器会在更换装备后放入这里。</p>'}</div><div class="inventory-heading">本局祝福 <small>仅在这一次冒险中生效</small></div><div class="all-boons">${boonChips()}</div><div class="inventory-heading">技能觉醒</div>${run.party.map(p=>`<p class="small muted" style="margin-bottom:8px"><span style="color:${JOBS[p.job].color}">${e(p.name)}</span>　${p.skills.filter(id=>p.ranks[id]).map(id=>`${SKILLS[id].name} +${p.ranks[id]}`).join(' / ')||'尚未觉醒'}</p>`).join('')}`,{wide:true});}
+function menuModal(){return dialog('星灯仍在这里','PAUSE & REFLECT',`SEED ${e(run.seed)} · 第 ${run.floor} 层 · 本局已自动保存`,`<div class="menu-choices"><button class="secondary" data-action="close">${icon('arrow',18)} 继续探索</button><button class="secondary" data-action="inventory">${icon('bag',18)} 查看装备与祝福</button><button class="secondary" data-action="help">${icon('help',18)} 查看冒险指南</button><button class="secondary" data-action="return-title">${icon('moon',18)} 返回序章（保留本局存档）</button><button class="secondary danger-text" data-action="restart-confirm">${icon('exit',18)} 放弃本局，重新编队</button></div>`,{narrow:true});}
+function renderModal(){
+  let html='',key='';
+  if(run?.phase==='reward'){html=rewardModal();key=`reward-${run.rewards.map(r=>r.id||r.skillId||r.weapon?.uid).join('-')}-${ui.rewardIndex}`;}
+  else if(run?.phase==='event'){html=eventModal();key=`event-${run.event.key}`;}
+  else if(run?.phase==='ended'){html=endModal();key=`end-${run.ending}`;}
+  else if(ui.modal){key=`${ui.modal}-${ui.modalData||''}`;
+    if(ui.modal==='help')html=helpModal();
+    else if(ui.modal==='classes')html=classesModal();
+    else if(ui.modal==='class')html=heroModal(ui.modalData,true);
+    else if(ui.modal==='hero'&&run)html=heroModal(ui.modalData);
+    else if(ui.modal==='inventory'&&run)html=inventoryModal();
+    else if(ui.modal==='map'&&run)html=dialog('把走过的路，记在心里。','MAP / '+FLOORS[run.floor-1].jp,`已探索 ${exploration()}% · 坐标 ${run.x}, ${run.y} · 面向${DIRECTIONS[run.dir].label}`,`<div class="large-map">${mapSvg(true)}</div><p class="modal-hint">金色：宝箱　绿色：星灯 / 泉水　紫色：月门　绯色：精英<br>仅显示已经发现的区域与事件。月门守卫击败后，月门标记变为绿色。</p>`,{narrow:true});
+    else if(ui.modal==='menu'&&run)html=menuModal();
+    else if(ui.modal==='equip-bag'&&run){const w=run.inventory.find(w=>w.uid===ui.modalData);if(w)html=dialog(e(w.name),'CHANGE YOUR WEAPON',`「${e(w.effectName)}」${e(w.desc)}`,equipChoices(w,'equip-bag'));}
+    else if(ui.modal==='confirm-start')html=dialog('开始一段新的旅程？','A NEW BEGINNING','新的冒险会覆盖当前存档。旧局的等级、武器、祝福和技能强化都不会保留。',`<div class="center-actions"><button class="secondary" data-action="close">保留旧局</button><button class="primary" data-action="confirm-start">从零开始 ${icon('arrow',18)}</button></div>`,{narrow:true});
+    else if(ui.modal==='confirm-abandon')html=dialog('让这一次星火熄灭？','RETURN TO THE BEGINNING','当前冒险将被清空。你将回到职业选择，所有成长从零开始。',`<div class="center-actions"><button class="secondary" data-action="close">继续冒险</button><button class="primary" data-action="abandon">确认放弃</button></div>`,{narrow:true});
+  }
+  if(!html){
+    if(MODAL.innerHTML){MODAL.innerHTML='';ROOT.removeAttribute('inert');document.body.style.overflow='';if(lastFocus?.isConnected)lastFocus.focus({preventScroll:true});lastFocus=null;}
+    modalKey='';return;
+  }
+  // Do not replace a dialog on every HUD update: preserve focused controls and scroll position.
+  if(key===modalKey&&MODAL.innerHTML)return;
+  if(!MODAL.innerHTML){lastFocus=document.activeElement;ROOT.setAttribute('inert','');document.body.style.overflow='hidden';}
+  MODAL.innerHTML=html;modalKey=key;MODAL.querySelector('.dialog')?.focus({preventScroll:true});
+}
+function beginRun(){
+  run=createRun(ui.selection,ui.seedDraft.trim()||seedCode());ui.modal=null;ui.modalData=null;ui.rewardIndex=null;ui.pendingSkill=null;ui.selectedEnemy=null;ui.busy=false;modalKey='';
+  save();mountGame();AUDIO.sfx('magic');
+}
+function goTitle({clear=false}={}){
+  if(run)ui.selection=run.party.map(p=>p.job);
+  if(clear){try{localStorage.removeItem(SAVE_KEY);}catch{}}else save();
+  run=null;ui.modal=null;ui.modalData=null;ui.pendingSkill=null;ui.rewardIndex=null;ui.busy=false;ui.seedDraft='';modalKey='';renderLanding();
+}
+function mutateExplore(action){
+  if(!run||run.phase!=='explore'||ui.modal||ui.busy)return;
+  const before=run.phase;
+  let ok;
+  if(action==='turn-left')ok=turn(run,-1);
+  else if(action==='turn-right')ok=turn(run,1);
+  else if(action==='interact')ok=interact(run);
+  else ok=move(run,{'forward':'forward','back':'back','strafe-left':'left','strafe-right':'right'}[action]);
+  if(!ok){if(action==='interact')toast('这里没有可以调查的事物。');else if(!action.startsWith('turn'))toast('前方是坚实的石壁。');return;}
+  if(run.phase==='battle'&&before!=='battle'){AUDIO.sfx('battle');ui.selectedEnemy=null;ui.pendingSkill=null;}
+  else if(run.phase==='reward')AUDIO.sfx('magic');else AUDIO.sfx('move');
+  save();updateGame();
+}
+function useSkill(id,target=null){
+  if(!run||run.phase!=='battle'||ui.busy||ui.modal)return;
+  const hero=activeHero(run),skill=SKILLS[id];if(!hero)return;
+  if(id!=='escape'&&skill?.target==='ally'&&!target){ui.pendingSkill=id;updateGame();toast('请选择下方的一名队友。');return;}
+  const targetId=target||ui.selectedEnemy||run.battle.enemies.find(p=>p.hp>0)?.id;
+  const result=act(run,id,targetId);
+  if(!result.ok){toast(result.error);return;}
+  ui.pendingSkill=null;ui.busy=true;
+  AUDIO.sfx(run.phase==='reward'||run.ending==='victory'?'victory':['magic','heal','aegis','revive','haste','rewind'].includes(skill?.kind)?'magic':'attack');
+  renderer?.pulse();save();updateGame();
+  const current=run;
+  setTimeout(()=>{if(run!==current)return;ui.busy=false;run.fx=[];if(ui.screen==='game')updateGame();},420);
+}
+function handleAction(button){
+  const action=button.dataset.action;
+  if(button.disabled)return;
+  if(action==='job'){
+    ui.seedDraft=document.getElementById('seed-input')?.value||ui.seedDraft;
+    const id=button.dataset.job,index=ui.selection.indexOf(id);
+    if(index>=0)ui.selection.splice(index,1);else if(ui.selection.length<3)ui.selection.push(id);else{toast('最多选择三个职业。先移除一名同行者，也可以仅用一个职业独行。');return;}
+    AUDIO.sfx('select');renderLanding();return;
+  }
+  if(action==='start'){ui.seedDraft=document.getElementById('seed-input')?.value||'';if(!ui.selection.length)return;const saved=readSave();if(saved&&saved.phase!=='ended')setModal('confirm-start');else beginRun();return;}
+  if(action==='confirm-start'){beginRun();return;}
+  if(action==='resume'){
+    const saved=readSave();if(!saved){toast('未能读取存档。请开始新的冒险。');return;}run=saved;ui.modal=null;ui.rewardIndex=null;ui.pendingSkill=null;ui.busy=false;mountGame();return;
+  }
+  if(action==='sound'){
+    AUDIO.toggle().then(enabled=>{if(ui.screen==='landing')renderLanding();else document.getElementById('sound-button').innerHTML=soundButton();toast(enabled?'已开启原创合成音乐与音效。':'已关闭声音。');}).catch(()=>toast('当前浏览器未允许播放音频。'));return;
+  }
+  if(action==='close'){closeModal();return;}
+  if(action==='help'){setModal('help');return;}
+  if(action==='classes'){setModal('classes');return;}
+  if(action==='class-detail'){setModal('class',button.dataset.job);return;}
+  if(action==='map'||action==='inventory'||action==='menu'){if(run)setModal(action);return;}
+  if(action==='return-title'){goTitle();return;}
+  if(action==='again'){goTitle({clear:true});return;}
+  if(action==='restart-confirm'){setModal('confirm-abandon');return;}
+  if(action==='abandon'){goTitle({clear:true});return;}
+  if(['forward','back','turn-left','turn-right','strafe-left','strafe-right','interact'].includes(action)){mutateExplore(action);return;}
+  if(!run)return;
+  if(action==='target'){ui.selectedEnemy=button.dataset.id;AUDIO.sfx('select');updateGame();return;}
+  if(action==='skill'){useSkill(button.dataset.skill);return;}
+  if(action==='flee'){useSkill('escape');return;}
+  if(action==='cancel-target'){ui.pendingSkill=null;updateGame();return;}
+  if(action==='party'){
+    if(ui.pendingSkill){useSkill(ui.pendingSkill,button.dataset.id);return;}
+    setModal('hero',button.dataset.id);return;
+  }
+  if(action==='reward'){
+    const index=Number(button.dataset.index),reward=run.rewards[index];if(!reward)return;
+    if(reward.type==='weapon'){ui.rewardIndex=index;modalKey='';renderModal();return;}
+    const result=takeReward(run,index);if(!result.ok){toast(result.error);return;}
+    ui.rewardIndex=null;ui.busy=false;AUDIO.sfx('magic');save();updateGame();return;
+  }
+  if(action==='reward-back'){ui.rewardIndex=null;modalKey='';renderModal();return;}
+  if(action==='equip-reward'){
+    const result=takeReward(run,Number(button.dataset.index),button.dataset.id);if(!result.ok){toast(result.error);return;}
+    ui.rewardIndex=null;ui.busy=false;AUDIO.sfx('select');save();updateGame();return;
+  }
+  if(action==='event'){
+    if(!resolveEvent(run,button.dataset.choice)){toast('当前无法进行这个选择。');return;}
+    AUDIO.sfx(button.dataset.choice==='leave'?'select':'heal');save();updateGame();return;
+  }
+  if(action==='choose-bag-weapon'){if(run.phase==='explore')setModal('equip-bag',button.dataset.uid);return;}
+  if(action==='equip-bag'){
+    if(equipWeapon(run,button.dataset.id,ui.modalData)){AUDIO.sfx('select');ui.modal='inventory';ui.modalData=null;modalKey='';save();updateGame();}return;
+  }
+}
+document.addEventListener('click',event=>{
+  const button=event.target.closest('[data-action]');if(!button)return;
+  try{handleAction(button);}catch(error){console.error('Action failed:',error);toast(`操作未完成：${error.message}`);ui.busy=false;}
+});
+document.addEventListener('input',event=>{if(event.target.id==='seed-input')ui.seedDraft=event.target.value;});
+document.addEventListener('keydown',event=>{
+  if(event.key==='Tab'&&MODAL.innerHTML){
+    const focusable=[...MODAL.querySelectorAll('button:not(:disabled),input,select,[tabindex="0"]')].filter(el=>el.getClientRects().length),first=focusable[0],last=focusable.at(-1);
+    if(!first){event.preventDefault();return;}
+    if(event.shiftKey&&(document.activeElement===first||document.activeElement===MODAL.querySelector('.dialog'))){event.preventDefault();last.focus();}
+    else if(!event.shiftKey&&(document.activeElement===last||document.activeElement===MODAL.querySelector('.dialog'))){event.preventDefault();first.focus();}return;
+  }
+  if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
+  if(event.key==='Escape'){if(MODAL.innerHTML)closeModal();else if(ui.pendingSkill){ui.pendingSkill=null;updateGame();}else if(run)setModal('menu');return;}
+  if(MODAL.innerHTML||!run)return;
+  const key=event.key.toLowerCase();
+  if(key==='m'){event.preventDefault();setModal('map');return;}
+  if(key==='i'){event.preventDefault();setModal('inventory');return;}
+  if(key==='h'){event.preventDefault();setModal('help');return;}
+  if(run.phase==='battle'&&/^[1-5]$/.test(key)){event.preventDefault();const p=activeHero(run);if(p)useSkill(['attack',...p.skills,'guard'][Number(key)-1]);return;}
+  if(run.phase!=='explore')return;
+  const action={w:'forward',arrowup:'forward',s:'back',arrowdown:'back',a:'turn-left',arrowleft:'turn-left',d:'turn-right',arrowright:'turn-right',q:'strafe-left',e:'strafe-right',f:'interact',enter:'interact'}[key];
+  if(action){event.preventDefault();const now=performance.now();if(now-ui.lastMove<140&&event.repeat)return;ui.lastMove=now;mutateExplore(action);}
+});
+window.addEventListener('beforeunload',save);
+window.addEventListener('pagehide',save);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
+renderLanding();
+
+Object.assign(exports,{});
+};
+require('app');})();
+</script>
+</body>
+</html>

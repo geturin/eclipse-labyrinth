@@ -1,0 +1,108 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { JOBS, SKILLS, WEAPONS, BOONS, MAX_FLOOR, VERSION } from '../src/data.js';
+import { hashSeed, random, createRun, generateDungeon, distances, walkable, move, turn, currentEvent, interact, resolveEvent, startBattle, activeHero, act, heroStats, skillCost, makeWeapon, openRewards, takeReward, equipWeapon, serializeRun, restoreRun, cellKey } from '../src/engine.js';
+
+const copy=x=>JSON.parse(JSON.stringify(x));
+function ready(job='knight',seed='TEST'){
+  const r=createRun([job,job==='chrono'?'shrine':'chrono'],seed);r.party[0].spd=200;r.party[1].spd=150;
+  startBattle(r);r.battle.enemies=r.battle.enemies.slice(0,1);
+  const enemy=r.battle.enemies[0];enemy.maxHp=enemy.hp=10000;
+  r.battle.queue=r.battle.queue.filter(id=>r.party.some(p=>p.id===id)||id===enemy.id);
+  return r;
+}
+function deal(r,id='attack'){const enemy=r.battle.enemies[0],before=enemy.hp;assert.equal(act(r,id,enemy.id).ok,true);return before-enemy.hp;}
+function killBattle(r){let turns=0;while(r.phase==='battle'&&turns++<100){const h=activeHero(r);h.atk=10000;h.mag=10000;h.mp=h.maxMp;const enemy=r.battle.enemies.find(e=>e.hp>0);assert.equal(act(r,'attack',enemy.id).ok,true);}assert.notEqual(r.phase,'battle');}
+
+// 150 seeds x 5 floor sizes: all walkable cells and all events must be reachable.
+test('750 generated floors have sealed borders, connected rooms and reachable stairs',()=>{
+  for(let seed=0;seed<150;seed++)for(let floor=1;floor<=MAX_FLOOR;floor++){
+    const d=generateDungeon({rng:hashSeed(`map-${seed}`)},floor),dist=distances(d,1,1);
+    let count=0;
+    for(let y=0;y<d.size;y++)for(let x=0;x<d.size;x++){
+      if(x===0||y===0||x===d.size-1||y===d.size-1)assert.equal(d.tiles[y][x],1);
+      if(d.tiles[y][x]===0){count++;assert.notEqual(dist[cellKey(x,y)],undefined);}
+    }
+    assert.equal(Object.keys(dist).length,count);
+    for(const key of Object.keys(d.events))assert.ok(dist[key]>0);
+    assert.ok(dist[cellKey(d.stairs.x,d.stairs.y)]>=10);
+    assert.equal(d.events[cellKey(d.stairs.x,d.stairs.y)].type,'stairs');
+    assert.ok(Object.values(d.events).some(x=>x.type==='shrine'));
+    assert.ok(Object.values(d.events).some(x=>x.type==='chest'));
+  }
+});
+test('seed + party reproduces identical initial state',()=>assert.deepEqual(createRun(['knight','mage'],'A'),createRun(['knight','mage'],'A')));
+test('different seeds produce different maps',()=>assert.notDeepEqual(createRun(['knight'],'A').dungeon.tiles,createRun(['knight'],'B').dungeon.tiles));
+test('RNG is serializable and stays in [0, 1)',()=>{const a={rng:123},b={rng:123};for(let i=0;i<200;i++){const x=random(a);assert.ok(x>=0&&x<1);assert.equal(x,random(b));}});
+test('invalid and duplicate parties are rejected',()=>{for(const party of [[],['bad'],['mage','mage'],['mage','knight','chrono','shrine']])assert.throws(()=>createRun(party,'x'));});
+test('all six classes have three available skills and unique passive text',()=>{assert.equal(Object.keys(JOBS).length,6);for(const j of Object.values(JOBS)){assert.equal(j.skills.length,3);for(const id of j.skills)assert.ok(SKILLS[id]);assert.ok(j.passiveDesc.length>10);}});
+test('only weapon slot exists; every one of 18 weapons has a fixed effect',()=>{assert.equal(Object.keys(WEAPONS).length,18);for(const [id,w]of Object.entries(WEAPONS)){assert.ok(w.effect&&w.effectName&&w.desc);assert.equal(makeWeapon(id).effect,w.effect);}const h=createRun(['ninja'],'x').party[0];assert.ok(h.weapon);assert.equal(h.armor,undefined);assert.equal(h.accessory,undefined);});
+test('solo oath scales initial HP and MP',()=>{const solo=createRun(['mage'],'solo'),team=createRun(['mage','knight'],'solo');assert.equal(solo.party[0].maxHp,Math.round(team.party[0].maxHp*1.45));assert.equal(solo.party[0].maxMp,Math.round(team.party[0].maxMp*1.3));});
+test('new runs reset levels, weapon loot, boons and skill ranks',()=>{const a=createRun(['knight'],'reset');a.level=12;a.boons.siphon=3;a.party[0].ranks.cleave=3;a.party[0].weapon=makeWeapon('comet');const b=createRun(['knight'],'reset');assert.equal(b.level,1);assert.deepEqual(b.boons,{});assert.deepEqual(b.party[0].ranks,{});assert.equal(b.party[0].weapon.id,'moonblade');});
+test('turning does not advance encounters, steps or RNG',()=>{const r=createRun(['knight'],'turn'),before=r.rng;turn(r,1);turn(r,-1);assert.equal(r.steps,0);assert.equal(r.rng,before);assert.equal(r.danger,0);});
+test('walls block grid movement and do not spend a turn',()=>{const r=createRun(['knight'],'wall');r.dir=0;assert.equal(move(r),false);assert.equal(r.y,1);assert.equal(r.steps,0);});
+test('moving in exploration triggers deterministic encounters',()=>{const r=createRun(['knight'],'move');r.grace=0;r.encounterAt=1;assert.ok(move(r));assert.equal(r.steps,1);assert.equal(r.phase,'battle');assert.ok(activeHero(r));});
+test('movement and turns are disabled during battle',()=>{const r=ready(),before=[r.x,r.y,r.dir];assert.equal(move(r),false);assert.equal(turn(r,1),false);assert.deepEqual([r.x,r.y,r.dir],before);});
+test('basic attack regenerates exactly 5 MP without a bonus weapon',()=>{const r=ready('ninja');r.party[0].weapon.effect='none';r.party[0].mp=1;deal(r);assert.equal(r.party[0].mp,6);});
+test('guard restores MP and remains active until next turn',()=>{const r=ready();r.party[0].mp=0;assert.equal(act(r,'guard').ok,true);assert.equal(r.party[0].mp,7);assert.equal(r.party[0].guard,true);});
+test('invalid skill/target and insufficient MP do not consume a turn or RNG',()=>{const r=ready(),before=serializeRun(r);assert.equal(act(r,'fire','enemy-0').ok,false);assert.equal(serializeRun(r),before);assert.equal(act(r,'cleave','nope').ok,false);assert.equal(serializeRun(r),before);r.party[0].mp=0;const after=serializeRun(r);assert.equal(act(r,'cleave','enemy-0').ok,false);assert.equal(serializeRun(r),after);});
+test('physical attacks exploit break but magic does not',()=>{const a=ready(),b=copy(a);a.party[0].weapon.effect=b.party[0].weapon.effect='none';b.battle.enemies[0].status.break={turns:3,applied:0};assert.ok(deal(b)>deal(a)*1.2);});
+test('frost on a burning enemy triggers melt',()=>{const a=ready('mage'),b=copy(a);a.party[0].weapon.effect=b.party[0].weapon.effect='none';b.battle.enemies[0].status.burn={turns:3,power:1,applied:0};assert.ok(deal(b,'frost')>deal(a,'frost')*1.4);assert.ok(b.log.some(l=>l.text.includes('融解')));});
+test('ninja passive benefits from negative statuses',()=>{const a=ready('ninja'),b=copy(a);a.party[0].weapon.effect=b.party[0].weapon.effect='none';b.battle.enemies[0].status.slow={turns:3,applied:0};assert.ok(deal(b)>deal(a)*1.15);});
+test('different heroes attacking the same enemy build a chain',()=>{const r=ready();deal(r);const second=activeHero(r);assert.notEqual(second.id,r.party[0].id);assert.equal(act(r,'attack',r.battle.enemies[0].id).ok,true);assert.ok(r.log.some(l=>l.text.includes('CHAIN')));});
+test('reaver drains health and blood pact cannot self-kill',()=>{const r=ready('reaver');r.party[0].hp=20;deal(r,'rend');assert.ok(r.party[0].hp>20);const s=ready('reaver');s.party[0].hp=1;s.party[0].mp=0;act(s,'bloodpact');assert.equal(s.party[0].hp,1);assert.equal(s.party[0].mp,12);assert.ok(s.party[0].status.fury);});
+test('shrine damage heals the most injured living ally',()=>{const r=ready('shrine');r.party[1].hp=10;const before=r.party[1].hp;deal(r,'ray');assert.ok(r.party[1].hp>before);});
+test('revive brings a fallen ally back and heal cannot target an enemy',()=>{const r=ready('shrine');r.party[1].hp=0;const mp=r.party[0].mp;assert.equal(act(r,'revive','enemy-0').ok,false);assert.equal(r.party[0].mp,mp);assert.equal(act(r,'revive',r.party[1].id).ok,true);assert.ok(r.party[1].hp>0);});
+test('mend cleanses burn and poison for the entire party',()=>{const r=ready('shrine');for(const p of r.party){p.hp=25;p.status.burn={turns:3,applied:0};p.status.poison={turns:3,applied:0};}act(r,'mend');for(const p of r.party){assert.ok(p.hp>25);assert.equal(p.status.burn,undefined);assert.equal(p.status.poison,undefined);}});
+test('haste grants speed and every rank extends its duration',()=>{for(let rank=0;rank<=3;rank++){const r=ready('chrono');r.party[0].ranks.haste=rank;const speed=heroStats(r.party[0]).spd;act(r,'haste');assert.equal(r.party[0].status.haste.turns,3+rank);assert.equal(heroStats(r.party[0]).spd,speed*1.5);}});
+test('skill upgrades increase damage',()=>{const a=ready(),b=copy(a);b.party[0].ranks.cleave=3;assert.ok(deal(b,'cleave')>deal(a,'cleave')*1.5);});
+test('weapon: vampire returns health from damage',()=>{const r=ready();r.party[0].weapon.effect='vampire';r.party[0].hp=20;deal(r);assert.ok(r.party[0].hp>20);});
+test('weapon: lifewell regenerates after non-damaging actions',()=>{const r=ready();r.party[0].weapon.effect='lifewell';r.party[0].hp=20;act(r,'guard');assert.ok(r.party[0].hp>20);});
+test('weapon: mana restores 3 extra MP after a guard',()=>{const r=ready();r.party[0].weapon.effect='mana';r.party[0].mp=0;act(r,'guard');assert.equal(r.party[0].mp,10);});
+test('weapon: chorus heals lowest health ally after an action',()=>{const r=ready();r.party[0].weapon.effect='chorus';r.party[1].hp=5;act(r,'guard');assert.equal(r.party[1].hp,13);});
+test('weapon: execution boosts damage below 40% target HP',()=>{const a=ready(),b=copy(a);a.party[0].weapon.effect='none';b.party[0].weapon.effect='execution';a.battle.enemies[0].hp=b.battle.enemies[0].hp=3000;assert.ok(deal(b)>deal(a)*1.4);});
+test('weapon: frostbite rewards slow targets',()=>{const a=ready(),b=copy(a);a.party[0].weapon.effect='none';b.party[0].weapon.effect='frostbite';a.battle.enemies[0].status.slow=b.battle.enemies[0].status.slow={turns:2,applied:0};assert.ok(deal(b)>deal(a)*1.3);});
+test('weapon: firstlight applies only on the first two rounds',()=>{const a=ready(),b=copy(a);a.party[0].weapon.effect=b.party[0].weapon.effect='firstlight';b.battle.round=3;assert.ok(deal(a)>deal(b)*1.3);});
+test('weapon: bloodmoon rewards low HP',()=>{const a=ready(),b=copy(a);a.party[0].weapon.effect=b.party[0].weapon.effect='bloodmoon';b.party[0].hp=10;assert.ok(deal(b)>deal(a)*1.35);});
+test('weapon: affliction scales with each negative effect',()=>{const a=ready(),b=copy(a);a.party[0].weapon.effect='none';b.party[0].weapon.effect='affliction';for(const r of [a,b])r.battle.enemies[0].status.slow={turns:2,applied:0};assert.ok(deal(b)>deal(a)*1.1);});
+test('weapon: overload increases skill damage and skill cost but not basic cost',()=>{const a=ready('mage'),b=copy(a);a.party[0].weapon.effect='none';b.party[0].weapon.effect='overload';assert.equal(skillCost(b.party[0],'fire'),8);assert.equal(skillCost(b.party[0],'attack'),0);assert.ok(deal(b,'fire')>deal(a,'fire')*1.3);});
+test('weapon: economy discounts MP without making skills free',()=>{const r=ready('mage');r.party[0].weapon.effect='economy';assert.equal(skillCost(r.party[0],'fire'),3);assert.equal(skillCost(r.party[0],'nova'),9);assert.equal(skillCost(r.party[0],'attack'),0);});
+test('weapon: soulsteal heals and restores MP on kill',()=>{const r=ready();r.battle.enemies.push({...copy(r.battle.enemies[0]),id:'enemy-9'});r.party[0].weapon.effect='soulsteal';r.party[0].hp=10;r.party[0].mp=0;r.battle.enemies[0].hp=1;deal(r);assert.ok(r.party[0].hp>20);assert.equal(r.party[0].mp,11);});
+test('weapon: comet splash damages non-target enemies',()=>{const r=ready();r.party[0].weapon.effect='cleave';const other={...copy(r.battle.enemies[0]),id:'enemy-2'};r.battle.enemies.push(other);deal(r);assert.ok(other.hp<other.maxHp);});
+test('weapons: random procs (break/burn/poison/slow/echo) are actually reachable',()=>{
+  for(const [effect,status]of [['guardbreak','break'],['kindle','burn'],['toxin','poison'],['frostbite','slow'],['echo',null]]){
+    let triggered=false;
+    for(let seed=0;seed<40&&!triggered;seed++){const r=ready('knight',`proc-${seed}`);r.party[0].weapon.effect=effect;deal(r);triggered=status?Boolean(r.battle.enemies[0].status[status]):r.log.some(l=>l.text.includes('「回响」'));}
+    assert.ok(triggered,effect);
+  }
+});
+test('weapon: phoenix revives once per battle, not infinitely',()=>{
+  const r=createRun(['knight'],'phoenix');r.party[0].weapon=makeWeapon('eternity');r.party[0].spd=100;startBattle(r);const p=r.party[0];
+  r.battle.enemies=r.battle.enemies.slice(0,1);const foe=r.battle.enemies[0];foe.hp=foe.maxHp=10000;foe.atk=10000;foe.mag=10000;foe.intent=['attack'];
+  r.battle.queue=[foe.id];act(r,'guard');assert.ok(p.phoenixUsed);assert.ok(p.hp>0);r.battle.queue=[foe.id];act(r,'guard');assert.equal(r.phase,'ended');assert.equal(r.ending,'defeat');
+});
+test('blessings stack and stat blessings increase every party member',()=>{const r=createRun(['knight','mage'],'boon');const before=r.party.map(p=>p.maxHp);for(let i=0;i<2;i++){r.phase='reward';r.rewards=[{type:'boon',id:'vitality'}];assert.ok(takeReward(r,0).ok);}assert.equal(r.boons.vitality,2);r.party.forEach((p,i)=>assert.equal(p.maxHp,before[i]+28));});
+test('skill rewards are individual and cannot be claimed twice',()=>{const r=createRun(['knight','mage'],'rank');r.phase='reward';r.rewards=[{type:'skill',heroId:r.party[0].id,skillId:'cleave'}];assert.ok(takeReward(r,0).ok);assert.equal(r.party[0].ranks.cleave,1);assert.equal(r.party[1].ranks.cleave,undefined);assert.equal(takeReward(r,0).ok,false);});
+test('weapon rewards require a recipient and place old weapon in inventory',()=>{const r=createRun(['knight'],'loot'),old=r.party[0].weapon.uid;r.phase='reward';r.rewards=[{type:'weapon',weapon:makeWeapon('duet',2,1)}];assert.equal(takeReward(r,0).ok,false);assert.equal(r.phase,'reward');assert.ok(takeReward(r,0,r.party[0].id).ok);assert.equal(r.inventory[0].uid,old);assert.equal(r.party[0].weapon.id,'duet');assert.ok(equipWeapon(r,r.party[0].id,old));assert.equal(r.party[0].weapon.id,'moonblade');});
+test('weapon swapping is blocked during battle',()=>{const r=ready();r.inventory.push(makeWeapon('duet',2,8));assert.equal(equipWeapon(r,r.party[0].id,r.inventory[0].uid),false);});
+test('treasure rewards are three choices and contain a weapon',()=>{for(let i=0;i<25;i++){const r=createRun(['mage'],`loot-${i}`);openRewards(r,'treasure');assert.equal(r.rewards.length,3);assert.ok(r.rewards.some(x=>x.type==='weapon'));}});
+test('altar weapon choices are guaranteed legendary',()=>{const r=createRun(['mage'],'altar');for(let i=0;i<20;i++){openRewards(r,'altar');for(const w of r.rewards.filter(x=>x.type==='weapon'))assert.equal(w.weapon.rarity,'legendary');}});
+test('fully upgraded skills fall back to other rewards',()=>{const r=createRun(['chrono'],'all');for(const id of r.party[0].skills)r.party[0].ranks[id]=3;openRewards(r);assert.equal(r.rewards.length,3);assert.equal(r.rewards.some(x=>x.type==='skill'),false);});
+test('a chest cannot be opened twice',()=>{const r=createRun(['knight'],'chest');const [key]=Object.entries(r.dungeon.events).find(([,v])=>v.type==='chest');[r.x,r.y]=key.split(',').map(Number);assert.ok(interact(r));assert.equal(r.phase,'reward');assert.equal(r.dungeon.events[key].used,true);const index=r.rewards.findIndex(x=>x.type==='boon');takeReward(r,index);assert.equal(currentEvent(r),null);assert.equal(interact(r),false);});
+test('rest point heals once; leaving does not consume it',()=>{const r=createRun(['knight'],'rest');const [key]=Object.entries(r.dungeon.events).find(([,v])=>v.type==='shrine');[r.x,r.y]=key.split(',').map(Number);r.party[0].hp=1;interact(r);resolveEvent(r,'leave');assert.equal(r.dungeon.events[key].used,false);interact(r);resolveEvent(r,'rest');assert.ok(r.party[0].hp>1);assert.equal(r.dungeon.events[key].used,true);});
+test('altar rejects insufficient funds and blood cost never kills',()=>{const r=createRun(['knight'],'altar');const [key]=Object.entries(r.dungeon.events).find(([,v])=>v.type==='altar');[r.x,r.y]=key.split(',').map(Number);interact(r);assert.equal(resolveEvent(r,'offer'),false);assert.equal(r.phase,'event');r.party[0].hp=1;assert.ok(resolveEvent(r,'blood'));assert.equal(r.party[0].hp,1);assert.equal(r.phase,'reward');});
+test('guardians prevent descent and cannot be escaped',()=>{const r=createRun(['knight'],'gate');r.x=r.dungeon.stairs.x;r.y=r.dungeon.stairs.y;interact(r);assert.equal(r.phase,'battle');assert.equal(r.battle.type,'guardian');assert.equal(act(r,'escape').ok,false);assert.equal(r.floor,1);});
+test('victory opens the gate, then explicit interaction descends',()=>{const r=createRun(['knight'],'descend');r.x=r.dungeon.stairs.x;r.y=r.dungeon.stairs.y;interact(r);killBattle(r);assert.equal(r.guardianDefeated,true);assert.equal(r.phase,'reward');takeReward(r,r.rewards.findIndex(x=>x.type==='boon'));assert.equal(r.floor,1);interact(r);assert.equal(r.floor,2);assert.equal(r.guardianDefeated,false);assert.equal(r.x,1);});
+test('defeating the fifth-floor boss reaches a real victory ending',()=>{const r=createRun(['knight'],'final');r.floor=5;r.dungeon=generateDungeon(r,5);r.x=r.dungeon.stairs.x;r.y=r.dungeon.stairs.y;interact(r);assert.equal(r.battle.type,'boss');killBattle(r);assert.equal(r.phase,'ended');assert.equal(r.ending,'victory');});
+test('whole party defeat ends the run',()=>{const r=createRun(['knight'],'loss');r.party[0].spd=100;startBattle(r);for(const foe of r.battle.enemies){foe.atk=10000;foe.mag=10000;foe.intent=['attack'];}r.party[0].hp=1;act(r,'guard');assert.equal(r.phase,'ended');assert.equal(r.ending,'defeat');});
+test('save round-trip preserves deterministic combat continuation',()=>{const a=ready('mage','save'),b=restoreRun(serializeRun(a));deal(a,'fire');deal(b,'fire');assert.deepEqual(a,b);});
+test('all persisted gameplay phases can be round-tripped',()=>{const r=createRun(['knight'],'states');assert.equal(restoreRun(serializeRun(r)).phase,'explore');openRewards(r);assert.equal(restoreRun(serializeRun(r)).phase,'reward');r.phase='explore';const [key]=Object.entries(r.dungeon.events).find(([,v])=>v.type==='shrine');[r.x,r.y]=key.split(',').map(Number);interact(r);assert.equal(restoreRun(serializeRun(r)).phase,'event');});
+test('corrupted saves and incompatible versions are rejected',()=>{assert.throws(()=>restoreRun('this is not json'));assert.throws(()=>restoreRun('{}'));const r=createRun(['knight'],'bad');r.version=VERSION+1;assert.throws(()=>restoreRun(serializeRun(r)));r.version=VERSION;r.x=-9;assert.throws(()=>restoreRun(serializeRun(r)));});
+test('malformed maps and invalid hero bounds are rejected',()=>{const r=createRun(['knight'],'badmap');r.dungeon.tiles[0]=[];assert.throws(()=>restoreRun(serializeRun(r)));const s=createRun(['knight'],'badhp');s.party[0].hp=s.party[0].maxHp+1;assert.throws(()=>restoreRun(serializeRun(s)));});
+test('combat fuzz: all jobs keep bounded HP/MP and reach an outcome',()=>{
+  for(const job of Object.keys(JOBS))for(let seed=0;seed<10;seed++){
+    const r=createRun([job],`fuzz-${seed}`);startBattle(r);let n=0;
+    while(r.phase==='battle'&&n++<150){const h=activeHero(r),foe=r.battle.enemies.find(p=>p.hp>0);const ids=['attack',...h.skills,'guard'];const id=ids[n%ids.length],s=SKILLS[id];const affordable=skillCost(h,id)<=h.mp;act(r,affordable?id:'attack',s.target==='ally'?h.id:foe.id);for(const p of r.party){assert.ok(p.hp>=0&&p.hp<=p.maxHp);assert.ok(p.mp>=0&&p.mp<=p.maxMp);}}
+    assert.notEqual(r.phase,'battle',`${job} seed=${seed}`);
+  }
+});
