@@ -1,0 +1,99 @@
+name: Apply verified bilingual game
+on:
+  push:
+    branches: ['feat/english-localization-v033']
+    paths: ['.github/i18n-stage/**', '.github/workflows/i18n-apply.yml']
+permissions:
+  contents: write
+concurrency:
+  group: i18n033-staging
+  cancel-in-progress: false
+jobs:
+  apply:
+    if: github.repository == 'geturin/eclipse-labyrinth'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reconstruct the reviewed static catalog from original source text
+        shell: bash
+        run: |
+          npm install --prefix "$RUNNER_TEMP/acorn" --ignore-scripts --no-audit --no-fund acorn@8.15.0
+          ACORN_PATH="$RUNNER_TEMP/acorn/node_modules/acorn" node .github/i18n-stage/catalog.cjs . .github/i18n-stage "$RUNNER_TEMP/i18n-en.js"
+      - name: Verify source preconditions and apply bounded text changes
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          stage = Path('.github/i18n-stage')
+          manifest = json.loads((stage/'manifest.json').read_text())
+          assert manifest['base'] == '4b22124def75a4ed87fa32b7e28ff7422905bfae'
+          assert manifest['dist'] == '3524e2a313c0d7edf5f394b841f9e2352dcf3d36'
+          changes = {}
+          for filename in ['app-patch.json','config-patch.json']:
+              patch = json.loads((stage/filename).read_text())
+              assert not set(changes).intersection(patch)
+              changes.update(patch)
+          assert not set(changes).intersection(manifest['files'])
+          changes.update(manifest['files'])
+          allowed = {'src/app.js','src/renderer.js','src/i18n.js','src/i18n-en.js','AGENTS.md','README.md','CHANGELOG.md','compact.css','index.html','package.json','scripts/build.mjs','tests/battle_browser.py','tests/browser_smoke.py','tests/compact_browser.py','tests/navigation_browser.py','tests/render_browser.py','tests/i18n.test.mjs','tests/i18n_browser.py','docs/I18N033.md','docs/i18n033-results.json'}
+          assert set(changes) == allowed
+          def blob(b):
+              return hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()
+          prepared = {}
+          for path, change in changes.items():
+              p = Path(path)
+              if change['before'] is None:
+                  assert not p.exists(), path
+              else:
+                  original = p.read_bytes()
+                  assert blob(original) == change['before'], (path, 'baseline', blob(original))
+              if change.get('generated'):
+                  b = (Path(os.environ['RUNNER_TEMP'])/'i18n-en.js').read_bytes()
+              elif 'staged' in change:
+                  assert '/' not in change['staged'] and '..' not in change['staged']
+                  b = (stage/change['staged']).read_bytes()
+                  if path == 'tests/i18n_browser.py':
+                      # Normalize one transport-only space, then require the exact tested blob.
+                      b = b.replace('extra="r.seed=\'碎星斩-<moon>\';" );'.encode(), 'extra="r.seed=\'碎星斩-<moon>\';");'.encode())
+              else:
+                  text = original.decode('utf-8')
+                  previous = len(text)
+                  for start, end, replacement in reversed(change['edits']):
+                      assert 0 <= start <= end <= previous, path
+                      text = text[:start] + replacement + text[end:]
+                      previous = start
+                  b = text.encode('utf-8')
+              assert blob(b) == change['after'], (path, 'result', blob(b), change['after'])
+              prepared[path] = b
+          for path, b in prepared.items():
+              p = Path(path); p.parent.mkdir(parents=True, exist_ok=True); p.write_bytes(b)
+          (Path(os.environ['RUNNER_TEMP'])/'i18n-paths.json').write_text(json.dumps(sorted(allowed | {'dist/index.html'})))
+          print('Verified every baseline and resulting source blob before writing.')
+          PY
+      - run: npm run build
+      - run: npm test
+      - run: npm run verify:dist
+      - name: Commit source and the exact tested static page together
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.ref_name }}
+        run: |
+          test "$(git hash-object dist/index.html)" = '3524e2a313c0d7edf5f394b841f9e2352dcf3d36'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          paths = json.loads((Path(os.environ['RUNNER_TEMP'])/'i18n-paths.json').read_text())
+          subprocess.run(['git','add','--',*paths], check=True)
+          PY
+          git commit -m 'feat: Chinese and English browser localization with compiled v0.3.3'
+          test "$(git ls-remote origin "refs/heads/$TARGET_BRANCH" | cut -f1)" = "$GITHUB_SHA"
+          git push origin "HEAD:$TARGET_BRANCH"

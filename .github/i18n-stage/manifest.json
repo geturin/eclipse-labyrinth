@@ -1,0 +1,13 @@
+{
+  "base": "4b22124def75a4ed87fa32b7e28ff7422905bfae",
+  "dist": "3524e2a313c0d7edf5f394b841f9e2352dcf3d36",
+  "files": {
+    "src/i18n.js": {"before": null, "after": "6d01b6ed486a45e09bebcf0d080b8af61a5df79d", "staged": "src_i18n.js"},
+    "tests/i18n.test.mjs": {"before": null, "after": "ab2c0ceff43451265a56c5b150f25461b8855038", "staged": "tests_i18n.test.mjs"},
+    "tests/i18n_browser.py": {"before": null, "after": "6f9dabcc779d0667076c2c4d0be438ac68f11d8d", "staged": "tests_i18n_browser.py"},
+    "README.md": {"before": "44703eba83aafa5f0c33e3f358b095e45fbefae7", "after": "418750ac386c643a6eab9b0e7965a0b34486887f", "staged": "README.md"},
+    "docs/I18N033.md": {"before": null, "after": "94694588a736405725edabc7f8f4b992e17c87d4", "staged": "docs_I18N033.md"},
+    "docs/i18n033-results.json": {"before": null, "after": "3e4bdd825710f786f9a7a572e372140515e8cc2b", "staged": "docs_i18n033-results.json"},
+    "src/i18n-en.js": {"before": null, "after": "b30843c4f0c76ec9af3c29ecb67b31b1bd999f99", "generated": true}
+  }
+}
