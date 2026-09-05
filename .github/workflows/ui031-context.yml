@@ -1,0 +1,20 @@
+name: Private compact UI baseline
+on:
+  push:
+    branches: ['refactor/compact-hud-v031']
+    paths: ['.github/workflows/ui031-context.yml']
+permissions:
+  contents: read
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 27f82328f919687b1439b5b22f4a3d748a4c6113
+      - run: git archive --format=zip HEAD -o /tmp/ui031-baseline.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: private-ui031-baseline
+          path: /tmp/ui031-baseline.zip
+          retention-days: 1
