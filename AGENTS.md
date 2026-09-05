@@ -64,3 +64,13 @@ v0.3 uses `eclipse-labyrinth.run.v3`. Older v1/v2 saves remain untouched and are
 Read docs/V03.md as the current design; older QA/design documents are historical.
 Do not promise all party combinations/seeds can win; record balance changes in
 `CHANGELOG.md`. Keep user-facing documentation in Chinese.
+
+## Compact UI invariants (v0.3.1)
+
+Use the party status cards as the single hero-selector / ally-target row. Do not re-add
+separate hero tabs, a permanently expanded supply row, or duplicate tutorial panels.
+Current boss counterplay/deadline/progress and party HP/critical statuses remain visible.
+Keep full skill/item details accessible on touch devices, not hover-only. Preserve native
+keyboard activation and focus when rerendering the dock. Optional UI does not spend turns.
+`compact.css` is bundled along with `style.css`; ship both edits with rebuilt static HTML.
+Run `python tests/compact_browser.py` alongside the three existing browser suites.

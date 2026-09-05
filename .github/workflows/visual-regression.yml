@@ -1,10 +1,10 @@
 name: Browser and exploration regression
 on:
   pull_request:
-    paths: ['src/**', 'style.css', 'scripts/build.mjs', 'tests/**', '.github/workflows/visual-regression.yml']
+    paths: ['src/**', 'style.css', 'compact.css', 'index.html', 'scripts/build.mjs', 'tests/**', '.github/workflows/visual-regression.yml']
   push:
     branches: [main]
-    paths: ['src/**', 'style.css', 'scripts/build.mjs', 'tests/**', '.github/workflows/visual-regression.yml']
+    paths: ['src/**', 'style.css', 'compact.css', 'index.html', 'scripts/build.mjs', 'tests/**', '.github/workflows/visual-regression.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -30,6 +30,7 @@ jobs:
           python tests/render_browser.py
           python tests/battle_browser.py
           python tests/browser_smoke.py
+          python tests/compact_browser.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
