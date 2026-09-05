@@ -32,6 +32,7 @@ jobs:
           python tests/browser_smoke.py
           python tests/compact_browser.py
           python tests/navigation_browser.py
+          python tests/i18n_browser.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
