@@ -27,8 +27,7 @@ jobs:
           import base64, gzip, hashlib, json, os, subprocess
           parts = [Path(f'.github/v021-part-{i}.txt') for i in range(3)]
           chunks = [p.read_text().strip() for p in parts]
-          # Repair three known transport transcription differences before validating
-          # the complete payload and every source blob. No unverified input is applied.
+          # Repair known transport differences, then verify the complete checksum.
           chunks[0] = chunks[0].replace('NDvj7euur7', 'NDvj7vur7').replace('ZyNcefNTcVc', 'ZyNntVc')
           chunks[1] = chunks[1].replace('E/7Nj8/Kqg', 'E/7Nj9n8/Kqg')
           compressed = base64.b64decode(''.join(chunks), validate=True)
@@ -48,7 +47,6 @@ jobs:
               else:
                   assert blob(path) == hashes['before'], path
           patch = data['patch'].encode('utf-8')
-          # difflib leaves an unterminated final added line without Git's EOF marker.
           if not patch.endswith(b'\n'):
               patch += b'\n\\ No newline at end of file\n'
           subprocess.run(['git','apply','--check','--whitespace=nowarn','-'], input=patch, check=True)
@@ -64,13 +62,18 @@ jobs:
                   assert text.count(old) == 1, (str(p), old)
                   text = text.replace(old, new, 1)
               p.write_text(text)
+          # GITHUB_TOKEN cannot manage workflows. Leave this workflow unchanged;
+          # the authorized connector will add visual CI and remove this staging job.
+          visual_workflow = '.github/workflows/visual-regression.yml'
+          Path(visual_workflow).unlink()
           tmp = Path(os.environ['RUNNER_TEMP'])
           (tmp/'v021-dist').write_text(data['dist'])
-          staged = sorted(allowed | {'README.md','AGENTS.md','dist/index.html','.github/workflows/v021-apply.yml'} | {str(p) for p in parts})
+          staged = sorted((allowed - {visual_workflow}) | {'README.md','AGENTS.md','dist/index.html'} | {str(p) for p in parts})
+          assert not any(p.startswith('.github/workflows/') for p in staged)
           (tmp/'v021-paths.json').write_text(json.dumps(staged))
-          for p in parts + [Path('.github/workflows/v021-apply.yml')]:
+          for p in parts:
               p.unlink()
-          print('Verified source patch applied; temporary transport removed.')
+          print('Verified source patch applied; bot will not modify workflow files.')
           PY
       - run: npm test
       - run: npm run build
