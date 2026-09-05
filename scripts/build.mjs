@@ -17,6 +17,8 @@ for(const id of modules){
 bundle+=`require('app');})();`;
 let html=await readFile(path.join(root,'index.html'),'utf8');
 const css=await readFile(path.join(root,'style.css'),'utf8');
+const compact=await readFile(path.join(root,'compact.css'),'utf8');
+html=html.replace('<link rel="stylesheet" href="./compact.css">',`<style>\n${compact}\n</style>`);
 html=html.replace('<link rel="stylesheet" href="./style.css">',`<style>\n${css}\n</style>`).replace('<script type="module" src="./src/app.js"></script>',`<script>\n${bundle.replace(/<\/script/gi,'<\\/script')}\n</script>`);
 await mkdir(path.join(root,'dist'),{recursive:true});await writeFile(path.join(root,'dist/index.html'),html);
 console.log(`Built dist/index.html (${Math.round(Buffer.byteLength(html)/1024)} KB), self-contained, zero runtime requests.`);

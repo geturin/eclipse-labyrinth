@@ -1,0 +1,128 @@
+/* v0.3.1: one party selector, one contextual command row. No game-rule changes. */
+.game-grid { grid-template-areas: "view side" "dock side"; gap: 12px; }
+.hud-dock { grid-area: dock; min-width: 0; background: #171d2b; border: 1px solid #b4b5d32e; border-radius: 12px; overflow: hidden; }
+.hud-dock #battle-alerts:empty { display: none; }
+.hud-dock .command-panel { border: 0; border-radius: 0; min-height: 0; overflow: visible; background: none; }
+.hud-dock .party-strip { padding: 10px 10px 0; gap: 8px; }
+.hud-dock .party-card { display: flex; align-items: center; min-height: 84px; padding: 8px; gap: 9px; border-radius: 8px; box-shadow: none; }
+.hud-dock .party-card.active { background: linear-gradient(120deg,#30384e,#22283d); border-color: var(--job-color); }
+.hud-dock .party-card:focus-visible { outline: 2px solid #eee6ff; outline-offset: -3px; }
+.hud-dock .party-face { position: relative; inset: auto; width: 48px; height: 66px; flex: 0 0 48px; overflow: hidden; opacity: 1; border-radius: 5px; }
+.hud-dock .party-face img { position: absolute; width: 108px; max-width: none; height: auto; left: -30px; top: -22px; }
+.hud-dock .party-info { display: flex; flex-direction: column; padding: 0; gap: 3px; }
+.hud-dock .party-name { font: 600 15px var(--sans); letter-spacing: 0; margin: 0; line-height: 1.3; }
+.hud-dock .party-role { font-size: 11px; margin: 0; color: #abb4ca; }
+.hud-dock .bar-line { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 0; }
+.hud-dock .bar-line .bar { min-width: 30px; flex: 1; height: 5px; }
+.hud-dock .bar-line .value { min-width: 0; font: 11px var(--sans); font-variant-numeric: tabular-nums; color: #dce4ed; }
+.hud-dock .hero-cooldowns { margin: 0; font-size: 11px; color: #b8c8de; }
+.hud-dock .status-list { display: flex; flex-wrap: wrap; gap: 3px; margin: 0; }
+.hud-dock .status-list:empty { display: none; }
+.hud-dock .status-badge { font-size: 10px; padding: 1px 3px; line-height: 1.3; }
+.hud-dock .battle-command { padding: 10px; }
+.hud-dock .tactical-skills { display: grid; grid-template-columns: repeat(var(--skill-count,2),minmax(0,1fr)); gap: 7px; }
+.hud-dock .skill-button { min-height: 72px; height: auto; padding: 9px 11px; border-radius: 7px; display: flex; flex-direction: column; justify-content: center; gap: 5px; overflow: hidden; }
+.hud-dock .skill-button .skill-top { display: flex; align-items: center; justify-content: space-between; margin: 0; gap: 4px; width: 100%; }
+.hud-dock .skill-button .skill-top span { font-size: 11px; }
+.hud-dock .skill-button strong { font: 600 14px/1.4 var(--sans); white-space: normal; margin: 0; overflow-wrap: anywhere; }
+.hud-dock .skill-button .hotkey { position: absolute; right: 6px; bottom: 3px; font-size: 9px; opacity: .55; }
+.hud-dock .skill-button .rank { font-size: 10px; }
+.hud-dock .skill-button:disabled { opacity: .6; }
+.hud-dock .team-controls { display: flex; flex-wrap: nowrap; margin: 9px 0 0; padding: 0; border: 0; gap: 7px; align-items: stretch; }
+.hud-dock .team-controls .secondary { width: auto; min-height: 44px; padding: 8px 13px; font: 13px var(--sans); justify-content: center; gap: 6px; }
+.hud-dock .team-controls .team-attack { flex: 1; min-width: 0; min-height: 44px; padding: 8px 16px; font: 600 14px var(--sans); justify-content: center; gap: 8px; }
+.hud-dock .team-attack kbd { font: 10px var(--sans); opacity: .7; background: none; border: none; }
+.hud-dock .target-prompt { min-height: 40px; padding: 5px 0 9px; font-size: 13px; gap: 8px; }
+.hud-dock .target-prompt .ghost { min-height: 36px; padding: 5px 9px; font-size: 13px; }
+.hud-dock .party-card.targetable { border-color: #ace5c4; background: #213b35; box-shadow: inset 0 0 0 1px #ace5c43a; }
+.hud-dock #battle-alerts:not(:empty) { padding: 10px 10px 0; }
+.hud-dock .omen-panel { margin: 0 0 6px; padding: 9px 12px; border-left-width: 3px; border-radius: 7px; }
+.hud-dock .omen-panel:last-child { margin-bottom: 0; }
+.hud-dock .omen-panel>div { gap: 5px 12px; }
+.hud-dock .omen-panel strong { font: 600 15px var(--sans); letter-spacing: 0; }
+.hud-dock .omen-tag { font-size: 12px; }
+.hud-dock .omen-progress { font-size: 12px; width: auto; margin-left: auto; }
+.hud-dock .omen-panel p { font-size: 12px; margin-top: 5px; line-height: 1.5; }
+.battle-mode .stage-footer { height: auto; min-height: 39px; font-size: 12px; padding: 0 12px; }
+.battle-mode .stage-footer .path-label { letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stage-tools { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.stage-tools .ghost { display: flex; align-items: center; gap: 5px; min-height: 40px; font-size: 12px; }
+.incoming-note { font-size: 12px; color: #b1c4de; }
+.incoming-note.urgent { color: #ffc08f; }
+.battle-mode .team-phase { font-size: 12px; }
+.battle-mode .side-column .objective, .battle-mode .side-column .boon-card, .battle-mode .side-foot { display: none; }
+.journal-card summary { cursor: pointer; min-height: 24px; margin-bottom: 0; }
+.journal-card[open] summary { margin-bottom: 10px; }
+.journal-card .journal { font-size: 12px; }
+.detail-status { margin-top: 16px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 12px; }
+.detail-status .status-list { margin: 0; }
+.intel-block { border-bottom: 1px solid #b9bfce24; padding: 12px 0; font-size: 13px; }
+.intel-block h3 { font-size: 15px; margin-bottom: 6px; }
+.intel-block p { line-height: 1.65; margin-bottom: 6px; }
+.intel-block summary { min-height: 32px; cursor: pointer; }
+.intel-block .secondary { padding: 8px 14px; font-size: 13px; margin-top: 6px; }
+.intel-retreat { display: flex; align-items: center; gap: 14px; margin-top: 16px; font-size: 12px; color: #c5b1c0; }
+.intel-retreat .flee { min-height: 44px; padding: 8px 15px; font-size: 13px; flex-shrink: 0; }
+.hud-dock .compact-explore { display: flex; align-items: center; justify-content: space-between; padding: 12px; gap: 16px; }
+.hud-dock .dpad { grid-template-columns: repeat(3,44px); grid-template-rows: repeat(2,38px); }
+.hud-dock .command-shortcuts { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; }
+.hud-dock .command-shortcuts button { width: auto; min-width: 58px; height: 48px; min-height: 44px; padding: 6px 10px; flex-direction: row; gap: 6px; }
+.hud-dock .command-shortcuts button span { font-size: 13px; color: #c5cede; }
+@media(max-width:900px){
+  .game-grid { grid-template-columns: minmax(0,1fr); grid-template-areas: "view" "dock" "side"; }
+  .battle-mode .side-column { display: none; }
+}
+@media(max-width:600px){
+  .game-shell { padding-bottom: 10px; }
+  .game-grid { gap: 8px; }
+  .hud-dock .party-strip { padding: 7px 7px 0; gap: 5px; }
+  .hud-dock .party-card { min-height: 89px; padding: 7px; display: block; }
+  .hud-dock .party-face { position: absolute; top: 4px; right: 0; left: auto; width: 35px; height: 43px; opacity: .7; }
+  .hud-dock .party-face img { width: 83px; top: -17px; left: -24px; }
+  .hud-dock .party-info { position: relative; padding: 0; gap: 3px; }
+  .hud-dock .party-name { font-size: 14px; min-height: 19px; text-shadow: 0 1px 4px #111624; }
+  .hud-dock .party-role { font-size: 10px; }
+  .hud-dock .bar-line { flex-direction: column-reverse; align-items: stretch; gap: 4px; }
+  .hud-dock .bar-line .bar { flex: auto; }
+  .hud-dock .bar-line .value { text-align: left; font-size: 11px; }
+  .hud-dock .hero-cooldowns { font-size: 11px; }
+  .hud-dock .battle-command { padding: 8px 7px; }
+  .hud-dock .tactical-skills { grid-template-columns: repeat(var(--skill-count,2),minmax(0,1fr)); gap: 5px; }
+  .hud-dock .skill-button { min-height: 76px; padding: 7px 5px; justify-content: flex-start; gap: 5px; }
+  .hud-dock .skill-button .skill-top span { font-size: 10px; white-space: nowrap; }
+  .hud-dock .skill-button .skill-top svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .hud-dock .skill-button strong { font-size: 13px; line-height: 1.4; }
+  .hud-dock .skill-button .hotkey { display: none; }
+  .hud-dock .skill-button .rank, .hud-dock .awakened-mark { font-size: 9px; margin-left: 1px; }
+  .hud-dock .team-controls { gap: 5px; }
+  .hud-dock .team-controls .secondary { padding: 8px; min-width: 42px; flex-direction: column; gap: 3px; font-size: 11px; }
+  .hud-dock .team-controls .team-attack { min-width: 0; font-size: 14px; padding: 8px 10px; }
+  .hud-dock .team-attack kbd { display: none; }
+  .hud-dock #battle-alerts:not(:empty) { padding: 7px 7px 0; }
+  .hud-dock .omen-panel { padding: 8px; }
+  .hud-dock .omen-progress { margin-left: 0; }
+  .hud-dock .omen-panel>div { gap: 4px 8px; }
+  .hud-dock .omen-panel strong { font-size: 14px; }
+  .hud-dock .omen-panel p { font-size: 12px; }
+  .battle-mode .stage-footer { padding: 0 10px; gap: 5px; }
+  .battle-mode .stage-footer .path-label { font-size: 11px; }
+  .stage-tools { gap: 6px; }
+  .incoming-note { font-size: 11px; }
+  .hud-dock .compact-explore { padding: 10px 8px; gap: 12px; }
+  .hud-dock .dpad { grid-template-columns: repeat(3,40px); grid-template-rows: repeat(2,40px); }
+  .hud-dock .command-shortcuts { grid-template-columns: repeat(2,minmax(0,1fr)); flex: 1; gap: 5px; }
+  .hud-dock .command-shortcuts button { min-width: 0; height: 40px; min-height: 40px; padding: 6px; gap: 5px; }
+  .hud-dock .command-shortcuts button span { font-size: 12px; }
+  .game-shell .side-column { display: none; }
+  .game-foot { font-size: 10px; padding-top: 8px; }
+}
+.journal-card summary::after { content: "⌄"; margin-left: auto; color: #aab4cc; }
+.journal-card[open] summary::after { content: "⌃"; }
+@media(min-width:1280px){
+  .hud-dock .battle-command { display: grid; grid-template-columns: minmax(0,1fr) 320px; gap: 10px; }
+  .hud-dock .team-controls { margin: 0; gap: 6px; }
+  .hud-dock .team-controls .secondary { flex-direction: column; padding: 8px 10px; gap: 5px; min-width: 49px; }
+  .hud-dock .team-controls .team-attack { flex-wrap: wrap; gap: 5px; padding: 10px; }
+  .hud-dock .team-attack kbd { display: none; }
+  .hud-dock .target-prompt { grid-column: 1 / -1; padding-bottom: 0; }
+}

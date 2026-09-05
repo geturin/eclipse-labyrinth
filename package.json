@@ -1,6 +1,6 @@
 {
   "name": "eclipse-labyrinth",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "type": "module",
   "description": "\u6708\u8755\u306e\u8ff7\u5bae \u2014 a self-contained first-person roguelike dungeon RPG",

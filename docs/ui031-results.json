@@ -1,0 +1,231 @@
+{
+  "count": 102,
+  "checks": [
+    "360px battle has one integrated party selector",
+    "360px battle party appears before skills",
+    "360px battle all skills are in one row",
+    "360px battle no clipped skill text",
+    "360px battle body fits width",
+    "360px battle main action label remains readable",
+    "360px battle supplies and repeated intel are absent by default",
+    "360px battle journal is collapsed",
+    "360px battle lower controls stay compact",
+    "360px boss has one integrated party selector",
+    "360px boss party appears before skills",
+    "360px boss all skills are in one row",
+    "360px boss no clipped skill text",
+    "360px boss body fits width",
+    "360px boss main action label remains readable",
+    "360px boss supplies and repeated intel are absent by default",
+    "360px boss journal is collapsed",
+    "360px boss lower controls stay compact",
+    "360px boss counterplay and deadline are still visible",
+    "390px battle has one integrated party selector",
+    "390px battle party appears before skills",
+    "390px battle all skills are in one row",
+    "390px battle no clipped skill text",
+    "390px battle body fits width",
+    "390px battle main action label remains readable",
+    "390px battle supplies and repeated intel are absent by default",
+    "390px battle journal is collapsed",
+    "390px battle lower controls stay compact",
+    "390px boss has one integrated party selector",
+    "390px boss party appears before skills",
+    "390px boss all skills are in one row",
+    "390px boss no clipped skill text",
+    "390px boss body fits width",
+    "390px boss main action label remains readable",
+    "390px boss supplies and repeated intel are absent by default",
+    "390px boss journal is collapsed",
+    "390px boss lower controls stay compact",
+    "390px boss counterplay and deadline are still visible",
+    "768px battle has one integrated party selector",
+    "768px battle party appears before skills",
+    "768px battle all skills are in one row",
+    "768px battle no clipped skill text",
+    "768px battle body fits width",
+    "768px battle main action label remains readable",
+    "768px battle supplies and repeated intel are absent by default",
+    "768px battle journal is collapsed",
+    "768px battle lower controls stay compact",
+    "768px boss has one integrated party selector",
+    "768px boss party appears before skills",
+    "768px boss all skills are in one row",
+    "768px boss no clipped skill text",
+    "768px boss body fits width",
+    "768px boss main action label remains readable",
+    "768px boss supplies and repeated intel are absent by default",
+    "768px boss journal is collapsed",
+    "768px boss lower controls stay compact",
+    "768px boss counterplay and deadline are still visible",
+    "1440px battle has one integrated party selector",
+    "1440px battle party appears before skills",
+    "1440px battle all skills are in one row",
+    "1440px battle no clipped skill text",
+    "1440px battle body fits width",
+    "1440px battle main action label remains readable",
+    "1440px battle supplies and repeated intel are absent by default",
+    "1440px battle journal is collapsed",
+    "1440px battle lower controls stay compact",
+    "1440px boss has one integrated party selector",
+    "1440px boss party appears before skills",
+    "1440px boss all skills are in one row",
+    "1440px boss no clipped skill text",
+    "1440px boss body fits width",
+    "1440px boss main action label remains readable",
+    "1440px boss supplies and repeated intel are absent by default",
+    "1440px boss journal is collapsed",
+    "1440px boss lower controls stay compact",
+    "1440px boss counterplay and deadline are still visible",
+    "clicking the HP card selects that hero",
+    "selection does not advance clocks or resources",
+    "Enter on a party card selects rather than attacks",
+    "bracket shortcut selects and focuses the new card",
+    "details includes complete abilities and equipped weapon",
+    "read-only details do not modify the saved run",
+    "closing details restores keyboard focus",
+    "supplies replace the skill row instead of appending another",
+    "touch users can read complete supply descriptions",
+    "opening trays and supply help is cosmetic only",
+    "item targeting uses the same party cards",
+    "attack disabled during target selection",
+    "target cancellation consumes nothing",
+    "tonic heals through integrated card without moving world",
+    "healing targets do not replace the skill caster",
+    "guard appears on its own HP card",
+    "guard toggle remains free and reversible",
+    "optional tactics exposes enemy hint, movement and retreat",
+    "reading battle intel leaves clocks unchanged",
+    "global Enter still commits exactly one round",
+    "knocked-out heroes cannot be selected to cast",
+    "revive enables the fallen card and disables living targets",
+    "revive keeps its caster and restores the fallen ally",
+    "mobile exploration still exposes action history",
+    "no JavaScript errors in compact UI checks",
+    "no external resources used by offline compact UI"
+  ],
+  "metrics": [
+    {
+      "viewport": 360,
+      "mode": "battle",
+      "new": {
+        "dockHeight": 266.59375,
+        "pageHeight": 844,
+        "attackBottom": 733.59375
+      },
+      "old": {
+        "dockHeight": 765.765625,
+        "pageHeight": 1491,
+        "attackBottom": 1076.765625
+      },
+      "reduction_percent": 65.2
+    },
+    {
+      "viewport": 360,
+      "mode": "boss",
+      "new": {
+        "dockHeight": 352.59375,
+        "pageHeight": 871,
+        "attackBottom": 819.59375
+      },
+      "old": {
+        "dockHeight": 1130.546875,
+        "pageHeight": 1856,
+        "attackBottom": 1441.546875
+      },
+      "reduction_percent": 68.8
+    },
+    {
+      "viewport": 390,
+      "mode": "battle",
+      "new": {
+        "dockHeight": 266.59375,
+        "pageHeight": 844,
+        "attackBottom": 733.59375
+      },
+      "old": {
+        "dockHeight": 765.765625,
+        "pageHeight": 1506,
+        "attackBottom": 1076.765625
+      },
+      "reduction_percent": 65.2
+    },
+    {
+      "viewport": 390,
+      "mode": "boss",
+      "new": {
+        "dockHeight": 334.59375,
+        "pageHeight": 853,
+        "attackBottom": 801.59375
+      },
+      "old": {
+        "dockHeight": 1092.453125,
+        "pageHeight": 1832,
+        "attackBottom": 1403.453125
+      },
+      "reduction_percent": 69.4
+    },
+    {
+      "viewport": 768,
+      "mode": "battle",
+      "new": {
+        "dockHeight": 254.6875,
+        "pageHeight": 1000,
+        "attackBottom": 806.6875
+      },
+      "old": {
+        "dockHeight": 627.78125,
+        "pageHeight": 1524,
+        "attackBottom": 1034.609375
+      },
+      "reduction_percent": 59.4
+    },
+    {
+      "viewport": 768,
+      "mode": "boss",
+      "new": {
+        "dockHeight": 328.6875,
+        "pageHeight": 1000,
+        "attackBottom": 880.6875
+      },
+      "old": {
+        "dockHeight": 827.65625,
+        "pageHeight": 1724,
+        "attackBottom": 1234.484375
+      },
+      "reduction_percent": 60.3
+    },
+    {
+      "viewport": 1440,
+      "mode": "battle",
+      "new": {
+        "dockHeight": 201.6875,
+        "pageHeight": 1000,
+        "attackBottom": 787.6875
+      },
+      "old": {
+        "dockHeight": 613.28125,
+        "pageHeight": 1262,
+        "attackBottom": 1051.109375
+      },
+      "reduction_percent": 67.1
+    },
+    {
+      "viewport": 1440,
+      "mode": "boss",
+      "new": {
+        "dockHeight": 275.6875,
+        "pageHeight": 1000,
+        "attackBottom": 861.6875
+      },
+      "old": {
+        "dockHeight": 703.65625,
+        "pageHeight": 1352,
+        "attackBottom": 1141.484375
+      },
+      "reduction_percent": 60.8
+    }
+  ],
+  "errors": [],
+  "limits": "Chromium, deterministic fixtures, memory Storage; not native file storage or Safari."
+}

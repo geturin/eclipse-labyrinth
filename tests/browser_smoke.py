@@ -55,6 +55,8 @@ def no_overflow(page, name):
     check(name, page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'))
 
 def act(page, skill, target=None):
+    if skill in ['tonic','ether','salt'] and not page.locator(f'[data-skill="{skill}"]').count():
+        page.locator('[data-action="toggle-supplies"]').click()
     page.locator(f'[data-action="skill"][data-skill="{skill}"]').click()
     if target:
         page.locator(f'[data-action="party"][data-id="{target}"]').click()
@@ -143,6 +145,7 @@ with sync_playwright() as p:
     page.locator('[data-action="comfort"]').click()
     page.keyboard.press('Escape')
     before=state(page)['dungeon']['elapsed']
+    page.evaluate('document.activeElement?.blur()')  # global wait shortcut, not native button activation
     page.keyboard.press('Space')
     check('Wait advances one world tick',state(page)['dungeon']['elapsed']==before+1)
     saved=state(page)
@@ -174,7 +177,7 @@ with sync_playwright() as p:
             r=state(page)
             if r['phase']!='battle':break
             if r['party'][idx]['hp']<=0:continue
-            page.locator(f'[data-action="select-hero"][data-id="{h["id"]}"]').click()
+            page.locator(f'[data-action="party"][data-id="{h["id"]}"]').click()
             for skill in h['skills']:
                 if state(page)['phase']!='battle':break
                 button=page.locator(f'[data-skill="{skill}"]')
