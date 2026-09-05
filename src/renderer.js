@@ -1,14 +1,14 @@
-import { FLOORS } from './data.js';
 import { SPRITE_KEYS, explorationSvg, rasterSprite } from './sprite-art.js';
 import { sceneObjects, sceneDecorations, projectSprite, visibleSpans, spriteMotion, placeLabels } from './sprite-scene.js';
 import { REGIONS, regionAt } from './world.js';
+import { GridCamera, headingOf, viewMode, clipNearPlane, mixHex } from './navigation.js';
 
-/** First-person grid raycaster. Default comfort mode snaps movement and turns without camera bob. */
+/** Discrete commands with continuous, finite camera movement and fixed horizon. */
 export class DungeonRenderer {
   constructor(canvas,getState) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});this.getState=getState;
     this.active=true;this.floor=0;this.x=1.5;this.y=1.5;this.angle=0;this.last=0;this.frame=0;this.images={};this.textures=[];this.flash=0;
-    this.decorations=[];this.lastLabels=[];this.assetErrors=[];
+    this.decorations=[];this.lastLabels=[];this.assetErrors=[];this.camera=new GridCamera();this.travel=null;
     this.reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
     this.ready=Promise.all(SPRITE_KEYS.map(async key=>{
       try{this.images[key]=await rasterSprite(explorationSvg(key));}
@@ -29,7 +29,7 @@ export class DungeonRenderer {
     this.uiScale=w/Math.max(1,rect.width);
     if(this.canvas.width!==w||this.canvas.height!==h){this.canvas.width=w;this.canvas.height=h;this.z=new Float32Array(w);}
   }
-  destroy(){this.active=false;cancelAnimationFrame(this.request);this.resizeObserver.disconnect();}
+  destroy(){this.travel=null;this.active=false;cancelAnimationFrame(this.request);this.resizeObserver.disconnect();}
   pulse(){if(this.getState()?.comfort===false&&!this.reducedMotion.matches)this.flash=0.12;}
   makeTextures(floor) {
     this.textures=[];
@@ -79,19 +79,50 @@ export class DungeonRenderer {
       this.textures.push(c);
     }
   }
+  beginTravel(before,after,action,done){
+    const mode=viewMode(after,this.reducedMotion.matches);
+    if(!this.camera.begin(before,after,action,performance.now(),mode))return false;
+    // The snapshot shares geometry with the live dungeon; do not rebuild textures per step.
+    if(this.dungeon===after.dungeon)this.dungeon=before.dungeon;
+    this.travel={before,after,done};this.last=0;
+    Object.assign(this,this.camera.pose);
+    return true;
+  }
+  finishTravel(){
+    const travel=this.travel;if(!travel)return;
+    this.travel=null;this.dungeon=travel.after.dungeon;Object.assign(this,this.camera.reset(travel.after));
+    this.draw(travel.after,performance.now());travel.done();
+  }
+  navigationFrame(pose){
+    const stage=this.canvas.closest('.stage');if(!stage)return;
+    stage.dataset.travel=this.travel?'moving':'idle';this.canvas.setAttribute('aria-busy',String(!!this.travel));
+    const dir=headingOf(pose.angle),heading=stage.querySelector('[data-facing]');
+    if(heading)heading.textContent=['北 N','东 E','南 S','西 W'][dir];
+    for(const marker of document.querySelectorAll('.map-player')){
+      marker.setAttribute('transform',`translate(${5+(pose.x-.5)*12+6} ${5+(pose.y-.5)*12+6}) rotate(${(pose.angle+Math.PI/2)*180/Math.PI})`);
+    }
+  }
   loop(time){
     if(!this.active)return;this.request=requestAnimationFrame(this.loop);
-    if(time-this.last<30||document.hidden)return;this.last=time;
+    if(document.hidden||(!this.travel&&time-this.last<32))return;this.last=time;
     const run=this.getState();if(!run?.dungeon)return;
-    if(this.floor!==run.floor||this.dungeon!==run.dungeon){this.floor=run.floor;this.dungeon=run.dungeon;this.makeTextures(run.floor);this.decorations=sceneDecorations(run.dungeon);this.x=run.x+.5;this.y=run.y+.5;this.angle=-Math.PI/2+run.dir*Math.PI/2;}
-    const target=-Math.PI/2+run.dir*Math.PI/2;
-    let delta=((target-this.angle+Math.PI*3)%(Math.PI*2))-Math.PI;
-    if(run.comfort!==false||this.reducedMotion.matches){this.angle=target;this.x=run.x+.5;this.y=run.y+.5;this.flash=0;}else{this.angle+=delta*.38;this.x+=(run.x+.5-this.x)*.4;this.y+=(run.y+.5-this.y)*.4;}
-    this.draw(run,time);
+    if(this.floor!==run.floor||this.dungeon!==run.dungeon){
+      this.floor=run.floor;this.dungeon=run.dungeon;this.makeTextures(run.floor);this.decorations=sceneDecorations(run.dungeon);
+      if(!this.travel)this.camera.reset(run);
+    }
+    let frame;
+    if(this.travel){
+      if(this.reducedMotion.matches){this.finishTravel();return;}
+      frame=this.camera.sample(time);Object.assign(this,{x:frame.x,y:frame.y,angle:frame.angle});
+      this.travel.mix=frame.mix;
+    }else{Object.assign(this,this.camera.reset(run));frame={...this.camera.pose,done:true,shade:0};}
+    this.flash=0;this.draw(run,time);this.navigationFrame(frame);
+    if(frame.shade){this.ctx.fillStyle=`rgba(17,23,36,${frame.shade})`;this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);}
+    if(this.travel&&frame.done){const {done,after}=this.travel;this.dungeon=after.dungeon;this.travel=null;done();}
   }
   floorTile(ctx,w,h,points,fill){
-    if(points.some(p=>p.z<.14))return;
-    ctx.beginPath();points.forEach((p,i)=>{const x=w/2+p.lateral/p.z*w/.78/2,y=h/2+h/p.z/2;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle='#a1a2c011';ctx.lineWidth=1;ctx.stroke();
+    const clipped=clipNearPlane(points);if(clipped.length<3)return;
+    ctx.beginPath();clipped.forEach((p,i)=>{const x=w/2+p.lateral/p.z*w/.78/2,y=h/2+h/p.z/2;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle='#a1a2c011';ctx.lineWidth=1;ctx.stroke();
   }
   clipSpans(spans) {
     const ctx=this.ctx;ctx.beginPath();
@@ -101,7 +132,14 @@ export class DungeonRenderer {
   drawObjects(run,time) {
     const ctx=this.ctx,w=this.canvas.width,h=this.canvas.height;
     const animate=run.objectMotion===true&&!this.reducedMotion.matches&&run.phase==='explore';
-    const objects=[...this.decorations,...sceneObjects(run)];
+    let visual=run;
+    if(this.travel){
+      const {before,after,mix=0}=this.travel;
+      const next=new Map(after.dungeon.packs.map(p=>[p.id,p]));
+      const packs=before.dungeon.packs.map(p=>{const q=next.get(p.id)||p;return {...p,x:p.x+(q.x-p.x)*mix,y:p.y+(q.y-p.y)*mix};});
+      visual={...run,dungeon:{...run.dungeon,packs}};
+    }
+    const objects=[...this.decorations,...sceneObjects(visual)];
     const sprites=objects.map(o=>projectSprite(o,this,w,h)).filter(Boolean).sort((a,b)=>b.depth-a.depth);
     const candidates=[];
     for(const s of sprites) {
@@ -154,7 +192,7 @@ export class DungeonRenderer {
     if(this.hudHeading!==heading||this.hudSize!==signature){
       this.hudHeading=heading;this.hudSize=signature;
       const box=this.canvas.getBoundingClientRect(),s=this.uiScale;
-      this.hudObstacles=[...stage.querySelectorAll('.floor-heading,.floor-number,.compass,.interaction,.explore-caption,.position-label')].map(el=>{
+      this.hudObstacles=[...stage.querySelectorAll('.floor-heading,.floor-number,.compass,.interaction,.explore-caption,.position-label,.navigation-map')].map(el=>{
         const r=el.getBoundingClientRect();return {x:(r.left-box.left-3)*s,y:(r.top-box.top-3)*s,w:(r.width+6)*s,h:(r.height+6)*s};
       });
     }
@@ -181,7 +219,11 @@ export class DungeonRenderer {
     const ctx=this.ctx,w=this.canvas.width,h=this.canvas.height;
     if(!w||!h)return;
     const dx=Math.cos(this.angle),dy=Math.sin(this.angle),planeX=-dy*.78,planeY=dx*.78;
-    const zone=regionAt(run.dungeon,run.x,run.y);
+    let zone=regionAt(run.dungeon,run.x,run.y);
+    if(this.travel){
+      const target=regionAt(this.travel.after.dungeon,this.travel.after.x,this.travel.after.y),t=this.travel.mix??0;
+      zone={...zone,floor:mixHex(zone.floor,target.floor,t),mortar:mixHex(zone.mortar,target.mortar,t)};
+    }
     const floorGrad=ctx.createLinearGradient(0,h*.4,0,h);floorGrad.addColorStop(0,'#121727');floorGrad.addColorStop(1,zone.floor);ctx.fillStyle=floorGrad;ctx.fillRect(0,0,w,h);
     const sky=ctx.createLinearGradient(0,0,0,h/2);sky.addColorStop(0,zone.mortar);sky.addColorStop(1,'#222939');ctx.fillStyle=sky;ctx.fillRect(0,0,w,h/2);
     for(let y=Math.max(0,Math.floor(this.y)-9);y<Math.min(run.dungeon.size,Math.floor(this.y)+10);y++)for(let x=Math.max(0,Math.floor(this.x)-9);x<Math.min(run.dungeon.size,Math.floor(this.x)+10);x++){
@@ -210,9 +252,7 @@ export class DungeonRenderer {
     this.drawObjects(run,time);
     const vignette=ctx.createRadialGradient(w/2,h*.48,h*.12,w/2,h*.5,Math.max(w*.67,h*.8));vignette.addColorStop(0,'#10142a00');vignette.addColorStop(.65,'#090d1830');vignette.addColorStop(1,run.comfort!==false?'#07091588':'#070915cc');ctx.fillStyle=vignette;ctx.fillRect(0,0,w,h);
     const haze=ctx.createLinearGradient(0,h*.25,0,h*.8);haze.addColorStop(0,'#aaa0d000');haze.addColorStop(.45,'#909bd20c');haze.addColorStop(1,'#aba9d300');ctx.fillStyle=haze;ctx.fillRect(0,0,w,h);
-    ctx.fillStyle=FLOORS[run.floor-1].color;
-    for(let i=0;run.comfort===false&&!this.reducedMotion.matches&&i<12;i++){const px=((i*157.7+time*.002*(i%3+1))%w),py=((i*97.4-time*.006+100000)%h);ctx.globalAlpha=.15+(Math.sin(time*.001+i)*.5+.5)*.32;ctx.beginPath();ctx.arc(px,py,i%6===0?1.8:.7,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
-    if(run.phase!=='battle')this.drawLabels();
+    if(run.phase!=='battle'&&!this.travel)this.drawLabels();
     if(run.phase==='battle'){ctx.fillStyle='#07091577';ctx.fillRect(0,0,w,h);}
     if(this.flash>0){ctx.fillStyle=`rgba(206,193,243,${this.flash})`;ctx.fillRect(0,0,w,h);this.flash*=.72;if(this.flash<.005)this.flash=0;}
   }

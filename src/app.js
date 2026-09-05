@@ -3,6 +3,7 @@ import { createRun, move, turn, interact, currentEvent, resolveEvent, activeHero
 import { icon, portraitUri, enemyUri, objectSvg, svgUri } from './art.js';
 import { DungeonRenderer } from './renderer.js';
 import { AudioSystem } from './audio.js';
+import { VIEW_MODES, NAV_ACTIONS, moveCue, viewMode } from './navigation.js';
 import { REGIONS, regionAt, visiblePacks, packMode, useFieldTool, paths } from './world.js';
 
 const ROOT=document.getElementById('app'), MODAL=document.getElementById('modal-root');
@@ -11,6 +12,7 @@ const PORTRAITS=Object.fromEntries(Object.keys(JOBS).map(id=>[id,portraitUri(id)
 const ENEMY_IMAGES=new Map();
 const MODE_NAMES={patrol:'定轨巡逻',return:'返回巡线',alarmed:'警报集结',elite:'精英追踪',lured:'诱导中',sleep:'眠缚',rest:'整顿'};
 let run=null,renderer=null,toastTimer=null,modalKey='',lastFocus=null;
+let navigation=null,queuedMove=null,navigationTrail=[],lastNavigationCue='';
 const ui={selection:['knight','mage','shrine'],modal:null,modalData:null,rewardIndex:null,selectedEnemy:null,pendingSkill:null,busy:false,seedDraft:'',screen:'landing',lastMove:0,storageError:false,presentation:null,playback:null,animationToken:0,showPatrol:true,suppliesOpen:false};
 const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const e=escapeHtml;
@@ -33,10 +35,10 @@ function selectionDescription(){
   return [ids.map(id=>JOBS[id].name).join(' / '),synergies.join('　·　')];
 }
 function renderLanding(){
-  ui.screen='landing';renderer?.destroy();renderer=null;
+  ui.screen='landing';navigation=null;queuedMove=null;renderer?.destroy();renderer=null;
   const saved=readSave(),canResume=saved&&saved.phase!=='ended';
   const [line,sub]=selectionDescription();
-  ROOT.innerHTML=`<header class="page-head">${brand()}<div class="header-actions"><span class="edition"><i class="dot"></i>ROGUELIKE DRPG · 0.3.1</span>${soundButton()}<button class="icon-button" data-action="help" aria-label="游戏说明">${icon('help',18)}</button></div></header>
+  ROOT.innerHTML=`<header class="page-head">${brand()}<div class="header-actions"><span class="edition"><i class="dot"></i>ROGUELIKE DRPG · 0.3.2</span>${soundButton()}<button class="icon-button" data-action="help" aria-label="游戏说明">${icon('help',18)}</button></div></header>
   <main class="landing">
     <section class="hero-intro">
       <div class="intro-copy"><div class="eyebrow">A NEW MOON. A NEW BEGINNING.</div><h1>月蝕の迷宮</h1><div class="intro-en">E C L I P S E　L A B Y R I N T H</div><div class="intro-sub">以微小的星火，<br>踏入无月之夜。</div><p>在不断重生的迷宫中，编织属于你的职业、武器与祝福。<br>每一次坠落，都是另一段故事的开端。</p><div class="feature-line"><span>${icon('eye',15)} 第一人称探索</span><span>${icon('sword',15)} 回合制战斗</span><span>${icon('star',15)} 随机构筑</span></div></div>
@@ -52,10 +54,10 @@ function renderLanding(){
   renderModal();
 }
 function mountGame(){
-  ui.suppliesOpen=false;ui.screen='game';renderer?.destroy();
+  ui.suppliesOpen=false;ui.screen='game';navigation=null;queuedMove=null;navigationTrail=[{x:run.x,y:run.y,floor:run.floor}];lastNavigationCue='';renderer?.destroy();
   ROOT.innerHTML=`<main class="game-shell"><header class="game-head">${brand()}<div id="top-stats" class="head-run"></div><div class="header-actions"><span id="sound-button">${soundButton()}</span><button class="icon-button" data-action="help" aria-label="游戏说明">${icon('help',18)}</button><button class="icon-button" data-action="menu" aria-label="冒险菜单">${icon('menu',18)}</button></div></header>
     <div class="game-grid"><section class="viewport-panel" aria-label="第一人称迷宫视图"><div class="stage" id="stage"><canvas id="dungeon-canvas" aria-label="第一人称三维迷宫"></canvas><div id="stage-hud" class="stage-hud"></div></div><div id="stage-footer" class="stage-footer"></div></section><section class="hud-dock" aria-label="队伍与行动"><div id="battle-alerts" aria-live="polite"></div><div id="party-strip" class="party-strip" role="group" aria-label="选择队员或技能目标"></div><div id="command-panel" class="command-panel" aria-label="行动指令"></div></section><aside class="side-column"><section class="side-card map-card"><div class="card-title"><span>${icon('map',14)} 探索地图</span><small id="exploration-percent"></small></div><button class="map-wrapper" id="minimap" data-action="map" aria-label="展开已探索地图"></button><div class="map-legend"><span><i></i> 月门</span><span class="treasure"><i></i> 宝箱</span><span class="rest"><i></i> 休息</span><span class="foe-legend">◆ 明雷</span></div></section><section id="objective" class="side-card objective"></section><details class="side-card journal-card"><summary class="card-title"><span>${icon('moon',14)} 行动记录</span></summary><div id="journal" class="journal"></div></details><section class="side-card boon-card"><div class="card-title"><span>${icon('star',14)} 星之祝福</span><button class="ghost" data-action="inventory" aria-label="查看全部祝福">${icon('arrow',12)}</button></div><div id="boon-overview" class="boon-overview"></div></section><div class="side-foot">YOU ARE NOT LOST. NOT YET.</div></aside></div><footer id="game-foot" class="game-foot"></footer></main>`;
-  renderer=new DungeonRenderer(document.getElementById('dungeon-canvas'),()=>ui.presentation||run);
+  renderer=new DungeonRenderer(document.getElementById('dungeon-canvas'),()=>navigation?.before||ui.presentation||run);
   updateGame();
 }
 function mapSvg(large=false){
@@ -77,8 +79,9 @@ function mapSvg(large=false){
     const cx=pad+mob.x*tile+6,cy=pad+mob.y*tile+6;
     shapes+=`<g><title>${e(mob.name)} · ${mob.troop.length} 体 · ${MODE_NAMES[packMode(run,mob)]}</title><path d="M${cx},${cy-4.5} ${cx+4.5},${cy} ${cx},${cy+4.5} ${cx-4.5},${cy}Z" fill="${mob.kind==='elite'?'#ffbb65':'#f2869f'}" stroke="#301522" stroke-width=".8"/>${mob.alert?`<circle cx="${cx}" cy="${cy}" r="6" fill="none" stroke="#f2869f" stroke-width=".65"/>`:''}</g>`;
   }
+  for(const p of navigationTrail.filter(p=>p.floor===run.floor&&d.visited[p.y]?.[p.x]).slice(-6))shapes+=`<circle cx="${pad+p.x*tile+6}" cy="${pad+p.y*tile+6}" r="2" fill="#dad5f2" opacity=".6"/>`;
   const px=pad+run.x*tile+6,py=pad+run.y*tile+6;
-  shapes+=`<circle cx="${px}" cy="${py}" r="8" fill="#ded0ef22"/><g transform="translate(${px} ${py}) rotate(${run.dir*90})"><path d="M0-5 4.5 4 0 2-4.5 4Z" fill="#f7e7ff" stroke="#514569" stroke-width=".8"/></g>`;
+  shapes+=`<circle cx="${px}" cy="${py}" r="8" fill="#ded0ef22"/><g class="map-player" transform="translate(${px} ${py}) rotate(${run.dir*90})"><path d="M0-5 4.5 4 0 2-4.5 4Z" fill="#f7e7ff" stroke="#514569" stroke-width=".8"/></g>`;
   return `<svg viewBox="0 0 ${width} ${width}" role="img" aria-label="明雷探索地图；你在 ${run.x},${run.y}，面向${DIRECTIONS[run.dir].label}">${shapes}</svg>${large?`<div class="region-legend">${REGIONS.map(z=>`<span style="color:${z.color}">${z.code} ${z.name}</span>`).join('')}</div>`:''}`;
 }
 function exploration(){let seen=0,total=0;for(let y=0;y<run.dungeon.size;y++)for(let x=0;x<run.dungeon.size;x++)if(run.dungeon.tiles[y][x]===0){total++;if(run.dungeon.visited[y][x])seen++;}return Math.round(seen/total*100);}
@@ -97,7 +100,7 @@ function eventLabel(event){if(!event)return '';return {chest:'打开遗落的宝
 function eventIcon(type){return {chest:'chest',shrine:'star',fountain:'drop',altar:'moon',elite:'sword',stairs:'stairs'}[type]||'star';}
 function renderExploreHud(){
   const floor=FLOORS[run.floor-1],event=currentEvent(run),dir=DIRECTIONS[run.dir],zone=regionAt(run.dungeon,run.x,run.y),threat=reinforcementInfo(run)[0];
-  return `<div class="floor-heading"><div class="eyebrow">TACTICAL EXPLORATION / B${run.floor}</div><h2>${floor.name}</h2><div class="zone-badge" style="--zone:${zone.color}">${zone.code} · ${zone.name}</div></div><div class="floor-number"><strong>B${String(run.floor).padStart(2,'0')}</strong><span>OF 05 FLOORS</span></div><div class="compass"><span>${DIRECTIONS[(run.dir+3)%4].short}</span><span class="north">${icon('up',12)} ${dir.short}</span><span>${DIRECTIONS[(run.dir+1)%4].short}</span></div><span class="crosshair"></span><p class="explore-caption">${threat?`${threat.known?e(threat.name):'未知脚步'} · 路径距离 ${threat.distance} 格 · ${MODE_NAMES[threat.mode]}`:'观察红色明雷，选择开战的位置。'}</p><span class="position-label"><i></i> ${String(run.x).padStart(2,'0')} : ${String(run.y).padStart(2,'0')}</span>${event?`<button class="interaction" data-action="interact">${icon(eventIcon(event.type),18)}<span>${eventLabel(event)}</span><kbd>F</kbd></button>`:''}`;
+  return `<div class="floor-heading"><div class="eyebrow">TACTICAL EXPLORATION / B${run.floor}</div><h2>${floor.name}</h2><div class="zone-badge" style="--zone:${zone.color}">${zone.code} · ${zone.name}</div></div><div class="floor-number"><strong>B${String(run.floor).padStart(2,'0')}</strong><span>OF 05 FLOORS</span></div><div class="compass navigation-compass"><strong data-facing>${dir.label} ${dir.short}</strong><small class="move-cue" aria-live="polite">${e(lastNavigationCue||'↑ 前进 · ↶↷ 转向')}</small></div><button class="navigation-map" data-action="map" aria-label="北向固定的小地图，点击展开"><span>北 ↑</span>${mapSvg()}<small>${run.x}, ${run.y}</small></button><span class="crosshair"></span><p class="explore-caption">${threat?`${threat.known?e(threat.name):'未知脚步'} · 路径距离 ${threat.distance} 格 · ${MODE_NAMES[threat.mode]}`:'观察红色明雷，选择开战的位置。'}</p><span class="position-label"><i></i> ${String(run.x).padStart(2,'0')} : ${String(run.y).padStart(2,'0')}</span>${event?`<button class="interaction" data-action="interact">${icon(eventIcon(event.type),18)}<span>${eventLabel(event)}</span><kbd>F</kbd></button>`:''}`;
 }
 function enemyImage(enemy){const key=`${enemy.kind}|${enemy.tint}`;if(!ENEMY_IMAGES.has(key))ENEMY_IMAGES.set(key,enemyUri(enemy.kind,enemy.tint));return ENEMY_IMAGES.get(key);}
 function renderBattleHud(){
@@ -159,13 +162,14 @@ function renderParty(){
 function boonChips(limit=Infinity){const entries=Object.entries(run.boons);if(!entries.length)return '<span class="tiny muted">未获得祝福。旅途才刚刚开始。</span>';return entries.slice(0,limit).map(([id,n])=>{const boon=BOONS.find(x=>x.id===id);return boon?`<span class="boon-chip" title="${e(boon.desc)} 已获取 ${n} 次">${icon(boon.icon,12)} ${boon.name}${n>1?`<b>×${n}</b>`:''}</span>`:'';}).join('')+(entries.length>limit?`<span class="boon-chip">+${entries.length-limit}</span>`:'');}
 function updateGame(){
   const actual=run;
-  try{if(ui.presentation)run=ui.presentation;drawGame();}
+  try{if(navigation)run=navigation.before;else if(ui.presentation)run=ui.presentation;drawGame();}
   finally{run=actual;}
 }
 function drawGame(){
   if(!run)return;
   const battle=run.phase==='battle';
-  ROOT.classList.toggle('battle-mode',battle);
+  ROOT.classList.toggle('battle-mode',battle);ROOT.classList.toggle('explore-mode',!battle);
+  ROOT.classList.toggle('navigation-busy',!!navigation);
   const focused=document.activeElement?.closest('.hud-dock [data-action]');
   const focusKey=focused?{action:focused.dataset.action,id:focused.dataset.id,skill:focused.dataset.skill}:null;
   document.getElementById('top-stats').innerHTML=`<span class="level">${icon('star',15)} LV.<b>${run.level}</b></span><span class="gold">${icon('drop',14)} <b>${run.gold}</b> 星砂</span><span class="steps">${run.steps} 步</span><span class="seed">SEED ${e(run.seed)}</span>`;
@@ -232,7 +236,7 @@ function eventModal(){
   return dialog(data.title,data.en,data.text,`<div class="event-art"><img src="${svgUri(objectSvg(type,'#c2b0e8'))}" alt="${data.title}"></div><div class="choice-stack">${choices}<button class="ghost" data-action="event" data-choice="leave">暂时离开 ${icon('arrow',14)}</button></div>`,{narrow:true,closable:false});
 }
 function endModal(){const win=run.ending==='victory';return dialog(win?'终有黎明。':'星灯，暂时熄灭了。',win?'THE END OF THE ECLIPSE':'EVERY END IS A BEGINNING',win?'你走过没有月亮的夜晚，也把星光带到了故事的尽头。':'迷宫会改变形状，而你会带着新的想法，再一次出发。',`<div class="result-icon">${win?'☼':'☾'}</div><div class="result-party">${run.party.map(p=>`<img src="${PORTRAITS[p.job]}" alt="${e(p.name)}">`).join('')}</div><div class="result-stats"><span><strong>B${run.floor}</strong><small>最深抵达</small></span><span><strong>${run.level}</strong><small>队伍等级</small></span><span><strong>${run.battles}</strong><small>战斗胜利</small></span><span><strong>${run.steps}</strong><small>探索步数</small></span></div><div class="center-actions"><button class="primary" data-action="again">重新点亮星灯 ${icon('arrow',18)}</button><button class="secondary" data-action="object-motion">${icon('star',18)} 物件动画：${run.objectMotion===true?'开启（系统减弱动态优先）':'关闭（静态舒适）'}</button><button class="secondary" data-action="return-title">回到序章</button></div><p class="modal-hint">SEED ${e(run.seed)} · 新一局将清空所有等级、武器、技能强化与祝福。</p>`,{closable:false,extra:win?'result-victory':''});}
-function helpModal(){return dialog('先布置，再出手','FIELD GUIDE / v0.3','独立 CD · 我方准备 → 全队攻击 → 敌方行动',`<div class="help-grid"><section class="help-block"><h3>01 / 准备阶段</h3><p>点击人物状态卡切换队员，连续使用不同的就绪技能。「详情」查看完整说明，「道具」切换到即时补给。同一回合可以先破甲、再火冰融解、再治疗。技能没有 MP，使用后进入独立冷却；冷却只随完整战斗回合减少。CD 3 的技能在 R1 用过后，R4 可再次使用。</p></section><section class="help-block"><h3>02 / 全队攻击</h3><p>按 Enter / 1 或点击全队攻击，未防御的存活队员各攻击一次，然后敌方按阵容顺序行动，不看速度。按 2 切换当前队员防御：本轮承伤 -65%，但不普通攻击；仍可释放技能。3～7 使用当前队员技能，[ / ] 切换队员。</p></section><section class="help-block"><h3>03 / 物品与时钟</h3><p>急救药、时砂滴、破咒盐都是有限即时补给，不会让怪物行动、移动或使状态过期。时砂和加速不能无限刷新：冷却操纵技能不互刷，本回合已经用过的技能最低保留 1 CD。武器的回合末治疗每轮只触发一次。</p></section><section class="help-block"><h3>04 / 巡逻与警报</h3><p>普通敌群沿固定路线前进，即使玩家靠近也不自动追击。只有鸣月哨祭的警报成功，路径 8 格内普通敌群才向警报地点移动 6 拍；杀死或封头可阻断。精英始终定位玩家，每拍追一格。巡逻路过战场也可能意外加入；新增援下一轮才行动。</p></section><section class="help-block"><h3>05 / 战前工具</h3><p>T 打开工具：诱导铃在当前格留 5 拍诱饵（普通怪 / 路径 6 格），眠缚铃停住已探明 4 格内的一队（普通 3 拍、精英 1 拍），静音粉阻断未来 6 拍警报。使用不耗时，但后续移动、等待、完整战斗回合消耗持续时间。精英免疫诱导。下层有限补充。</p></section><section class="help-block"><h3>06 / 预兆与舒适</h3><p>Boss 预兆保留完整准备窗口，按提示驱散、封头、清理侍从或多段命中。预兆取代该轮普通攻击；不能取消时防御止损。技能发生血线变化后，下一准备回合才预告。第 13 回合起逐渐暴走。战斗演出可跳过；系统减弱动态关闭位移动画，不影响结算。</p></section></div><div class="help-note">W/S 前后、A/D 转向、Q/E 平移、Space 等待、F 调查、M 地图（可显示已探索巡线）。1～3 人、五层、武器唯一装备槽与单一固有效果不变。v0.3.1 沿用 v0.3 存档；v0.2 存档未删除。</div>`,{wide:true});}
+function helpModal(){return dialog('先布置，再出手','FIELD GUIDE / v0.3','独立 CD · 我方准备 → 全队攻击 → 敌方行动',`<div class="help-grid"><section class="help-block"><h3>01 / 准备阶段</h3><p>点击人物状态卡切换队员，连续使用不同的就绪技能。「详情」查看完整说明，「道具」切换到即时补给。同一回合可以先破甲、再火冰融解、再治疗。技能没有 MP，使用后进入独立冷却；冷却只随完整战斗回合减少。CD 3 的技能在 R1 用过后，R4 可再次使用。</p></section><section class="help-block"><h3>02 / 全队攻击</h3><p>按 Enter / 1 或点击全队攻击，未防御的存活队员各攻击一次，然后敌方按阵容顺序行动，不看速度。按 2 切换当前队员防御：本轮承伤 -65%，但不普通攻击；仍可释放技能。3～7 使用当前队员技能，[ / ] 切换队员。</p></section><section class="help-block"><h3>03 / 物品与时钟</h3><p>急救药、时砂滴、破咒盐都是有限即时补给，不会让怪物行动、移动或使状态过期。时砂和加速不能无限刷新：冷却操纵技能不互刷，本回合已经用过的技能最低保留 1 CD。武器的回合末治疗每轮只触发一次。</p></section><section class="help-block"><h3>04 / 巡逻与警报</h3><p>普通敌群沿固定路线前进，即使玩家靠近也不自动追击。只有鸣月哨祭的警报成功，路径 8 格内普通敌群才向警报地点移动 6 拍；杀死或封头可阻断。精英始终定位玩家，每拍追一格。巡逻路过战场也可能意外加入；新增援下一轮才行动。</p></section><section class="help-block"><h3>05 / 战前工具</h3><p>T 打开工具：诱导铃在当前格留 5 拍诱饵（普通怪 / 路径 6 格），眠缚铃停住已探明 4 格内的一队（普通 3 拍、精英 1 拍），静音粉阻断未来 6 拍警报。使用不耗时，但后续移动、等待、完整战斗回合消耗持续时间。精英免疫诱导。下层有限补充。</p></section><section class="help-block"><h3>06 / 预兆与舒适</h3><p>Boss 预兆保留完整准备窗口，按提示驱散、封头、清理侍从或多段命中。预兆取代该轮普通攻击；不能取消时防御止损。技能发生血线变化后，下一准备回合才预告。第 13 回合起逐渐暴走。战斗演出可跳过；系统减弱动态关闭位移动画，不影响结算。</p></section></div><div class="help-note">W/S 前后、A/D 转向、Q/E 平移、Space 等待、F 调查、M 地图（可显示已探索巡线）。1～3 人、五层、武器唯一装备槽与单一固有效果不变。探索菜单可选择标准 / 舒缓 / 淡入视角，北向地图保持固定。v0.3.2 沿用 v0.3 存档；v0.2 存档未删除。</div>`,{wide:true});}
 function classesModal(){return dialog('六种星火，六种答案','JOB COMPENDIUM','明确分工，保留弱点。独行需要有限补给与局内技能弥补短板。',`<div class="choice-stack">${Object.values(JOBS).map(j=>`<button class="event-choice" data-action="class-detail" data-job="${j.id}"><span style="height:48px;width:48px;overflow:hidden;position:relative;border-radius:7px;background:${j.color}11;flex-shrink:0"><img src="${PORTRAITS[j.id]}" style="width:80px;max-width:none;position:absolute;left:-16px;top:-18px" alt=""></span><span class="choice-copy"><strong style="color:${j.color}">${j.name} · ${j.person}</strong><small>${j.role} / ${j.passiveDesc}</small></span>${icon('right',16)}</button>`).join('')}</div>`);}
 function heroModal(id,isClass=false){
   const hero=isClass?null:run.party.find(p=>p.id===id),job=JOBS[isClass?id:hero.job],stats=hero?heroStats(hero):job;
@@ -259,7 +263,8 @@ function battleIntelModal(){
   return dialog('战况','TACTICS',`第 ${run.battle.round} 回合 · 查看信息不推进时间`,body,{narrow:true});
 }
 
-function menuModal(){return dialog('星灯仍在这里','PAUSE & REFLECT',`SEED ${e(run.seed)} · 第 ${run.floor} 层 · 本局已自动保存`,`<div class="menu-choices"><button class="secondary" data-action="close">${icon('arrow',18)} 继续探索</button><button class="secondary" data-action="inventory">${icon('bag',18)} 查看装备与祝福</button><button class="secondary" data-action="journal">${icon('clock',18)} 行动记录</button><button class="secondary" data-action="help">${icon('help',18)} 查看冒险指南</button><button class="secondary" data-action="comfort">${icon('eye',18)} 舒适视角：${run.comfort!==false?'开启（即时转向 / 无闪屏）':'关闭（平滑移动）'}</button><button class="secondary" data-action="object-motion">${icon('star',18)} 物件动画：${run.objectMotion===true?'开启（系统减弱动态优先）':'关闭（静态舒适）'}</button><button class="secondary" data-action="return-title">${icon('moon',18)} 返回序章（保留本局存档）</button><button class="secondary danger-text" data-action="restart-confirm">${icon('exit',18)} 放弃本局，重新编队</button></div>`,{narrow:true});}
+function viewSettingsModal(){return dialog('探索视角','VIEW & ORIENTATION','固定视线，不摇头、不倾斜。移动与转向使用同一种过渡。',`<div class="menu-choices view-modes">${Object.entries(VIEW_MODES).map(([id,m])=>`<button class="secondary" data-action="view-mode" data-mode="${id}" aria-pressed="${viewMode(run)===id}"><strong>${m.name}</strong><span>${m.desc}</span></button>`).join('')}</div><p class="tiny muted">系统开启“减弱动态”时，自动停用空间过渡，保留方向提示和北向地图。舒缓不一定适合每个人，可比较标准与淡入模式。</p>`,{narrow:true});}
+function menuModal(){return dialog('星灯仍在这里','PAUSE & REFLECT',`SEED ${e(run.seed)} · 第 ${run.floor} 层 · 本局已自动保存`,`<div class="menu-choices"><button class="secondary" data-action="close">${icon('arrow',18)} 继续探索</button><button class="secondary" data-action="inventory">${icon('bag',18)} 查看装备与祝福</button><button class="secondary" data-action="journal">${icon('clock',18)} 行动记录</button><button class="secondary" data-action="help">${icon('help',18)} 查看冒险指南</button><button class="secondary" data-action="view-settings">${icon('eye',18)} 探索视角 · ${VIEW_MODES[viewMode(run)]?.name||'标准步进'}</button><button class="secondary" data-action="object-motion">${icon('star',18)} 物件动画：${run.objectMotion===true?'开启（系统减弱动态优先）':'关闭（静态舒适）'}</button><button class="secondary" data-action="return-title">${icon('moon',18)} 返回序章（保留本局存档）</button><button class="secondary danger-text" data-action="restart-confirm">${icon('exit',18)} 放弃本局，重新编队</button></div>`,{narrow:true});}
 function renderModal(){
   let html='',key='';
   if(run?.phase==='reward'){html=rewardModal();key=`reward-${run.rewards.map(r=>r.id||r.skillId||r.weapon?.uid).join('-')}-${ui.rewardIndex}`;}
@@ -276,6 +281,7 @@ function renderModal(){
     else if(ui.modal==='field'&&run)html=fieldModal();
     else if(ui.modal==='supply-detail'&&run)html=dialog('即时道具','SUPPLIES','使用不耗回合；返回后选择道具与目标。',`<div class="choice-stack">${['tonic','ether','salt'].map(id=>`<section class="intel-block"><h3>${SKILLS[id].name} ×${run.supplies[id]}</h3><p>${SKILLS[id].desc}</p></section>`).join('')}</div>`,{narrow:true});
     else if(ui.modal==='battle-intel'&&run?.phase==='battle')html=battleIntelModal();
+    else if(ui.modal==='view-settings'&&run)html=viewSettingsModal();
     else if(ui.modal==='menu'&&run)html=menuModal();
     else if(ui.modal==='equip-bag'&&run){const w=run.inventory.find(w=>w.uid===ui.modalData);if(w)html=dialog(e(w.name),'CHANGE YOUR WEAPON',`「${e(w.effectName)}」${e(w.desc)}`,equipChoices(w,'equip-bag'));}
     else if(ui.modal==='confirm-start')html=dialog('开始一段新的旅程？','A NEW BEGINNING','新的冒险会覆盖当前存档。旧局的等级、武器、祝福和技能强化都不会保留。',`<div class="center-actions"><button class="secondary" data-action="close">保留旧局</button><button class="primary" data-action="confirm-start">从零开始 ${icon('arrow',18)}</button></div>`,{narrow:true});
@@ -299,19 +305,47 @@ function goTitle({clear=false}={}){
   if(clear){try{localStorage.removeItem(SAVE_KEY);}catch{}}else save();
   run=null;ui.modal=null;ui.modalData=null;ui.pendingSkill=null;ui.rewardIndex=null;ui.busy=false;ui.presentation=null;ui.playback=null;ui.animationToken++;ui.seedDraft='';modalKey='';renderLanding();
 }
-function mutateExplore(action){
-  if(!run||run.phase!=='explore'||ui.modal||ui.busy)return;
-  const before=run.phase;
+function finishNavigation({discardQueue=false}={}){
+  if(discardQueue)queuedMove=null;
+  renderer?.finishTravel();
+}
+function mutateExplore(action,{repeat=false}={}){
+  if(!run||ui.modal||ui.busy)return;
+  if(navigation){
+    // Only one deliberate tap may wait. Key-repeat is never queued and cannot create a drift tail.
+    if(!repeat&&!queuedMove&&NAV_ACTIONS.includes(action)&&run.phase==='explore')queuedMove=action;
+    return;
+  }
+  if(run.phase!=='explore')return;
+  if(repeat&&action.startsWith('turn-'))return;
+  const before=structuredClone(run);
   let ok;
   if(action==='turn-left')ok=turn(run,-1);
   else if(action==='turn-right')ok=turn(run,1);
   else if(action==='interact')ok=interact(run);
   else if(action==='wait')ok=waitTurn(run);
   else ok=move(run,{'forward':'forward','back':'back','strafe-left':'left','strafe-right':'right'}[action]);
-  if(!ok){if(action==='interact')toast('这里没有可以调查的事物。');else if(!action.startsWith('turn'))toast('前方是坚实的石壁。');return;}
-  if(run.phase==='battle'&&before!=='battle'){AUDIO.sfx('battle');ui.selectedEnemy=null;ui.pendingSkill=null;ui.suppliesOpen=false;}
-  else if(run.phase==='reward')AUDIO.sfx('magic');else AUDIO.sfx('move');
-  save();updateGame();
+  if(!ok){lastNavigationCue=moveCue('blocked',before,run);if(action==='interact')toast('这里没有可以调查的事物。');else if(!action.startsWith('turn'))toast('前方是坚实的石壁。');updateGame();return;}
+  lastNavigationCue=moveCue(action,before,run);
+  save();
+  const actual=run;
+  const arrived=()=>{
+    if(run!==actual)return;
+    navigation=null;
+    if(before.floor!==run.floor)navigationTrail=[];
+    if(before.x!==run.x||before.y!==run.y)navigationTrail=[...navigationTrail,{x:run.x,y:run.y,floor:run.floor}].slice(-6);
+    if(run.phase==='battle'){queuedMove=null;AUDIO.sfx('battle');ui.selectedEnemy=null;ui.pendingSkill=null;ui.suppliesOpen=false;}
+    else if(run.phase==='reward')AUDIO.sfx('magic');
+    updateGame();
+    const next=queuedMove;queuedMove=null;
+    if(next&&!ui.modal&&run.phase==='explore')mutateExplore(next);
+  };
+  if(NAV_ACTIONS.includes(action)&&before.floor===run.floor){
+    navigation={before,action};
+    if(renderer?.beginTravel(before,run,action,arrived)){AUDIO.sfx('move');updateGame();return;}
+    navigation=null;
+  }
+  arrived();
 }
 function finishPlayback(){
   document.getElementById('combat-skip')?.remove();
@@ -337,7 +371,7 @@ async function playFrames(before,frames){
   }finally{if(token===ui.animationToken&&run===actual)finishPlayback();}
 }
 function useSkill(id,target=null){
-  if(!run||run.phase!=='battle'||ui.busy||ui.modal)return;
+  if(!run||run.phase!=='battle'||ui.busy||ui.modal||navigation)return;
   const hero=activeHero(run);if(!hero)return;const skill=effectiveSkill(hero,id);
   if(id!=='escape'&&skill?.target==='ally'&&!target){ui.pendingSkill=id;updateGame();return;}
   const targetId=target||(run.battle.enemies.some(p=>p.id===ui.selectedEnemy&&p.hp>0)?ui.selectedEnemy:null)||run.battle.enemies.find(p=>p.hp>0)?.id;
@@ -351,6 +385,7 @@ function useSkill(id,target=null){
 function handleAction(button){
   const action=button.dataset.action;
   if(button.disabled)return;
+  if(navigation&&!NAV_ACTIONS.includes(action)&&action!=='sound')finishNavigation({discardQueue:true});
   if(action==='skip-animation'){finishPlayback();return;}
   if(ui.busy&&action!=='sound')return;
   if(action==='job'){
@@ -371,7 +406,7 @@ function handleAction(button){
   if(action==='help'){setModal('help');return;}
   if(action==='classes'){setModal('classes');return;}
   if(action==='class-detail'){setModal('class',button.dataset.job);return;}
-  if(action==='map'||action==='inventory'||action==='menu'||action==='field'||action==='journal'){if(run)setModal(action);return;}
+  if(action==='map'||action==='inventory'||action==='menu'||action==='field'||action==='journal'||action==='view-settings'){if(run)setModal(action);return;}
   if(action==='return-title'){goTitle();return;}
   if(action==='again'){goTitle({clear:true});return;}
   if(action==='restart-confirm'){setModal('confirm-abandon');return;}
@@ -379,7 +414,7 @@ function handleAction(button){
   if(['forward','back','turn-left','turn-right','strafe-left','strafe-right','interact','wait'].includes(action)){mutateExplore(action);return;}
   if(!run)return;
   if(action==='object-motion'){run.objectMotion=run.objectMotion!==true;modalKey='';save();updateGame();return;}
-  if(action==='comfort'){run.comfort=run.comfort===false;modalKey='';save();updateGame();return;}
+  if(action==='view-mode'&&Object.hasOwn(VIEW_MODES,button.dataset.mode)){run.viewMode=button.dataset.mode;run.comfort=true;modalKey='';save();updateGame();return;}
   if(action==='patrol-toggle'){ui.showPatrol=!ui.showPatrol;modalKey='';renderModal();return;}
   if(action==='field-use'){
     const result=useFieldTool(run,button.dataset.tool,document.getElementById('field-pack')?.value||null);
@@ -435,12 +470,14 @@ document.addEventListener('keydown',event=>{
   }
   if(ui.busy){if(event.key==='Escape'){event.preventDefault();finishPlayback();}return;}
   if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
+  if(navigation&&['Escape','m','M','t','T','i','I','h','H'].includes(event.key))finishNavigation({discardQueue:true});
   if(event.key==='Escape'){if(MODAL.innerHTML)closeModal();else if(ui.pendingSkill){ui.pendingSkill=null;updateGame();}else if(run)setModal('menu');return;}
   if(MODAL.innerHTML||!run)return;
   const key=event.key.toLowerCase();
   if(key==='m'){event.preventDefault();setModal('map');return;}
   if(key==='t'&&run.phase==='explore'){event.preventDefault();setModal('field');return;}
   if((key==='enter'||key===' ')&&document.activeElement?.matches('button,summary,a'))return;
+  if(navigation&&run.phase!=='explore')return;
   if(run.phase==='battle'&&key==='enter'){event.preventDefault();useSkill('attack');return;}
   if(run.phase==='battle'&&['[',']'].includes(key)){event.preventDefault();const living=run.party.filter(p=>p.hp>0),i=living.findIndex(p=>p.id===run.battle.active);selectHero(run,living[(i+(key===']'?1:living.length-1))%living.length].id);ui.pendingSkill=null;ui.suppliesOpen=false;save();updateGame();ROOT.querySelector('.party-card.active')?.focus({preventScroll:true});return;}
   if(key==='i'){event.preventDefault();setModal('inventory');return;}
@@ -448,9 +485,10 @@ document.addEventListener('keydown',event=>{
   if(run.phase==='battle'&&/^[1-9]$/.test(key)){event.preventDefault();const p=activeHero(run);const id=p?['attack','guard',...p.skills][Number(key)-1]:null;if(id)useSkill(id);return;}
   if(run.phase!=='explore')return;
   const action={w:'forward',arrowup:'forward',s:'back',arrowdown:'back',a:'turn-left',arrowleft:'turn-left',d:'turn-right',arrowright:'turn-right',q:'strafe-left',e:'strafe-right',f:'interact',enter:'interact',' ':'wait'}[key];
-  if(action){event.preventDefault();const now=performance.now();if(now-ui.lastMove<140&&event.repeat)return;ui.lastMove=now;mutateExplore(action);}
+  if(action){event.preventDefault();const now=performance.now();if(now-ui.lastMove<140&&event.repeat)return;ui.lastMove=now;mutateExplore(action,{repeat:event.repeat});}
 });
 window.addEventListener('beforeunload',save);
 window.addEventListener('pagehide',save);
-document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){finishNavigation({discardQueue:true});save();}});
+window.addEventListener('blur',()=>finishNavigation({discardQueue:true}));
 renderLanding();

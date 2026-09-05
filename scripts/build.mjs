@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 // A deliberately tiny closed-world bundler for the local ES modules.
 // It supports only named imports and declarations used by this project. No eval or network.
-const modules=['data','rng','world','engine','art','sprite-art','sprite-scene','renderer','audio','app'];
+const modules=['data','rng','world','engine','art','sprite-art','sprite-scene','navigation','renderer','audio','app'];
 let bundle=`(()=>{'use strict';const modules=Object.create(null);const cache=Object.create(null);function require(id){if(cache[id])return cache[id];if(!modules[id])throw Error('Unknown module '+id);const exports=cache[id]={};modules[id](exports,require);return exports;}\n`;
 for(const id of modules){
   let code=await readFile(path.join(root,'src',`${id}.js`),'utf8');
