@@ -1,0 +1,95 @@
+name: Apply verified navigation v0.3.2
+on:
+  push:
+    branches: ['fix/readable-movement-v032']
+    paths: ['.github/view032-*.txt', '.github/view032-delta.json', '.github/workflows/view032-apply.yml']
+permissions:
+  contents: write
+concurrency:
+  group: navigation-v032-staging
+  cancel-in-progress: false
+jobs:
+  apply:
+    if: github.repository == 'geturin/eclipse-labyrinth'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate bounded source edits and apply exact tested files
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json, os
+          def blob(b):
+              return hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()
+          raw = Path('.github/view032-delta.json').read_bytes()
+          assert blob(raw) == '804bc0301bf6f232574681046d5a00f579e2b8a9'
+          data = json.loads(raw)
+          assert data['base'] == '34450da374be12bf48edf230bd791fabc8a669ca'
+          assert data['dist'] == '00a2210b18135578e39a959c62f840b234f21ae1'
+          allowed = {'src/renderer.js','src/app.js','compact.css','scripts/build.mjs','package.json','tests/browser_smoke.py','README.md','AGENTS.md','CHANGELOG.md'}
+          assert set(data['files']) == allowed
+          new = {
+              'src/navigation.js': ('navigation', '7f61058af1489d0a5d9d7e1760831bdc843b50b4'),
+              'tests/navigation.test.mjs': ('unit', 'b391f6a331b1d1bb799eec6308e8ca95cc092af0'),
+              'tests/navigation_browser.py': ('browser', '334fa392da8dc4890d08aba93e75db4ae72a8dc8'),
+              'docs/MOVEMENT032.md': ('doc', 'ea054d143741bfe4e65f15cb444d78b910da29eb'),
+              'docs/movement032-results.json': ('results', '719440f968daaf17c5590a5695b329972cabfc03')
+          }
+          prepared = {}
+          for path, change in data['files'].items():
+              original = Path(path).read_bytes()
+              assert blob(original) == change['before'], path
+              text = original.decode('utf-8')
+              previous = len(text)
+              for start, end, replacement in reversed(change['edits']):
+                  assert 0 <= start <= end <= previous, path
+                  text = text[:start] + replacement + text[end:]
+                  previous = start
+              b = text.encode('utf-8')
+              assert blob(b) == change['after'], path
+              prepared[path] = b
+          temporary = ['.github/view032-delta.json']
+          for path, (name, expected) in new.items():
+              assert not Path(path).exists(), path
+              transport = f'.github/view032-{name}.txt'
+              b = Path(transport).read_bytes()
+              assert blob(b) == expected, path
+              prepared[path] = b
+              temporary.append(transport)
+          for path, b in prepared.items():
+              p = Path(path)
+              p.parent.mkdir(parents=True, exist_ok=True)
+              p.write_bytes(b)
+          for path in temporary:
+              Path(path).unlink()
+          paths = sorted(set(prepared) | set(temporary) | {'dist/index.html'})
+          (Path(os.environ['RUNNER_TEMP'])/'view032-paths.json').write_text(json.dumps(paths))
+          print('All source preconditions and resulting blobs match the local tested build.')
+          PY
+      - run: npm test
+      - run: npm run build
+      - run: npm run verify:dist
+      - name: Commit source and exact static build together without force
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.ref_name }}
+        run: |
+          test "$(git hash-object dist/index.html)" = '00a2210b18135578e39a959c62f840b234f21ae1'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python - <<'PY'
+          from pathlib import Path
+          import json, os, subprocess
+          paths = json.loads((Path(os.environ['RUNNER_TEMP'])/'view032-paths.json').read_text())
+          subprocess.run(['git','add','-A','--',*paths], check=True)
+          PY
+          git commit -m 'fix: readable finite grid travel, orientation cues and compiled v0.3.2'
+          test "$(git ls-remote origin "refs/heads/$TARGET_BRANCH" | cut -f1)" = "$GITHUB_SHA"
+          git push origin "HEAD:$TARGET_BRANCH"
