@@ -58,7 +58,7 @@ test('decoration is deterministic, wall-adjacent, and avoids interactive cells',
     for(const o of a){const x=Math.floor(o.x),y=Math.floor(o.y);assert.equal(d.tiles[y][x],0);assert.ok(!d.events[`${x},${y}`]);assert.ok(!d.landmarks.some(l=>l.x===x&&l.y===y));assert.ok([[0,-1],[1,0],[0,1],[-1,0]].some(([dx,dy])=>d.tiles[y+dy]?.[x+dx]===1));}
   }
 });
-test('world motion remains disabled by default, and its opt-in survives existing v2 saves',()=>{
+test('world motion remains disabled by default, and its opt-in survives v3 saves',()=>{
   const run=createRun(['knight'],'MOTION');assert.notEqual(run.objectMotion,true);run.objectMotion=true;
   const restored=restoreRun(serializeRun(run));assert.equal(restored.objectMotion,true);assert.equal(restored.comfort,true);
 });

@@ -44,6 +44,14 @@
 @media(max-width:400px){.game-shell .stage{height:350px}.tactical-enemies .enemy-card{flex-basis:112px;min-width:112px;max-width:112px}.tactical-skills .description{font-size:10px}.tactical-skills .skill-button strong{font-size:12px}.supply-row button{font-size:10px}.omen-panel>div{gap:5px}.enemy-intel{font-size:10px}.zone-badge{padding:2px 7px}}
 /* Mobile players need the actual skill rules, not desktop-only hover tooltips. */
 @media(max-width:700px){.tactical-skills .skill-button .description{display:block;font-size:10px;line-height:1.5;margin-top:7px;color:#b1b6ca;white-space:normal}.tactical-skills .skill-button{min-height:133px;height:auto;padding-bottom:24px}.tactical-skills .skill-button .hotkey{bottom:7px}}
+/* v0.3: independent cooldown preparation and actor-local combat effects. */
+.hero-tabs{display:flex;gap:7px;margin:10px 0}.hero-tabs>button{flex:1;min-width:0;border:1px solid #b0aed332;border-radius:7px;background:#222a3b;padding:9px 7px;color:#d3cbe5;display:flex;flex-direction:column;gap:4px}.hero-tabs .chosen{border-color:#b6b6ec;background:#3a3754}.hero-tabs small{font-size:10px;color:#adb9c8}.hero-cooldowns{display:block;font-size:9px;color:#b7b6d6;margin-top:9px}.cooldown-skills{grid-template-columns:repeat(auto-fit,minmax(145px,1fr))}.skill-button.cooling{opacity:.58;filter:saturate(.5)}.team-controls{display:flex;gap:9px;justify-content:space-between;align-items:stretch;margin-top:13px;border-top:1px solid #d2c4e51c;padding-top:13px}.team-controls>.primary{flex:1;justify-content:center}.team-controls small{font-size:10px;opacity:.8}.guard-selected{border-color:#9fceaf;background:#314743}.team-phase{gap:6px!important;flex-wrap:wrap;font-size:10px}.team-phase>b{font-size:10px;color:#adb7d1;font-weight:400}.field-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.field-tool{border:1px solid #c2b4e538;border-radius:10px;background:#222738;padding:16px;display:flex;flex-direction:column;gap:14px}.field-tool h3{display:flex;gap:9px;align-items:center;font-size:15px}.field-tool h3 span{margin-left:auto;color:#e8c38d}.field-tool p{font-size:12px;line-height:1.8;color:#b9bfd2;flex:1}.field-tool select{width:100%;margin:7px 0;padding:10px;background:#151c2c;color:#dcd6ee;border:1px solid #c2b4e540;border-radius:5px}.field-tool label{font-size:12px}.help-note .ghost{padding:10px;display:inline-flex}.combat-acting{outline:1px solid #ffe6ab60}.combat-acting .enemy-intent{background:#7a443e;color:#ffe8da}.enemy-card,.party-card{isolation:isolate}.enemy-card[class*="impact-"]::after,.party-card[class*="impact-"]::after{content:"";position:absolute;inset:12%;z-index:5;pointer-events:none;border-radius:45%;opacity:0;animation:local-impact .28s ease-out forwards!important}.impact-slash::after{background:linear-gradient(128deg,transparent 42%,#fff1d9 48%,#ead3aa 50%,transparent 55%);box-shadow:0 0 10px #d9def030}.impact-fire::after,.impact-omen::after{background:radial-gradient(ellipse,#fff4c299,#ff985980 30%,#aa435944 58%,transparent 70%)}.impact-ice::after{background:linear-gradient(55deg,transparent 32%,#bcecfbba 45%,transparent 50%),linear-gradient(130deg,transparent 38%,#c4ddff99 48%,transparent 56%)}.impact-magic::after{border:3px solid #cba7f2;box-shadow:inset 0 0 30px #b98aff66}.impact-shield::after{border:3px double #aacbe8;box-shadow:0 0 18px #95afea88}.impact-heal::after{background:radial-gradient(ellipse,#b4f6cd88,transparent 70%)}.impact-alarm::after{border:4px double #ffb46a;box-shadow:0 0 15px #ffb46a88}
+.comfort-mode .combat-acting.enemy-card .enemy-art img,.combat-acting.enemy-card .enemy-art img{animation:enemy-action .35s ease-out!important}.comfort-mode .combat-acting.party-card .party-face img,.combat-acting.party-card .party-face img{animation:hero-action .35s ease-out!important}.comfort-mode .combat-acting.acting-shield .enemy-art img,.combat-acting.acting-shield .enemy-art img{animation:actor-cast .4s ease-out!important}.comfort-mode .combat-acting.acting-alarm .enemy-art img,.combat-acting.acting-alarm .enemy-art img{animation:actor-cast .4s ease-out!important}
+@keyframes enemy-action{0%,100%{transform:translateY(0) scale(1)}35%{transform:translateY(12px) scale(1.045)}70%{transform:translateY(2px) scale(1.015)}}@keyframes hero-action{0%,100%{transform:translateY(0)}35%{transform:translateY(-7px)}70%{transform:translateY(-2px)}}@keyframes actor-cast{0%,100%{filter:brightness(1)}45%{filter:brightness(1.38)}}@keyframes local-impact{0%{opacity:0;transform:scale(.75)}35%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.15)}}
+@media(max-width:767px){.field-tools{grid-template-columns:1fr}.team-controls{flex-wrap:wrap}.team-controls>.primary{min-width:100%}.hero-tabs small{font-size:9px}.team-phase>b{font-size:8px}.team-phase{max-width:74%}.cooldown-skills{grid-template-columns:repeat(2,minmax(0,1fr))}.team-controls .secondary{width:100%;justify-content:center}.field-tool{gap:9px}.hero-tabs>button{padding:9px 3px}}
+@media(prefers-reduced-motion:reduce){.comfort-mode .combat-acting.enemy-card .enemy-art img,.combat-acting.enemy-card .enemy-art img,.comfort-mode .combat-acting.party-card .party-face img,.combat-acting.party-card .party-face img,.comfort-mode .combat-acting.acting-shield .enemy-art img,.comfort-mode .combat-acting.acting-alarm .enemy-art img{animation:none!important;transform:none!important}.enemy-card[class*="impact-"]::after,.party-card[class*="impact-"]::after{animation:none!important;opacity:.22}.combat-acting{outline:2px solid #ead6a1}}
+
+.combat-skip{position:fixed;right:18px;bottom:max(18px,env(safe-area-inset-bottom));z-index:1500;background:#25243b;border:1px solid #c9b5ef;box-shadow:0 4px 24px #0009;padding:12px 20px}
 
 </style>
 </head>
@@ -55,159 +63,1651 @@
 <script>
 (()=>{'use strict';const modules=Object.create(null);const cache=Object.create(null);function require(id){if(cache[id])return cache[id];if(!modules[id])throw Error('Unknown module '+id);const exports=cache[id]={};modules[id](exports,require);return exports;}
 modules['data']=(exports,require)=>{
-/** All gameplay content is declarative. No art or names from an existing franchise. */
-const VERSION = 2;
-const SAVE_KEY = 'eclipse-labyrinth.run.v2';
-const MAX_FLOOR = 5;
-const DIRECTIONS = [{ x: 0, y: -1, label: '北', short: 'N' }, { x: 1, y: 0, label: '东', short: 'E' }, { x: 0, y: 1, label: '南', short: 'S' }, { x: -1, y: 0, label: '西', short: 'W' }];
-const FLOORS = [
-  { name: '遗忘的回廊', jp: '忘却の回廊', color: '#8ca3ed', lore: '你再次醒来。只有月亮记得，你曾经来过这里。' },
-  { name: '磷光庭园', jp: '燐光の庭', color: '#67d8c4', lore: '没有阳光的庭园里，花依旧向着某个方向盛开。' },
-  { name: '绯色礼拜堂', jp: '緋の礼拝堂', color: '#e893a8', lore: '祈祷早已停息，钟声却还在回响。' },
-  { name: '坠星书库', jp: '墜星の書庫', color: '#c3a6f1', lore: '书页间夹着某个人未曾抵达的明天。' },
-  { name: '无月王座', jp: '月なき玉座', color: '#edc686', lore: '故事的最后一页，只为还在前进的人留白。' },
-];
-// Two starting skills; advanced arts are discovered inside this run, never inherited.
-const JOBS = {
-  knight: {id:'knight',name:'星刃骑士',jp:'星剣士',person:'希露菲',roman:'SYLPHIE',role:'承伤 · 破甲 · 反击',color:'#9caef9',weapon:'moonblade',hp:142,mp:30,atk:15,mag:5,def:12,spd:8,skills:['cleave','aegis'],advanced:['counterwall','intercept','starfall'],growth:'atk',passive:'不退之盾',passiveDesc:'物理承伤减少 18%。壁垒能吸引单体攻击；没有治疗能力。',synopsis:'保护脆弱的施法者，用破甲创造突破口。反击与拦截要靠本局探索习得。'},
-  mage: {id:'mage',name:'焰咒魔导师',jp:'焔の魔導士',person:'莉瑟',roman:'LYS',role:'弱点 · 元素 · 蓄能',color:'#eda58c',weapon:'emberstaff',hp:76,mp:42,atk:6,mag:24,def:3,spd:11,skills:['fire','frost'],advanced:['nova','focuscast','thunderchain'],growth:'mag',passive:'元素学识',passiveDesc:'技能命中元素弱点时额外增伤 20%。普攻仅使用 55% 魔力；没有治疗或护盾。',synopsis:'MP 是输出窗口，不是无限燃料。蓄能爆发、连锁法术与群攻构筑各有用途。'},
-  shrine: {id:'shrine',name:'祈星巫女',jp:'星詠みの巫女',person:'澪',roman:'MIO',role:'治疗 · 净化 · 复苏',color:'#9dd5c7',weapon:'bellwand',hp:90,mp:44,atk:6,mag:19,def:5,spd:12,skills:['mend','cleanse'],advanced:['ray','revive','sanctuary'],growth:'mag',passive:'救护祈愿',passiveDesc:'主动治疗量提高 15%。攻击不再附带免费治疗；攻击魔法需在局内学习。',synopsis:'负责维持队伍，而不是另一个输出职业。治疗与净化是不同的行动，必须判断优先级。'},
-  ninja: {id:'ninja',name:'影缝忍者',jp:'影縫い',person:'紫苑',roman:'SHION',role:'封印 · 剧毒 · 追击',color:'#ccabea',weapon:'shadowfang',hp:84,mp:34,atk:18,mag:8,def:4,spd:19,skills:['venom','seal'],advanced:['disarm','execute','phantom'],growth:'atk',passive:'猎影',passiveDesc:'对负面状态目标增伤 20%。封头压制施法，封腕压制重击；没有自疗。',synopsis:'用封印破坏敌方配合，之后再追击破绽。控制有抗性窗口，不能无限封锁同一目标。'},
-  chrono: {id:'chrono',name:'刻时术士',jp:'刻の術師',person:'伊欧',roman:'IO',role:'速度 · 驱散 · 延期',color:'#e8c783',weapon:'clockstaff',hp:86,mp:40,atk:6,mag:17,def:5,spd:15,skills:['pulse','haste'],advanced:['unweave','delay','echoTime'],growth:'mag',passive:'时间利息',passiveDesc:'每次行动开始回复 1 MP。没有治疗；高阶技能可驱散强化、延后预兆。',synopsis:'让关键队友先出手，把危险回合拆开。延后一次不等于取消，需要真正完成应对。'},
-  reaver: {id:'reaver',name:'血誓剑士',jp:'血誓の剣士',person:'绯音',roman:'AKANE',role:'背水 · 换血 · 斩杀',color:'#e389a3',weapon:'bloodedge',hp:124,mp:26,atk:23,mag:4,def:4,spd:10,skills:['rend','bloodpact'],advanced:['reap','revenge','laststand'],growth:'atk',passive:'赤月誓约',passiveDesc:'生命低于 50% 时伤害提高 30%。只有指定技能与武器能吸血，不再被动全伤害吸血。',synopsis:'保留伤口以换取爆发，但不能用伤害解决一切。高压回合需要同伴保护或及时止损。'},
-};
-const SKILLS = {
-  attack:{id:'attack',name:'普通攻击',icon:'sword',cost:0,power:.85,target:'enemy',kind:'attack',desc:'低效能攻击，回复 1 MP。施法职业仅以 55% 魔力计算，不能代替法术。'},
-  guard:{id:'guard',name:'防御',icon:'shield',cost:0,target:'self',kind:'guard',desc:'直到下次行动承伤减少 65%，回复 3 MP。能应对多数预兆，但无法解除敌方强化。'},
-  tonic:{id:'tonic',name:'急救药',icon:'heart',cost:0,target:'ally',kind:'itemHeal',supply:'tonic',desc:'消耗队伍 1 份急救药，治疗存活队友 35% 生命。不会复活；占用行动。'},
-  ether:{id:'ether',name:'以太滴',icon:'drop',cost:0,target:'ally',kind:'itemMp',supply:'ether',desc:'消耗队伍 1 份以太滴，回复一名存活队友 14 MP；占用行动。'},
-  salt:{id:'salt',name:'破咒盐',icon:'star',cost:0,target:'enemy',kind:'dispel',supply:'salt',dispel:1,desc:'消耗队伍 1 份破咒盐，移除敌人 1 个可驱散强化；用于针对结界预兆。'},
-  cleave:{id:'cleave',name:'碎星斩',icon:'sword',cost:5,power:1.1,target:'enemy',kind:'physical',status:'break',turns:3,desc:'110% 物理伤害并破甲 3 次行动；物理承伤 +30%，穿透月铠。'},
-  aegis:{id:'aegis',name:'星纹壁垒',icon:'shield',cost:7,target:'self',kind:'aegis',desc:'本回合全队减伤 40%，自身吸引单体攻击 2 次行动。不恢复生命。'},
-  counterwall:{id:'counterwall',name:'镜盾反阵',icon:'shield',cost:9,target:'self',kind:'counter',minFloor:1,desc:'自身减伤 50%，本回合每次被直接命中反击 110% 攻击。反击计入破势次数。'},
-  intercept:{id:'intercept',name:'绝对拦截',icon:'shield',cost:11,target:'allies',kind:'intercept',minFloor:2,desc:'本回合全队减伤 60% 并免疫新异常；不提供治疗，保护在回合结算后消失。'},
-  starfall:{id:'starfall',name:'星陨剑阵',icon:'star',cost:13,power:1.3,target:'enemies',kind:'physical',status:'break',turns:2,minFloor:3,desc:'全体 130% 物理伤害并破甲，结束后自身获得一次反击。'},
-  fire:{id:'fire',name:'绯焰',icon:'flame',cost:6,power:1.65,target:'enemy',kind:'magic',element:'fire',status:'burn',turns:3,desc:'165% 火伤并燃烧 3 次行动。持续伤害基于施法者能力，不能按 Boss 总生命偷取巨额伤害。'},
-  frost:{id:'frost',name:'霜华',icon:'ice',cost:6,power:1.45,target:'enemy',kind:'magic',element:'ice',status:'slow',turns:2,desc:'145% 冰伤并迟缓；命中燃烧目标触发融解 +50%，并消耗燃烧。'},
-  nova:{id:'nova',name:'红莲终曲',icon:'flame',cost:14,power:1.3,target:'enemies',kind:'magic',element:'fire',status:'burn',turns:2,minFloor:1,desc:'对全体敌人造成 130% 火伤并燃烧。用于拆解护卫和支援者的小队。'},
-  focuscast:{id:'focuscast',name:'双重咏唱',icon:'star',cost:4,target:'self',kind:'focus',minFloor:2,desc:'下一个攻击法术变为两次独立命中，各造成 90% 伤害。每次命中分别计入破势。'},
-  thunderchain:{id:'thunderchain',name:'雷锁连环',icon:'star',cost:12,power:.8,hits:3,target:'enemy',kind:'magic',element:'light',minFloor:3,desc:'连续 3 次 80% 光伤。多段命中用于打破需要连击的预兆。'},
-  mend:{id:'mend',name:'缝光祈愿',icon:'heart',cost:6,power:1,target:'ally',kind:'heal',desc:'治疗一名队友：魔力 × 1.65 + 12。不附赠净化或输出。'},
-  cleanse:{id:'cleanse',name:'净铃',icon:'drop',cost:5,target:'allies',kind:'cleanse',desc:'解除全队异常；不回复生命。何时净化、何时治疗需要分开判断。'},
-  ray:{id:'ray',name:'月光裁决',icon:'star',cost:7,power:1.35,target:'enemy',kind:'magic',element:'light',dispel:1,status:'marked',turns:2,minFloor:1,desc:'135% 光伤，移除 1 个强化并施加星标。习得后才获得专用攻击法术。'},
-  revive:{id:'revive',name:'晨星归还',icon:'heart',cost:14,target:'ally',kind:'revive',minFloor:1,desc:'复活倒下的队友至 35% 生命；目标存活时治疗 35%。'},
-  sanctuary:{id:'sanctuary',name:'无垢圣域',icon:'flower',cost:14,target:'allies',kind:'sanctuary',minFloor:3,desc:'治疗全队并解除异常，本回合免疫新异常。与净铃、单体治疗承担不同职责。'},
-  venom:{id:'venom',name:'紫雾双刃',icon:'venom',cost:5,power:.85,target:'enemy',kind:'physical',status:'poison',turns:3,desc:'85% 物理伤害并中毒 3 次行动。毒伤基于施术者攻击，毒与破甲为后续追击铺路。'},
-  seal:{id:'seal',name:'封头·缄默',icon:'venom',cost:6,target:'enemy',kind:'seal',status:'headbind',turns:2,desc:'封头 2 次行动：施法、治疗和强化改为低效普攻。解除后 2 回合内不能再封同部位。'},
-  disarm:{id:'disarm',name:'封腕·断弦',icon:'sword',cost:7,power:.75,target:'enemy',kind:'physical',status:'armbind',turns:2,minFloor:1,desc:'75% 伤害并封腕，压制重击、猎杀和群体物理技。预兆仍需按提示应对。'},
-  execute:{id:'execute',name:'影缝·三闪',icon:'sword',cost:11,power:.65,hits:3,target:'enemy',kind:'physical',exploit:true,minFloor:2,desc:'3 次 65% 物理伤害，每种负面状态增伤 15%（最高 60%）。多段攻击可破势。'},
-  phantom:{id:'phantom',name:'残影诱饵',icon:'moon',cost:8,target:'self',kind:'phantom',minFloor:3,desc:'本回合吸引单体攻击，并完全闪避接下来的两次直接命中。不治疗，不回避持续伤害。'},
-  pulse:{id:'pulse',name:'时空脉冲',icon:'clock',cost:5,power:.9,target:'enemy',kind:'magic',status:'slow',turns:3,desc:'90% 魔法伤害并迟缓 3 次行动，改变下一轮行动顺序。'},
-  haste:{id:'haste',name:'加速咏唱',icon:'clock',cost:6,target:'ally',kind:'haste',desc:'一名队友获得 3 次行动迅捷：速度 +50%，伤害 +10%。顺序在下一回合重排。'},
-  unweave:{id:'unweave',name:'术式解体',icon:'clock',cost:7,target:'enemy',kind:'dispel',dispel:2,minFloor:1,desc:'移除目标最多 2 个可驱散强化。解除结界能取消相应预兆，不依赖补给。'},
-  delay:{id:'delay',name:'延宕一刻',icon:'clock',cost:10,target:'enemy',kind:'delay',minFloor:2,desc:'延后目标当前预兆 1 回合（每个预兆仅一次）；普通敌人跳过下一次行动，之后 2 回合免疫。'},
-  echoTime:{id:'echoTime',name:'昨日回声',icon:'link',cost:10,target:'ally',kind:'echoTime',minFloor:3,desc:'队友下一次攻击技能追加一次 60% 强度的施放，随后消耗。额外命中可破势。'},
-  rend:{id:'rend',name:'绯红裂刃',icon:'sword',cost:6,power:1.55,target:'enemy',kind:'physical',drain:.2,desc:'155% 物理伤害并吸取伤害的 20%。不会替其他队员治疗。'},
-  bloodpact:{id:'bloodpact',name:'血之契约',icon:'heart',cost:0,target:'self',kind:'bloodpact',desc:'消耗生命上限 18%（至少留 1），回复 8 MP，获得 3 次行动狂热。'},
-  reap:{id:'reap',name:'赤月收割',icon:'moon',cost:13,power:1.2,target:'enemies',kind:'physical',drain:.12,minFloor:1,desc:'全体 120% 物理伤害，吸取 12% 伤害。对落单目标不如单体技能。'},
-  revenge:{id:'revenge',name:'伤痕偿还',icon:'sword',cost:10,power:1.35,target:'enemy',kind:'physical',revenge:true,minFloor:2,desc:'基础 135% 伤害；随自身已损生命提高，最高额外 140%，并忽略一半防御。'},
-  laststand:{id:'laststand',name:'不归之誓',icon:'moon',cost:8,target:'self',kind:'laststand',minFloor:3,desc:'本回合一次致死直接伤害改为剩余 1 HP；每场战斗限用一次。持续伤害仍会致死。'},
-};
-// Evolution is a mechanical change, not a third numerical rank. Each starting art has one.
-const EVOLUTIONS = {
-  cleave:{id:'cleave',name:'破阵斩',desc:'碎星斩命中前额外移除 1 个强化，能立即打破结界。',patch:{name:'破阵斩',dispel:1}},
-  aegis:{id:'aegis',name:'镜星壁垒',desc:'壁垒额外赋予骑士一次反击；承伤后反击也计入 Boss 破势。',patch:{name:'镜星壁垒',retaliate:true}},
-  fire:{id:'fire',name:'传火',desc:'绯焰的燃烧同时扩散给其余敌人，形成持续的群体施压。',patch:{name:'传火',spread:true}},
-  frost:{id:'frost',name:'寂冻',desc:'霜华触发融解时同时封头 1 次行动，打断敌方施法节奏。',patch:{name:'寂冻',freezeSeal:true}},
-  mend:{id:'mend',name:'缝光·余辉',desc:'溢出治疗转为护盾，最高相当于目标生命上限 25%。',patch:{name:'缝光·余辉',overflow:true}},
-  cleanse:{id:'cleanse',name:'净铃·无垢',desc:'净化后本回合全队免疫新的异常，不再被后手重新上毒。',patch:{name:'净铃·无垢',immunity:true}},
-  venom:{id:'venom',name:'毒蔓连锁',desc:'攻击已经中毒的目标时，将其毒素传播给全部敌人。',patch:{name:'毒蔓连锁',spreadPoison:true}},
-  seal:{id:'seal',name:'缄默领域',desc:'封头改为覆盖全体敌人；各目标的封印抗性仍各自生效。',patch:{name:'缄默领域',target:'enemies'}},
-  pulse:{id:'pulse',name:'时锈脉冲',desc:'时空脉冲额外施加衰弱，目标直接伤害降低 25%。',patch:{name:'时锈脉冲',weaken:true}},
-  haste:{id:'haste',name:'星轨共振',desc:'加速咏唱从单体变为全队，使行动顺序构筑成为可能。',patch:{name:'星轨共振',target:'allies'}},
-  rend:{id:'rend',name:'双刃血吻',desc:'裂刃变为两次各 85% 的命中，分别吸血，并可用于破势。',patch:{name:'双刃血吻',hits:2,power:.85}},
-  bloodpact:{id:'bloodpact',name:'孤注契约',desc:'契约额外储存一次斩决：下一次物理技能无视防御，之后消耗。',patch:{name:'孤注契约',pierce:true}},
-};
-const STATUS = {
-  burn:{name:'燃烧',color:'#ffb58b',negative:true},poison:{name:'中毒',color:'#b8da83',negative:true},
-  break:{name:'破甲',color:'#e5a9b9',negative:true},slow:{name:'迟缓',color:'#a8c9ef',negative:true},
-  marked:{name:'星标',color:'#efdb94',negative:true},headbind:{name:'封头',color:'#cb97ed',negative:true},
-  armbind:{name:'封腕',color:'#e3b391',negative:true},weak:{name:'衰弱',color:'#acb7db',negative:true},
-  haste:{name:'迅捷',color:'#85dfd1',dispellable:true},protect:{name:'守护',color:'#a9b9ff',dispellable:true},
-  fury:{name:'狂热',color:'#efa6ad',dispellable:true},taunt:{name:'挑衅',color:'#a9b9ff'},
-  counter:{name:'反击',color:'#edc58c'},immune:{name:'无垢',color:'#a6dec8'},focus:{name:'双咏',color:'#eda58c'},
-  echo:{name:'回声',color:'#dac785'},pierce:{name:'斩决',color:'#ee9fbb'},dodge:{name:'残影',color:'#b797df'},
-  laststand:{name:'不归',color:'#efa6ad'},moonarmor:{name:'月铠',color:'#c4cee7',dispellable:true},
-  veil:{name:'仪式结界',color:'#dca5e9',dispellable:true},thorns:{name:'荆棘反甲',color:'#adc690',dispellable:true},
-  mirror:{name:'魔镜',color:'#80d7db',dispellable:true},rage:{name:'暴走',color:'#ff9d85'},
-};
-const WEAPONS = {
-  moonblade:{name:'未明之剑',type:'剑',atk:4,mag:1,effect:'guardbreak',effectName:'星痕',desc:'所有攻击有 30% 概率附加 2 回合破甲。',rarity:'common'},
-  emberstaff:{name:'余烬枝',type:'法杖',atk:0,mag:5,effect:'kindle',effectName:'余火',desc:'攻击有 25% 概率附加 2 回合燃烧。',rarity:'common'},
-  bellwand:{name:'初祈铃',type:'铃杖',atk:1,mag:4,effect:'lifewell',effectName:'祈愿',desc:'战斗中每次行动后，恢复自身 2% 生命。',rarity:'common'},
-  shadowfang:{name:'薄暮牙',type:'双刃',atk:5,mag:0,effect:'toxin',effectName:'蛇吻',desc:'攻击有 25% 概率附加 2 回合中毒。',rarity:'common'},
-  clockstaff:{name:'停摆的秒针',type:'时杖',atk:1,mag:4,effect:'mana',effectName:'滴答',desc:'每次行动后，额外回复 1 MP。',rarity:'common'},
-  bloodedge:{name:'朱誓',type:'大剑',atk:6,mag:0,effect:'vampire',effectName:'血契',desc:'造成的伤害附带 8% 吸血。',rarity:'common'},
-  eclipse:{name:'月蚀·无声',type:'剑',atk:11,mag:3,effect:'execution',effectName:'终幕',desc:'对生命低于 40% 的目标，伤害提高 50%。',rarity:'rare'},
-  winter:{name:'白夜之枝',type:'法杖',atk:2,mag:12,effect:'frostbite',effectName:'永冬',desc:'对迟缓目标伤害提高 40%，攻击有 30% 概率施加迟缓。',rarity:'rare'},
-  duet:{name:'双生誓言',type:'双刃',atk:9,mag:4,effect:'echo',effectName:'回响',desc:'攻击有 28% 概率追加一次 45% 伤害的回声。',rarity:'rare'},
-  aurora:{name:'极光咏叹',type:'铃杖',atk:3,mag:11,effect:'chorus',effectName:'合唱',desc:'每次行动后，治疗生命比例最低的存活队友 8 点。',rarity:'rare'},
-  sundial:{name:'第十三刻',type:'时杖',atk:5,mag:10,effect:'firstlight',effectName:'破晓',desc:'每场战斗的前两回合，伤害提高 40%。',rarity:'rare'},
-  thorn:{name:'绯棘王冠',type:'大剑',atk:14,mag:0,effect:'bloodmoon',effectName:'背水',desc:'生命低于 50% 时，伤害提高 45%。',rarity:'rare'},
-  comet:{name:'坠星裁决',type:'剑',atk:16,mag:7,effect:'cleave',effectName:'星屑',desc:'对单个目标造成伤害后，对其他敌人追加 25% 溅射伤害。',rarity:'legendary'},
-  grimoire:{name:'禁书·第零页',type:'法杖',atk:2,mag:20,effect:'overload',effectName:'超载',desc:'技能伤害提高 40%，技能 MP 消耗额外 +2。',rarity:'legendary'},
-  eternity:{name:'永恒的安可',type:'铃杖',atk:7,mag:16,effect:'phoenix',effectName:'返魂',desc:'每场战斗首次倒下时，立即以 35% 生命复活一次。',rarity:'legendary'},
-  obsidian:{name:'黒羽·绝影',type:'双刃',atk:19,mag:3,effect:'affliction',effectName:'蚀骨',desc:'每种目标负面状态使伤害提高 18%。',rarity:'legendary'},
-  genesis:{name:'创世时计',type:'时杖',atk:5,mag:18,effect:'economy',effectName:'零时',desc:'技能 MP 消耗降低 35%（向下取整，最低 1）。',rarity:'legendary'},
-  requiem:{name:'葬月挽歌',type:'大剑',atk:22,mag:0,effect:'soulsteal',effectName:'噬魂',desc:'击败一个敌人后，回复 18% 生命和 6 MP。',rarity:'legendary'},
-};
+/** Original content. v0.3: team turns, independent cooldowns and field counterplay. */
 const BOONS = [
-  {id:'vitality',name:'生命之露',icon:'heart',desc:'全队生命上限 +10，并恢复 10 生命。上限 3 层。',type:'stat',stat:'maxHp',value:10,cap:3},
-  {id:'power',name:'刃之记忆',icon:'sword',desc:'全队攻击力 +2。上限 3 层。',type:'stat',stat:'atk',value:2,cap:3},
-  {id:'wisdom',name:'星语残篇',icon:'star',desc:'全队魔力 +2。上限 3 层。',type:'stat',stat:'mag',value:2,cap:3},
-  {id:'armor',name:'银月鳞片',icon:'shield',desc:'全队防御 +1。上限 3 层。',type:'stat',stat:'def',value:1,cap:3},
-  {id:'spirit',name:'澄澈魔泉',icon:'drop',desc:'全队 MP 上限 +5，并恢复 5 MP。上限 3 层。',type:'stat',stat:'maxMp',value:5,cap:3},
-  {id:'swift',name:'流风羽',icon:'wind',desc:'全队速度 +1。上限 3 层。',type:'stat',stat:'spd',value:1,cap:3},
-  {id:'embers',name:'不灭余烬',icon:'flame',desc:'燃烧和毒伤 +20%。上限 3 层。',type:'boon',cap:3},
-  {id:'siphon',name:'赤色露珠',icon:'heart',desc:'所有直接伤害额外吸血 3%。上限 3 层。',type:'boon',cap:3},
-  {id:'victory',name:'凯旋花束',icon:'flower',desc:'胜利额外恢复全队 4% 生命。上限 3 层。',type:'boon',cap:3},
-  {id:'focus',name:'静谧冥想',icon:'moon',desc:'每次行动開始額外回复 1 MP。上限 2 层。',type:'boon',cap:2},
-  {id:'critical',name:'猎星之眼',icon:'eye',desc:'暴击率 +5%。上限 3 层。',type:'boon',cap:3},
-  {id:'harmony',name:'共鸣之环',icon:'link',desc:'技能联携增伤额外 +10%。普攻不会累积联携。上限 3 层。',type:'boon',cap:3},
-];
-const ENEMY_TYPES = {
-  wisp:{name:'烙印灯灵',kind:'wisp',hp:69,atk:15,mag:23,def:3,spd:11,weak:'ice',tint:'#93a6ff',role:'施法 / 标记',hint:'先标记脆弱队员，猎手会追击标记。封头可压制。',intent:['mark','hex','hex']},
-  slime:{name:'腐蚀墨滴',kind:'slime',hp:90,atk:20,mag:11,def:7,spd:6,weak:'fire',tint:'#ac98de',role:'减益 / 腐甲',hint:'腐甲后重击更危险。用火攻击或净化破甲。',intent:['corrode','poison','attack']},
-  moth:{name:'逐痕夜蝶',kind:'moth',hp:62,atk:25,mag:11,def:3,spd:17,weak:'fire',tint:'#d5aae8',role:'猎杀 / 高速',hint:'优先攻击星标或中毒目标，猎杀额外增伤。可封腕。',intent:['hunt','attack','hunt']},
-  sentinel:{name:'失心卫士',kind:'sentinel',hp:110,atk:24,mag:5,def:12,spd:8,weak:'light',tint:'#9fb7d3',role:'护卫 / 重击',hint:'给全队守护、为低血量友军分担单体攻击。驱散或先破甲。',intent:['cover','heavy','attack']},
-  revenant:{name:'无声的祈祷者',kind:'ghost',hp:72,atk:10,mag:23,def:3,spd:13,weak:'light',tint:'#c5b1e1',role:'治疗 / 强化',hint:'治疗最低血量同伴，并强化全队。封头或优先击杀。',intent:['bless','enemyHeal','hex']},
-  briar:{name:'荆棘甲兽',kind:'sentinel',hp:98,atk:25,mag:8,def:10,spd:9,weak:'fire',tint:'#a8c386',role:'反甲 / 物理抗性',hint:'荆棘反甲会反伤物理攻击。法术或驱散破解。',intent:['thorns','heavy','corrode']},
-  prism:{name:'折光晶核',kind:'wisp',hp:78,atk:14,mag:29,def:5,spd:10,weak:'ice',tint:'#7ce0d7',role:'魔法屏障 / 咒术',hint:'魔镜削减 80% 魔法伤害。用物理或驱散处理。',intent:['mirror','hex','sweepMagic']},
-  caller:{name:'孵月祭司',kind:'ghost',hp:88,atk:12,mag:24,def:4,spd:12,weak:'light',tint:'#daa48d',role:'召唤 / 治疗',hint:'召唤一只夜蝶（每场限一次），随后治疗。封头会推迟其召唤。',intent:['summon','enemyHeal','hex']},
-  guardian:{name:'月门守卫',kind:'sentinel',hp:340,atk:31,mag:27,def:10,spd:9,weak:'ice',tint:'#d1ba8e',role:'首领',hint:'预兆在回合末结算。血线阶段有一次相位锁，不能跳过。',intent:['heavy','attack','sweep']},
-  sovereign:{name:'蚀月的圣女',kind:'sovereign',hp:390,atk:32,mag:32,def:11,spd:13,weak:'light',tint:'#d8b4f7',role:'最终首领',hint:'驱散结界、清除仪式侍从、连击破势；预兆必须在期限内应对。',intent:['hex','heavy','sweepMagic']},
-};
-const ENCOUNTERS = [
-  [['slime','wisp'],['wisp','moth'],['sentinel','revenant'],['slime','moth']],
-  [['briar','moth'],['caller','slime'],['wisp','moth','moth'],['sentinel','revenant']],
-  [['sentinel','revenant','wisp'],['prism','moth'],['caller','briar'],['revenant','moth','slime']],
-  [['prism','revenant','moth'],['briar','sentinel','wisp'],['caller','prism'],['wisp','moth','moth']],
-  [['caller','sentinel','revenant'],['prism','briar','moth'],['sentinel','wisp','moth'],['revenant','prism','slime']],
+  {
+    "id": "vitality",
+    "name": "生命之露",
+    "icon": "heart",
+    "desc": "全队生命上限 +10，并恢复 10 生命。上限 3 层。",
+    "type": "stat",
+    "stat": "maxHp",
+    "value": 10,
+    "cap": 3
+  },
+  {
+    "id": "power",
+    "name": "刃之记忆",
+    "icon": "sword",
+    "desc": "全队攻击力 +2。上限 3 层。",
+    "type": "stat",
+    "stat": "atk",
+    "value": 2,
+    "cap": 3
+  },
+  {
+    "id": "wisdom",
+    "name": "星语残篇",
+    "icon": "star",
+    "desc": "全队魔力 +2。上限 3 层。",
+    "type": "stat",
+    "stat": "mag",
+    "value": 2,
+    "cap": 3
+  },
+  {
+    "id": "armor",
+    "name": "银月鳞片",
+    "icon": "shield",
+    "desc": "全队防御 +1。上限 3 层。",
+    "type": "stat",
+    "stat": "def",
+    "value": 1,
+    "cap": 3
+  },
+  {
+    "id": "spirit",
+    "name": "澄澈祈愿",
+    "icon": "heart",
+    "desc": "主动治疗强度 +10%。上限 3 层。",
+    "type": "boon",
+    "cap": 3
+  },
+  {
+    "id": "swift",
+    "name": "流风护符",
+    "icon": "wind",
+    "desc": "全队受到的直接伤害 -4%。上限 3 层。",
+    "type": "boon",
+    "cap": 3
+  },
+  {
+    "id": "embers",
+    "name": "不灭余烬",
+    "icon": "flame",
+    "desc": "燃烧和毒伤 +20%。上限 3 层。",
+    "type": "boon",
+    "cap": 3
+  },
+  {
+    "id": "siphon",
+    "name": "赤色露珠",
+    "icon": "heart",
+    "desc": "所有直接伤害额外吸血 3%。上限 3 层。",
+    "type": "boon",
+    "cap": 3
+  },
+  {
+    "id": "victory",
+    "name": "凯旋花束",
+    "icon": "flower",
+    "desc": "胜利额外恢复全队 4% 生命。上限 3 层。",
+    "type": "boon",
+    "cap": 3
+  },
+  {
+    "id": "focus",
+    "name": "静谧冥想",
+    "icon": "moon",
+    "desc": "每个完整战斗回合结束时，全队额外恢复 1% 生命。上限 2 层。",
+    "type": "boon",
+    "cap": 2
+  },
+  {
+    "id": "critical",
+    "name": "猎星之眼",
+    "icon": "eye",
+    "desc": "暴击率 +5%。上限 3 层。",
+    "type": "boon",
+    "cap": 3
+  },
+  {
+    "id": "harmony",
+    "name": "共鸣之环",
+    "icon": "link",
+    "desc": "技能联携增伤额外 +10%。普攻不会累积联携。上限 3 层。",
+    "type": "boon",
+    "cap": 3
+  }
 ];
 const BOSS_SPECS = [
-  {name:'星锁统御者',kind:'sentinel',tint:'#d1ba8e',trait:'月铠：物理减伤 65%；破甲或驱散解除。',buff:'moonarmor',period:4,turnName:'坠月震荡',turnCounter:'guard',hp:[{at:.7,name:'星锁封界',counter:'dispel'},{at:.35,name:'审判大剑',counter:'hits'}]},
-  {name:'磷庭孵月者',kind:'moth',tint:'#91d8ab',trait:'荆棘反甲：反击物理伤害；可驱散。',buff:'thorns',period:4,turnName:'瘴雨降临',turnCounter:'guard',hp:[{at:.7,name:'孵月仪式',counter:'adds'},{at:.35,name:'荆棘暴食',counter:'dispel'}]},
-  {name:'绯钟执祷者',kind:'ghost',tint:'#f0a0b1',trait:'魔镜：法术减伤 80%；可驱散。',buff:'mirror',period:4,turnName:'恸哭钟声',turnCounter:'seal',hp:[{at:.7,name:'不净祝圣',counter:'dispel'},{at:.35,name:'双钟共鸣',counter:'adds'}]},
-  {name:'逆行刻盘',kind:'sentinel',tint:'#acb5f3',trait:'迅捷：高速行动；可驱散。',buff:'haste',period:3,turnName:'时针断层',turnCounter:'hits',hp:[{at:.7,name:'停滞结界',counter:'dispel'},{at:.35,name:'终刻坠落',counter:'hits'}]},
-  {name:'蚀月的圣女',kind:'sovereign',tint:'#d8b4f7',trait:'月铠：物理减伤 65%；破甲或驱散解除。',buff:'moonarmor',period:4,turnName:'无月审判',turnCounter:'guard',hp:[{at:.75,name:'零月结界',counter:'dispel'},{at:.5,name:'仪式双星',counter:'adds'},{at:.25,name:'黎明禁令',counter:'hits'}]},
+  {
+    "name": "星锁统御者",
+    "kind": "sentinel",
+    "tint": "#d1ba8e",
+    "trait": "月铠：物理减伤 65%；破甲或驱散解除。",
+    "buff": "moonarmor",
+    "period": 4,
+    "turnName": "坠月震荡",
+    "turnCounter": "guard",
+    "hp": [
+      {
+        "at": 0.7,
+        "name": "星锁封界",
+        "counter": "dispel"
+      },
+      {
+        "at": 0.35,
+        "name": "审判大剑",
+        "counter": "hits"
+      }
+    ]
+  },
+  {
+    "name": "磷庭孵月者",
+    "kind": "moth",
+    "tint": "#91d8ab",
+    "trait": "荆棘反甲：反击物理伤害；可驱散。",
+    "buff": "thorns",
+    "period": 4,
+    "turnName": "瘴雨降临",
+    "turnCounter": "guard",
+    "hp": [
+      {
+        "at": 0.7,
+        "name": "孵月仪式",
+        "counter": "adds"
+      },
+      {
+        "at": 0.35,
+        "name": "荆棘暴食",
+        "counter": "dispel"
+      }
+    ]
+  },
+  {
+    "name": "绯钟执祷者",
+    "kind": "ghost",
+    "tint": "#f0a0b1",
+    "trait": "魔镜：法术减伤 80%；可驱散。",
+    "buff": "mirror",
+    "period": 4,
+    "turnName": "恸哭钟声",
+    "turnCounter": "seal",
+    "hp": [
+      {
+        "at": 0.7,
+        "name": "不净祝圣",
+        "counter": "dispel"
+      },
+      {
+        "at": 0.35,
+        "name": "双钟共鸣",
+        "counter": "adds"
+      }
+    ]
+  },
+  {
+    "name": "逆行刻盘",
+    "kind": "sentinel",
+    "tint": "#acb5f3",
+    "trait": "迅捷：直接伤害提高 20%；可驱散。不改变双方先后顺序。",
+    "buff": "haste",
+    "period": 3,
+    "turnName": "时针断层",
+    "turnCounter": "hits",
+    "hp": [
+      {
+        "at": 0.7,
+        "name": "停滞结界",
+        "counter": "dispel"
+      },
+      {
+        "at": 0.35,
+        "name": "终刻坠落",
+        "counter": "hits"
+      }
+    ]
+  },
+  {
+    "name": "蚀月的圣女",
+    "kind": "sovereign",
+    "tint": "#d8b4f7",
+    "trait": "月铠：物理减伤 65%；破甲或驱散解除。",
+    "buff": "moonarmor",
+    "period": 4,
+    "turnName": "无月审判",
+    "turnCounter": "guard",
+    "hp": [
+      {
+        "at": 0.75,
+        "name": "零月结界",
+        "counter": "dispel"
+      },
+      {
+        "at": 0.5,
+        "name": "仪式双星",
+        "counter": "adds"
+      },
+      {
+        "at": 0.25,
+        "name": "黎明禁令",
+        "counter": "hits"
+      }
+    ]
+  }
+];
+const DIRECTIONS = [
+  {
+    "x": 0,
+    "y": -1,
+    "label": "北",
+    "short": "N"
+  },
+  {
+    "x": 1,
+    "y": 0,
+    "label": "东",
+    "short": "E"
+  },
+  {
+    "x": 0,
+    "y": 1,
+    "label": "南",
+    "short": "S"
+  },
+  {
+    "x": -1,
+    "y": 0,
+    "label": "西",
+    "short": "W"
+  }
+];
+const ENCOUNTERS = [
+  [
+    [
+      "slime",
+      "wisp"
+    ],
+    [
+      "wisp",
+      "moth"
+    ],
+    [
+      "sentinel",
+      "revenant"
+    ],
+    [
+      "slime",
+      "moth"
+    ],
+    [
+      "caller",
+      "moth"
+    ]
+  ],
+  [
+    [
+      "briar",
+      "moth"
+    ],
+    [
+      "caller",
+      "slime"
+    ],
+    [
+      "wisp",
+      "moth",
+      "moth"
+    ],
+    [
+      "sentinel",
+      "revenant"
+    ]
+  ],
+  [
+    [
+      "sentinel",
+      "revenant",
+      "wisp"
+    ],
+    [
+      "prism",
+      "moth"
+    ],
+    [
+      "caller",
+      "briar"
+    ],
+    [
+      "revenant",
+      "moth",
+      "slime"
+    ]
+  ],
+  [
+    [
+      "prism",
+      "revenant",
+      "moth"
+    ],
+    [
+      "briar",
+      "sentinel",
+      "wisp"
+    ],
+    [
+      "caller",
+      "prism"
+    ],
+    [
+      "wisp",
+      "moth",
+      "moth"
+    ]
+  ],
+  [
+    [
+      "caller",
+      "sentinel",
+      "revenant"
+    ],
+    [
+      "prism",
+      "briar",
+      "moth"
+    ],
+    [
+      "sentinel",
+      "wisp",
+      "moth"
+    ],
+    [
+      "revenant",
+      "prism",
+      "slime"
+    ]
+  ]
+];
+const ENEMY_TYPES = {
+  "wisp": {
+    "name": "烙印灯灵",
+    "kind": "wisp",
+    "hp": 69,
+    "atk": 15,
+    "mag": 23,
+    "def": 3,
+    "weak": "ice",
+    "tint": "#93a6ff",
+    "role": "施法 / 标记",
+    "hint": "先标记脆弱队员，猎手会追击标记。封头可压制。",
+    "intent": [
+      "mark",
+      "hex",
+      "hex"
+    ]
+  },
+  "slime": {
+    "name": "腐蚀墨滴",
+    "kind": "slime",
+    "hp": 90,
+    "atk": 20,
+    "mag": 11,
+    "def": 7,
+    "weak": "fire",
+    "tint": "#ac98de",
+    "role": "减益 / 腐甲",
+    "hint": "腐甲后重击更危险。用火攻击或净化破甲。",
+    "intent": [
+      "corrode",
+      "poison",
+      "attack"
+    ]
+  },
+  "moth": {
+    "name": "逐痕夜蝶",
+    "kind": "moth",
+    "hp": 62,
+    "atk": 25,
+    "mag": 11,
+    "def": 3,
+    "weak": "fire",
+    "tint": "#d5aae8",
+    "role": "猎杀 / 追击",
+    "hint": "优先攻击星标或中毒目标，猎杀额外增伤。可封腕。",
+    "intent": [
+      "hunt",
+      "attack",
+      "hunt"
+    ]
+  },
+  "sentinel": {
+    "name": "失心卫士",
+    "kind": "sentinel",
+    "hp": 110,
+    "atk": 24,
+    "mag": 5,
+    "def": 12,
+    "weak": "light",
+    "tint": "#9fb7d3",
+    "role": "护卫 / 重击",
+    "hint": "给全队守护、为低血量友军分担单体攻击。驱散或先破甲。",
+    "intent": [
+      "cover",
+      "heavy",
+      "attack"
+    ]
+  },
+  "revenant": {
+    "name": "无声的祈祷者",
+    "kind": "ghost",
+    "hp": 72,
+    "atk": 10,
+    "mag": 23,
+    "def": 3,
+    "weak": "light",
+    "tint": "#c5b1e1",
+    "role": "治疗 / 强化",
+    "hint": "治疗最低血量同伴，并强化全队。封头或优先击杀。",
+    "intent": [
+      "bless",
+      "enemyHeal",
+      "hex"
+    ]
+  },
+  "briar": {
+    "name": "荆棘甲兽",
+    "kind": "sentinel",
+    "hp": 98,
+    "atk": 25,
+    "mag": 8,
+    "def": 10,
+    "weak": "fire",
+    "tint": "#a8c386",
+    "role": "反甲 / 物理抗性",
+    "hint": "荆棘反甲会反伤物理攻击。法术或驱散破解。",
+    "intent": [
+      "thorns",
+      "heavy",
+      "corrode"
+    ]
+  },
+  "prism": {
+    "name": "折光晶核",
+    "kind": "wisp",
+    "hp": 78,
+    "atk": 14,
+    "mag": 29,
+    "def": 5,
+    "weak": "ice",
+    "tint": "#7ce0d7",
+    "role": "魔法屏障 / 咒术",
+    "hint": "魔镜削减 80% 魔法伤害。用物理或驱散处理。",
+    "intent": [
+      "mirror",
+      "hex",
+      "sweepMagic"
+    ]
+  },
+  "caller": {
+    "name": "鸣月哨祭",
+    "kind": "ghost",
+    "hp": 88,
+    "atk": 12,
+    "mag": 24,
+    "def": 4,
+    "weak": "light",
+    "tint": "#daa48d",
+    "role": "报警 / 召唤",
+    "hint": "首次轮到报警时，吸引路径 8 格内的普通小队。优先击杀、封头或战前使用静音粉可阻断；战斗本身不自动引怪。",
+    "intent": [
+      "alarm",
+      "summon",
+      "hex",
+      "enemyHeal"
+    ]
+  },
+  "guardian": {
+    "name": "月门守卫",
+    "kind": "sentinel",
+    "hp": 340,
+    "atk": 31,
+    "mag": 27,
+    "def": 10,
+    "weak": "ice",
+    "tint": "#d1ba8e",
+    "role": "首领",
+    "hint": "预兆在回合末结算。血线阶段有一次相位锁，不能跳过。",
+    "intent": [
+      "heavy",
+      "attack",
+      "sweep"
+    ]
+  },
+  "sovereign": {
+    "name": "蚀月的圣女",
+    "kind": "sovereign",
+    "hp": 390,
+    "atk": 32,
+    "mag": 32,
+    "def": 11,
+    "weak": "light",
+    "tint": "#d8b4f7",
+    "role": "最终首领",
+    "hint": "驱散结界、清除仪式侍从、连击破势；预兆必须在期限内应对。",
+    "intent": [
+      "hex",
+      "heavy",
+      "sweepMagic"
+    ]
+  }
+};
+const EVOLUTIONS = {
+  "cleave": {
+    "id": "cleave",
+    "name": "破阵斩",
+    "desc": "碎星斩命中前额外移除 1 个强化，能立即打破结界。",
+    "patch": {
+      "name": "破阵斩",
+      "dispel": 1
+    }
+  },
+  "aegis": {
+    "id": "aegis",
+    "name": "镜星壁垒",
+    "desc": "壁垒额外赋予骑士一次反击；承伤后反击也计入 Boss 破势。",
+    "patch": {
+      "name": "镜星壁垒",
+      "retaliate": true
+    }
+  },
+  "fire": {
+    "id": "fire",
+    "name": "传火",
+    "desc": "绯焰的燃烧同时扩散给其余敌人，形成持续的群体施压。",
+    "patch": {
+      "name": "传火",
+      "spread": true
+    }
+  },
+  "frost": {
+    "id": "frost",
+    "name": "寂冻",
+    "desc": "霜华触发融解时同时封头 1 次行动，打断敌方施法节奏。",
+    "patch": {
+      "name": "寂冻",
+      "freezeSeal": true
+    }
+  },
+  "mend": {
+    "id": "mend",
+    "name": "缝光·余辉",
+    "desc": "溢出治疗转为护盾，最高相当于目标生命上限 25%。",
+    "patch": {
+      "name": "缝光·余辉",
+      "overflow": true
+    }
+  },
+  "cleanse": {
+    "id": "cleanse",
+    "name": "净铃·无垢",
+    "desc": "净化后本回合全队免疫新的异常，不再被后手重新上毒。",
+    "patch": {
+      "name": "净铃·无垢",
+      "immunity": true
+    }
+  },
+  "venom": {
+    "id": "venom",
+    "name": "毒蔓连锁",
+    "desc": "攻击已经中毒的目标时，将其毒素传播给全部敌人。",
+    "patch": {
+      "name": "毒蔓连锁",
+      "spreadPoison": true
+    }
+  },
+  "seal": {
+    "id": "seal",
+    "name": "缄默领域",
+    "desc": "封头改为覆盖全体敌人；各目标的封印抗性仍各自生效。",
+    "patch": {
+      "name": "缄默领域",
+      "target": "enemies"
+    }
+  },
+  "pulse": {
+    "id": "pulse",
+    "name": "时锈脉冲",
+    "desc": "时空脉冲额外施加衰弱，目标直接伤害降低 25%。",
+    "patch": {
+      "name": "时锈脉冲",
+      "weaken": true
+    }
+  },
+  "haste": {
+    "id": "haste",
+    "name": "星轨共振",
+    "desc": "时流加速从单体变为全队：全队普通技能冷却缩短 1，并获得 2 回合伤害 +10%。",
+    "patch": {
+      "name": "星轨共振",
+      "target": "allies"
+    }
+  },
+  "rend": {
+    "id": "rend",
+    "name": "双刃血吻",
+    "desc": "裂刃变为两次各 85% 的命中，分别吸血，并可用于破势。",
+    "patch": {
+      "name": "双刃血吻",
+      "hits": 2,
+      "power": 0.85
+    }
+  },
+  "bloodpact": {
+    "id": "bloodpact",
+    "name": "孤注契约",
+    "desc": "契约额外储存一次斩决：下一次物理技能无视防御，之后消耗。",
+    "patch": {
+      "name": "孤注契约",
+      "pierce": true
+    }
+  }
+};
+const FLOORS = [
+  {
+    "name": "遗忘的回廊",
+    "jp": "忘却の回廊",
+    "color": "#8ca3ed",
+    "lore": "你再次醒来。只有月亮记得，你曾经来过这里。"
+  },
+  {
+    "name": "磷光庭园",
+    "jp": "燐光の庭",
+    "color": "#67d8c4",
+    "lore": "没有阳光的庭园里，花依旧向着某个方向盛开。"
+  },
+  {
+    "name": "绯色礼拜堂",
+    "jp": "緋の礼拝堂",
+    "color": "#e893a8",
+    "lore": "祈祷早已停息，钟声却还在回响。"
+  },
+  {
+    "name": "坠星书库",
+    "jp": "墜星の書庫",
+    "color": "#c3a6f1",
+    "lore": "书页间夹着某个人未曾抵达的明天。"
+  },
+  {
+    "name": "无月王座",
+    "jp": "月なき玉座",
+    "color": "#edc686",
+    "lore": "故事的最后一页，只为还在前进的人留白。"
+  }
 ];
 const INTENTS = {
- attack:{name:'攻击',icon:'sword'},heavy:{name:'重击',icon:'sword'},hex:{name:'咒火',icon:'flame'},poison:{name:'毒雾',icon:'venom'},guard:{name:'防御',icon:'shield'},charge:{name:'蓄力',icon:'star'},sweep:{name:'横扫',icon:'wind'},drain:{name:'汲取',icon:'heart'},
- mark:{name:'弱者烙印',icon:'eye'},corrode:{name:'腐甲',icon:'venom'},hunt:{name:'猎杀标记者',icon:'sword'},cover:{name:'全队守护',icon:'shield'},bless:{name:'全队狂热',icon:'star'},enemyHeal:{name:'救援同伴',icon:'heart'},thorns:{name:'荆棘反甲',icon:'shield'},mirror:{name:'折光魔镜',icon:'star'},sweepMagic:{name:'咒术群攻',icon:'flame'},summon:{name:'召唤夜蝶',icon:'moon'},bound:{name:'封印压制 · 弱攻',icon:'venom'},delay:{name:'行动被延后',icon:'clock'},
+  "attack": {
+    "name": "攻击",
+    "icon": "sword"
+  },
+  "heavy": {
+    "name": "重击",
+    "icon": "sword"
+  },
+  "hex": {
+    "name": "咒火",
+    "icon": "flame"
+  },
+  "poison": {
+    "name": "毒雾",
+    "icon": "venom"
+  },
+  "guard": {
+    "name": "防御",
+    "icon": "shield"
+  },
+  "charge": {
+    "name": "蓄力",
+    "icon": "star"
+  },
+  "sweep": {
+    "name": "横扫",
+    "icon": "wind"
+  },
+  "drain": {
+    "name": "汲取",
+    "icon": "heart"
+  },
+  "mark": {
+    "name": "弱者烙印",
+    "icon": "eye"
+  },
+  "corrode": {
+    "name": "腐甲",
+    "icon": "venom"
+  },
+  "hunt": {
+    "name": "猎杀标记者",
+    "icon": "sword"
+  },
+  "cover": {
+    "name": "全队守护",
+    "icon": "shield"
+  },
+  "bless": {
+    "name": "全队狂热",
+    "icon": "star"
+  },
+  "enemyHeal": {
+    "name": "救援同伴",
+    "icon": "heart"
+  },
+  "thorns": {
+    "name": "荆棘反甲",
+    "icon": "shield"
+  },
+  "mirror": {
+    "name": "折光魔镜",
+    "icon": "star"
+  },
+  "sweepMagic": {
+    "name": "咒术群攻",
+    "icon": "flame"
+  },
+  "summon": {
+    "name": "召唤夜蝶",
+    "icon": "moon"
+  },
+  "bound": {
+    "name": "封印压制 · 弱攻",
+    "icon": "venom"
+  },
+  "delay": {
+    "name": "行动被延后",
+    "icon": "clock"
+  },
+  "alarm": {
+    "name": "警报鸣唱",
+    "icon": "sound"
+  }
 };
-const RARITIES = {common:{name:'初始',color:'#adb5d0'},rare:{name:'稀有',color:'#b69af6'},legendary:{name:'传说',color:'#e5c083'}};
+const JOBS = {
+  "knight": {
+    "id": "knight",
+    "name": "星刃骑士",
+    "jp": "星剣士",
+    "person": "希露菲",
+    "roman": "SYLPHIE",
+    "role": "承伤 · 破甲 · 反击",
+    "color": "#9caef9",
+    "weapon": "moonblade",
+    "hp": 142,
+    "atk": 15,
+    "mag": 5,
+    "def": 12,
+    "skills": [
+      "cleave",
+      "aegis"
+    ],
+    "advanced": [
+      "counterwall",
+      "intercept",
+      "starfall"
+    ],
+    "growth": "atk",
+    "passive": "不退之盾",
+    "passiveDesc": "物理承伤减少 18%。壁垒能吸引单体攻击；没有治疗能力。",
+    "synopsis": "保护脆弱的施法者，用破甲创造突破口。反击与拦截要靠本局探索习得。"
+  },
+  "mage": {
+    "id": "mage",
+    "name": "焰咒魔导师",
+    "jp": "焔の魔導士",
+    "person": "莉瑟",
+    "roman": "LYS",
+    "role": "弱点 · 元素 · 蓄能",
+    "color": "#eda58c",
+    "weapon": "emberstaff",
+    "hp": 76,
+    "atk": 6,
+    "mag": 24,
+    "def": 3,
+    "skills": [
+      "fire",
+      "frost"
+    ],
+    "advanced": [
+      "nova",
+      "focuscast",
+      "thunderchain"
+    ],
+    "growth": "mag",
+    "passive": "元素学识",
+    "passiveDesc": "技能命中元素弱点时额外增伤 20%。普攻仅使用 55% 魔力；没有治疗或护盾。",
+    "synopsis": "看准冷却窗口，再组合火冰融解、双咏与群攻。没有治疗或防护，不能无脑交空所有技能。"
+  },
+  "shrine": {
+    "id": "shrine",
+    "name": "祈星巫女",
+    "jp": "星詠みの巫女",
+    "person": "澪",
+    "roman": "MIO",
+    "role": "治疗 · 净化 · 复苏",
+    "color": "#9dd5c7",
+    "weapon": "bellwand",
+    "hp": 90,
+    "atk": 6,
+    "mag": 19,
+    "def": 5,
+    "skills": [
+      "mend",
+      "cleanse"
+    ],
+    "advanced": [
+      "ray",
+      "revive",
+      "sanctuary"
+    ],
+    "growth": "mag",
+    "passive": "救护祈愿",
+    "passiveDesc": "主动治疗量提高 15%。攻击不再附带免费治疗；攻击魔法需在局内学习。",
+    "synopsis": "治疗与净化可在同一回合使用，但各有独立冷却。保留关键救护技能，应对下一次危机。"
+  },
+  "ninja": {
+    "id": "ninja",
+    "name": "影缝忍者",
+    "jp": "影縫い",
+    "person": "紫苑",
+    "roman": "SHION",
+    "role": "封印 · 剧毒 · 追击",
+    "color": "#ccabea",
+    "weapon": "shadowfang",
+    "hp": 84,
+    "atk": 18,
+    "mag": 8,
+    "def": 4,
+    "skills": [
+      "venom",
+      "seal"
+    ],
+    "advanced": [
+      "disarm",
+      "execute",
+      "phantom"
+    ],
+    "growth": "atk",
+    "passive": "猎影",
+    "passiveDesc": "对负面状态目标增伤 20%。封头压制施法，封腕压制重击；没有自疗。",
+    "synopsis": "用封印破坏敌方配合，之后再追击破绽。控制有抗性窗口，不能无限封锁同一目标。"
+  },
+  "chrono": {
+    "id": "chrono",
+    "name": "刻时术士",
+    "jp": "刻の術師",
+    "person": "伊欧",
+    "roman": "IO",
+    "role": "冷却 · 驱散 · 延期",
+    "color": "#e8c783",
+    "weapon": "clockstaff",
+    "hp": 86,
+    "atk": 6,
+    "mag": 17,
+    "def": 5,
+    "skills": [
+      "pulse",
+      "haste"
+    ],
+    "advanced": [
+      "unweave",
+      "delay",
+      "echoTime"
+    ],
+    "growth": "mag",
+    "passive": "时间利息",
+    "passiveDesc": "每第 3 个完整战斗回合结束时，自身最长技能冷却额外缩短 1。没有治疗；驱散与延后预兆需局内习得。",
+    "synopsis": "调配队友的技能冷却，把爆发和反制留给关键窗口。无需速度排序，也不能无限刷新技能。"
+  },
+  "reaver": {
+    "id": "reaver",
+    "name": "血誓剑士",
+    "jp": "血誓の剣士",
+    "person": "绯音",
+    "roman": "AKANE",
+    "role": "背水 · 换血 · 斩杀",
+    "color": "#e389a3",
+    "weapon": "bloodedge",
+    "hp": 124,
+    "atk": 23,
+    "mag": 4,
+    "def": 4,
+    "skills": [
+      "rend",
+      "bloodpact"
+    ],
+    "advanced": [
+      "reap",
+      "revenge",
+      "laststand"
+    ],
+    "growth": "atk",
+    "passive": "赤月誓约",
+    "passiveDesc": "生命低于 50% 时伤害提高 30%。只有指定技能与武器能吸血，不再被动全伤害吸血。",
+    "synopsis": "保留伤口以换取爆发，但不能用伤害解决一切。高压回合需要同伴保护或及时止损。"
+  }
+};
+const MAX_FLOOR = 5;
+const RARITIES = {
+  "common": {
+    "name": "初始",
+    "color": "#adb5d0"
+  },
+  "rare": {
+    "name": "稀有",
+    "color": "#b69af6"
+  },
+  "legendary": {
+    "name": "传说",
+    "color": "#e5c083"
+  }
+};
+const SAVE_KEY = "eclipse-labyrinth.run.v3";
+const SKILLS = {
+  "attack": {
+    "id": "attack",
+    "name": "全队攻击",
+    "icon": "sword",
+    "power": 0.85,
+    "target": "enemy",
+    "kind": "attack",
+    "desc": "结束准备阶段：未防御的存活队员各攻击一次，随后敌方行动。最后结算冷却、状态和地图移动。",
+    "cd": 0
+  },
+  "guard": {
+    "id": "guard",
+    "name": "防御姿态",
+    "icon": "shield",
+    "target": "self",
+    "kind": "guard",
+    "desc": "切换本回合防御：承伤减少 65%，但放弃本轮普通攻击。切换本身不推进回合，仍可使用技能。",
+    "cd": 0
+  },
+  "tonic": {
+    "id": "tonic",
+    "name": "急救药",
+    "icon": "heart",
+    "target": "ally",
+    "kind": "itemHeal",
+    "supply": "tonic",
+    "desc": "治疗存活队友 35% 生命。消耗 1 份急救药；不推进回合、不触发地图移动，可在探索中使用。",
+    "cd": 0
+  },
+  "ether": {
+    "id": "ether",
+    "name": "时砂滴",
+    "icon": "drop",
+    "target": "ally",
+    "kind": "itemCooldown",
+    "supply": "ether",
+    "desc": "队友的普通技能冷却缩短 1；本回合用过的技能最低保留 1 CD，不刷新冷却操纵技能。不推进回合。",
+    "cd": 0
+  },
+  "salt": {
+    "id": "salt",
+    "name": "破咒盐",
+    "icon": "star",
+    "target": "enemy",
+    "kind": "dispel",
+    "supply": "salt",
+    "dispel": 1,
+    "desc": "移除敌人 1 个可驱散强化，优先仪式结界。消耗 1 份破咒盐；不推进回合。",
+    "cd": 0
+  },
+  "cleave": {
+    "id": "cleave",
+    "name": "碎星斩",
+    "icon": "sword",
+    "power": 1.1,
+    "target": "enemy",
+    "kind": "physical",
+    "status": "break",
+    "turns": 3,
+    "desc": "110% 物理伤害并破甲 3 回合；物理承伤 +30%，穿透月铠。",
+    "cd": 3
+  },
+  "aegis": {
+    "id": "aegis",
+    "name": "星纹壁垒",
+    "icon": "shield",
+    "target": "self",
+    "kind": "aegis",
+    "desc": "本回合全队减伤 40%，自身吸引单体攻击 2 回合。不恢复生命。",
+    "cd": 4
+  },
+  "counterwall": {
+    "id": "counterwall",
+    "name": "镜盾反阵",
+    "icon": "shield",
+    "target": "self",
+    "kind": "counter",
+    "minFloor": 1,
+    "desc": "自身减伤 50%，本回合每次被直接命中反击 110% 攻击。反击计入破势次数。",
+    "cd": 4
+  },
+  "intercept": {
+    "id": "intercept",
+    "name": "绝对拦截",
+    "icon": "shield",
+    "target": "allies",
+    "kind": "intercept",
+    "minFloor": 2,
+    "desc": "本回合全队减伤 60% 并免疫新异常；不提供治疗，保护在回合结算后消失。",
+    "cd": 6
+  },
+  "starfall": {
+    "id": "starfall",
+    "name": "星陨剑阵",
+    "icon": "star",
+    "power": 1.3,
+    "target": "enemies",
+    "kind": "physical",
+    "status": "break",
+    "turns": 2,
+    "minFloor": 3,
+    "desc": "全体 130% 物理伤害并破甲，结束后自身获得一次反击。",
+    "cd": 5
+  },
+  "fire": {
+    "id": "fire",
+    "name": "绯焰",
+    "icon": "flame",
+    "power": 1.65,
+    "target": "enemy",
+    "kind": "magic",
+    "element": "fire",
+    "status": "burn",
+    "turns": 3,
+    "desc": "165% 火伤并燃烧 3 回合。持续伤害基于施法者能力，不能按 Boss 总生命偷取巨额伤害。",
+    "cd": 3
+  },
+  "frost": {
+    "id": "frost",
+    "name": "霜华",
+    "icon": "ice",
+    "power": 1.45,
+    "target": "enemy",
+    "kind": "magic",
+    "element": "ice",
+    "status": "slow",
+    "turns": 2,
+    "desc": "145% 冰伤并迟缓；命中燃烧目标触发融解 +50%，并消耗燃烧。",
+    "cd": 3
+  },
+  "nova": {
+    "id": "nova",
+    "name": "红莲终曲",
+    "icon": "flame",
+    "power": 1.3,
+    "target": "enemies",
+    "kind": "magic",
+    "element": "fire",
+    "status": "burn",
+    "turns": 2,
+    "minFloor": 1,
+    "desc": "对全体敌人造成 130% 火伤并燃烧。用于拆解护卫和支援者的小队。",
+    "cd": 5
+  },
+  "focuscast": {
+    "id": "focuscast",
+    "name": "双重咏唱",
+    "icon": "star",
+    "target": "self",
+    "kind": "focus",
+    "minFloor": 2,
+    "desc": "下一个攻击法术变为两次独立命中，各造成 90% 伤害。每次命中分别计入破势。",
+    "cd": 5
+  },
+  "thunderchain": {
+    "id": "thunderchain",
+    "name": "雷锁连环",
+    "icon": "star",
+    "power": 0.8,
+    "hits": 3,
+    "target": "enemy",
+    "kind": "magic",
+    "element": "light",
+    "minFloor": 3,
+    "desc": "连续 3 次 80% 光伤。多段命中用于打破需要连击的预兆。",
+    "cd": 5
+  },
+  "mend": {
+    "id": "mend",
+    "name": "缝光祈愿",
+    "icon": "heart",
+    "power": 1,
+    "target": "ally",
+    "kind": "heal",
+    "desc": "治疗一名队友：魔力 × 1.65 + 12。不附赠净化或输出。",
+    "cd": 3
+  },
+  "cleanse": {
+    "id": "cleanse",
+    "name": "净铃",
+    "icon": "drop",
+    "target": "allies",
+    "kind": "cleanse",
+    "desc": "解除全队异常；不回复生命。何时净化、何时治疗需要分开判断。",
+    "cd": 4
+  },
+  "ray": {
+    "id": "ray",
+    "name": "月光裁决",
+    "icon": "star",
+    "power": 1.35,
+    "target": "enemy",
+    "kind": "magic",
+    "element": "light",
+    "dispel": 1,
+    "status": "marked",
+    "turns": 2,
+    "minFloor": 1,
+    "desc": "135% 光伤，移除 1 个强化并施加星标。习得后才获得专用攻击法术。",
+    "cd": 4
+  },
+  "revive": {
+    "id": "revive",
+    "name": "晨星归还",
+    "icon": "heart",
+    "target": "ally",
+    "kind": "revive",
+    "minFloor": 1,
+    "desc": "复活倒下的队友至 35% 生命；目标存活时治疗 35%。",
+    "cd": 7
+  },
+  "sanctuary": {
+    "id": "sanctuary",
+    "name": "无垢圣域",
+    "icon": "flower",
+    "target": "allies",
+    "kind": "sanctuary",
+    "minFloor": 3,
+    "desc": "治疗全队并解除异常，本回合免疫新异常。与净铃、单体治疗承担不同职责。",
+    "cd": 6
+  },
+  "venom": {
+    "id": "venom",
+    "name": "紫雾双刃",
+    "icon": "venom",
+    "power": 0.85,
+    "target": "enemy",
+    "kind": "physical",
+    "status": "poison",
+    "turns": 3,
+    "desc": "85% 物理伤害并中毒 3 回合。毒伤基于施术者攻击，毒与破甲为后续追击铺路。",
+    "cd": 3
+  },
+  "seal": {
+    "id": "seal",
+    "name": "封头·缄默",
+    "icon": "venom",
+    "target": "enemy",
+    "kind": "seal",
+    "status": "headbind",
+    "turns": 2,
+    "desc": "封头 2 回合：压制报警、法术、治疗、强化和召唤，改为低效攻击。解除后 2 回合抗性。",
+    "cd": 5
+  },
+  "disarm": {
+    "id": "disarm",
+    "name": "封腕·断弦",
+    "icon": "sword",
+    "power": 0.75,
+    "target": "enemy",
+    "kind": "physical",
+    "status": "armbind",
+    "turns": 2,
+    "minFloor": 1,
+    "desc": "75% 伤害并封腕，压制重击、猎杀和群体物理技。预兆仍需按提示应对。",
+    "cd": 5
+  },
+  "execute": {
+    "id": "execute",
+    "name": "影缝·三闪",
+    "icon": "sword",
+    "power": 0.65,
+    "hits": 3,
+    "target": "enemy",
+    "kind": "physical",
+    "exploit": true,
+    "minFloor": 2,
+    "desc": "3 次 65% 物理伤害，每种负面状态增伤 15%（最高 60%）。多段攻击可破势。",
+    "cd": 4
+  },
+  "phantom": {
+    "id": "phantom",
+    "name": "残影诱饵",
+    "icon": "moon",
+    "target": "self",
+    "kind": "phantom",
+    "minFloor": 3,
+    "desc": "本回合吸引单体攻击，并完全闪避接下来的两次直接命中。不治疗，不回避持续伤害。",
+    "cd": 4
+  },
+  "pulse": {
+    "id": "pulse",
+    "name": "时空脉冲",
+    "icon": "clock",
+    "power": 0.9,
+    "target": "enemy",
+    "kind": "magic",
+    "status": "slow",
+    "turns": 3,
+    "desc": "90% 魔法伤害并迟缓 3 回合：目标直接伤害 -15%。不改变双方行动顺序。",
+    "cd": 3
+  },
+  "haste": {
+    "id": "haste",
+    "name": "时流加速",
+    "icon": "clock",
+    "target": "ally",
+    "kind": "haste",
+    "desc": "队友普通技能冷却缩短 1，并获得 2 回合伤害 +10%。不刷新冷却操纵技能；当回合已用技能最低保留 1 CD。",
+    "cd": 5
+  },
+  "unweave": {
+    "id": "unweave",
+    "name": "术式解体",
+    "icon": "clock",
+    "target": "enemy",
+    "kind": "dispel",
+    "dispel": 2,
+    "minFloor": 1,
+    "desc": "移除目标最多 2 个可驱散强化。解除结界能取消相应预兆，不依赖补给。",
+    "cd": 4
+  },
+  "delay": {
+    "id": "delay",
+    "name": "延宕一刻",
+    "icon": "clock",
+    "target": "enemy",
+    "kind": "delay",
+    "minFloor": 2,
+    "desc": "延后目标当前预兆 1 回合（每个预兆仅一次）；普通敌人跳过下一回合，之后 2 回合免疫。",
+    "cd": 6
+  },
+  "echoTime": {
+    "id": "echoTime",
+    "name": "昨日回声",
+    "icon": "link",
+    "target": "ally",
+    "kind": "echoTime",
+    "minFloor": 3,
+    "desc": "队友下一次攻击技能追加一次 60% 强度的施放，随后消耗。额外命中可破势。",
+    "cd": 5
+  },
+  "rend": {
+    "id": "rend",
+    "name": "绯红裂刃",
+    "icon": "sword",
+    "power": 1.55,
+    "target": "enemy",
+    "kind": "physical",
+    "drain": 0.2,
+    "desc": "155% 物理伤害并吸取伤害的 20%。不会替其他队员治疗。",
+    "cd": 3
+  },
+  "bloodpact": {
+    "id": "bloodpact",
+    "name": "血之契约",
+    "icon": "heart",
+    "target": "self",
+    "kind": "bloodpact",
+    "desc": "消耗生命上限 18%（至少留 1），自身普通技能冷却缩短 1，获得 2 回合狂热。不能重置本技能或同回合无限连放。",
+    "cd": 5
+  },
+  "reap": {
+    "id": "reap",
+    "name": "赤月收割",
+    "icon": "moon",
+    "power": 1.2,
+    "target": "enemies",
+    "kind": "physical",
+    "drain": 0.12,
+    "minFloor": 1,
+    "desc": "全体 120% 物理伤害，吸取 12% 伤害。对落单目标不如单体技能。",
+    "cd": 5
+  },
+  "revenge": {
+    "id": "revenge",
+    "name": "伤痕偿还",
+    "icon": "sword",
+    "power": 1.35,
+    "target": "enemy",
+    "kind": "physical",
+    "revenge": true,
+    "minFloor": 2,
+    "desc": "基础 135% 伤害；随自身已损生命提高，最高额外 140%，并忽略一半防御。",
+    "cd": 4
+  },
+  "laststand": {
+    "id": "laststand",
+    "name": "不归之誓",
+    "icon": "moon",
+    "target": "self",
+    "kind": "laststand",
+    "minFloor": 3,
+    "desc": "本回合一次致死直接伤害改为剩余 1 HP；每场战斗限用一次。持续伤害仍会致死。",
+    "cd": 8
+  }
+};
+const STATUS = {
+  "burn": {
+    "name": "燃烧",
+    "color": "#ffb58b",
+    "negative": true
+  },
+  "poison": {
+    "name": "中毒",
+    "color": "#b8da83",
+    "negative": true
+  },
+  "break": {
+    "name": "破甲",
+    "color": "#e5a9b9",
+    "negative": true
+  },
+  "slow": {
+    "name": "迟缓",
+    "color": "#a8c9ef",
+    "negative": true
+  },
+  "marked": {
+    "name": "星标",
+    "color": "#efdb94",
+    "negative": true
+  },
+  "headbind": {
+    "name": "封头",
+    "color": "#cb97ed",
+    "negative": true
+  },
+  "armbind": {
+    "name": "封腕",
+    "color": "#e3b391",
+    "negative": true
+  },
+  "weak": {
+    "name": "衰弱",
+    "color": "#acb7db",
+    "negative": true
+  },
+  "haste": {
+    "name": "迅捷",
+    "color": "#85dfd1",
+    "dispellable": true
+  },
+  "protect": {
+    "name": "守护",
+    "color": "#a9b9ff",
+    "dispellable": true
+  },
+  "fury": {
+    "name": "狂热",
+    "color": "#efa6ad",
+    "dispellable": true
+  },
+  "taunt": {
+    "name": "挑衅",
+    "color": "#a9b9ff"
+  },
+  "counter": {
+    "name": "反击",
+    "color": "#edc58c"
+  },
+  "immune": {
+    "name": "无垢",
+    "color": "#a6dec8"
+  },
+  "focus": {
+    "name": "双咏",
+    "color": "#eda58c"
+  },
+  "echo": {
+    "name": "回声",
+    "color": "#dac785"
+  },
+  "pierce": {
+    "name": "斩决",
+    "color": "#ee9fbb"
+  },
+  "dodge": {
+    "name": "残影",
+    "color": "#b797df"
+  },
+  "laststand": {
+    "name": "不归",
+    "color": "#efa6ad"
+  },
+  "moonarmor": {
+    "name": "月铠",
+    "color": "#c4cee7",
+    "dispellable": true
+  },
+  "veil": {
+    "name": "仪式结界",
+    "color": "#dca5e9",
+    "dispellable": true
+  },
+  "thorns": {
+    "name": "荆棘反甲",
+    "color": "#adc690",
+    "dispellable": true
+  },
+  "mirror": {
+    "name": "魔镜",
+    "color": "#80d7db",
+    "dispellable": true
+  },
+  "rage": {
+    "name": "暴走",
+    "color": "#ff9d85"
+  }
+};
+const VERSION = 3;
+const WEAPONS = {
+  "moonblade": {
+    "name": "未明之剑",
+    "type": "剑",
+    "atk": 4,
+    "mag": 1,
+    "effect": "guardbreak",
+    "effectName": "星痕",
+    "desc": "所有攻击有 30% 概率附加 2 回合破甲。",
+    "rarity": "common"
+  },
+  "emberstaff": {
+    "name": "余烬枝",
+    "type": "法杖",
+    "atk": 0,
+    "mag": 5,
+    "effect": "kindle",
+    "effectName": "余火",
+    "desc": "攻击有 25% 概率附加 2 回合燃烧。",
+    "rarity": "common"
+  },
+  "bellwand": {
+    "name": "初祈铃",
+    "type": "铃杖",
+    "atk": 1,
+    "mag": 4,
+    "effect": "lifewell",
+    "effectName": "祈愿",
+    "desc": "每个完整战斗回合结束时，恢复自身 2% 生命。技能或物品点击不重复触发。",
+    "rarity": "common"
+  },
+  "shadowfang": {
+    "name": "薄暮牙",
+    "type": "双刃",
+    "atk": 5,
+    "mag": 0,
+    "effect": "toxin",
+    "effectName": "蛇吻",
+    "desc": "攻击有 25% 概率附加 2 回合中毒。",
+    "rarity": "common"
+  },
+  "clockstaff": {
+    "name": "停摆的秒针",
+    "type": "时杖",
+    "atk": 1,
+    "mag": 4,
+    "effect": "mana",
+    "effectName": "滴答",
+    "desc": "每第 3 个完整战斗回合结束时，自身最长普通技能冷却额外缩短 1。",
+    "rarity": "common"
+  },
+  "bloodedge": {
+    "name": "朱誓",
+    "type": "大剑",
+    "atk": 6,
+    "mag": 0,
+    "effect": "vampire",
+    "effectName": "血契",
+    "desc": "造成的伤害附带 8% 吸血。",
+    "rarity": "common"
+  },
+  "eclipse": {
+    "name": "月蚀·无声",
+    "type": "剑",
+    "atk": 11,
+    "mag": 3,
+    "effect": "execution",
+    "effectName": "终幕",
+    "desc": "对生命低于 40% 的目标，伤害提高 50%。",
+    "rarity": "rare"
+  },
+  "winter": {
+    "name": "白夜之枝",
+    "type": "法杖",
+    "atk": 2,
+    "mag": 12,
+    "effect": "frostbite",
+    "effectName": "永冬",
+    "desc": "对迟缓目标伤害提高 40%，攻击有 30% 概率施加迟缓。",
+    "rarity": "rare"
+  },
+  "duet": {
+    "name": "双生誓言",
+    "type": "双刃",
+    "atk": 9,
+    "mag": 4,
+    "effect": "echo",
+    "effectName": "回响",
+    "desc": "攻击有 28% 概率追加一次 45% 伤害的回声。",
+    "rarity": "rare"
+  },
+  "aurora": {
+    "name": "极光咏叹",
+    "type": "铃杖",
+    "atk": 3,
+    "mag": 11,
+    "effect": "chorus",
+    "effectName": "合唱",
+    "desc": "每个完整战斗回合结束时，治疗生命比例最低的存活队友 8 点。",
+    "rarity": "rare"
+  },
+  "sundial": {
+    "name": "第十三刻",
+    "type": "时杖",
+    "atk": 5,
+    "mag": 10,
+    "effect": "firstlight",
+    "effectName": "破晓",
+    "desc": "每场战斗的前两回合，伤害提高 40%。",
+    "rarity": "rare"
+  },
+  "thorn": {
+    "name": "绯棘王冠",
+    "type": "大剑",
+    "atk": 14,
+    "mag": 0,
+    "effect": "bloodmoon",
+    "effectName": "背水",
+    "desc": "生命低于 50% 时，伤害提高 45%。",
+    "rarity": "rare"
+  },
+  "comet": {
+    "name": "坠星裁决",
+    "type": "剑",
+    "atk": 16,
+    "mag": 7,
+    "effect": "cleave",
+    "effectName": "星屑",
+    "desc": "对单个目标造成伤害后，对其他敌人追加 25% 溅射伤害。",
+    "rarity": "legendary"
+  },
+  "grimoire": {
+    "name": "禁书·第零页",
+    "type": "法杖",
+    "atk": 2,
+    "mag": 20,
+    "effect": "overload",
+    "effectName": "超载",
+    "desc": "技能伤害提高 40%，基础技能冷却额外 +1 回合。",
+    "rarity": "legendary"
+  },
+  "eternity": {
+    "name": "永恒的安可",
+    "type": "铃杖",
+    "atk": 7,
+    "mag": 16,
+    "effect": "phoenix",
+    "effectName": "返魂",
+    "desc": "每场战斗首次倒下时，立即以 35% 生命复活一次。",
+    "rarity": "legendary"
+  },
+  "obsidian": {
+    "name": "黒羽·绝影",
+    "type": "双刃",
+    "atk": 19,
+    "mag": 3,
+    "effect": "affliction",
+    "effectName": "蚀骨",
+    "desc": "每种目标负面状态使伤害提高 18%。",
+    "rarity": "legendary"
+  },
+  "genesis": {
+    "name": "创世时计",
+    "type": "时杖",
+    "atk": 5,
+    "mag": 18,
+    "effect": "economy",
+    "effectName": "零时",
+    "desc": "技能冷却减少 1 回合，最低 2 回合。",
+    "rarity": "legendary"
+  },
+  "requiem": {
+    "name": "葬月挽歌",
+    "type": "大剑",
+    "atk": 22,
+    "mag": 0,
+    "effect": "soulsteal",
+    "effectName": "噬魂",
+    "desc": "击杀敌人后恢复自身 18% 生命。仍只有这一个固有效果。",
+    "rarity": "legendary"
+  }
+};
+const FIELD_TOOLS = {
+  "lure": {
+    "name": "诱导铃",
+    "icon": "sound",
+    "target": "self",
+    "desc": "在当前格留下 5 个节拍的诱饵，吸引路径 6 格内普通敌群。使用不耗时；离开后它们仍走向诱饵，不追你的新位置。精英不受诱导。"
+  },
+  "sleep": {
+    "name": "眠缚铃",
+    "icon": "moon",
+    "target": "pack",
+    "range": 4,
+    "desc": "使已探明、路径 4 格内一队普通敌人停止 3 个节拍；精英仅停 1 拍，之后获得 4 拍抗性。不能反复覆盖。"
+  },
+  "hush": {
+    "name": "静音粉",
+    "icon": "mute",
+    "target": "self",
+    "desc": "接下来的 6 个世界节拍内阻断报警招式。不能撤销已发出的警报，不能阻止精英追击。"
+  }
+};
 
-Object.assign(exports,{VERSION,SAVE_KEY,MAX_FLOOR,DIRECTIONS,FLOORS,JOBS,SKILLS,EVOLUTIONS,STATUS,WEAPONS,BOONS,ENEMY_TYPES,ENCOUNTERS,BOSS_SPECS,INTENTS,RARITIES});
+Object.assign(exports,{BOONS,BOSS_SPECS,DIRECTIONS,ENCOUNTERS,ENEMY_TYPES,EVOLUTIONS,FLOORS,INTENTS,JOBS,MAX_FLOOR,RARITIES,SAVE_KEY,SKILLS,STATUS,VERSION,WEAPONS,FIELD_TOOLS});
 };
 modules['rng']=(exports,require)=>{
 /** Serializable PRNG shared by world generation and combat; rendering never draws randomness. */
@@ -228,7 +1728,7 @@ function shuffle(state,items){const a=[...items];for(let i=a.length-1;i>0;i--){c
 Object.assign(exports,{hash,next,int,pick,shuffle});
 };
 modules['world']=(exports,require)=>{
-const { DIRECTIONS, ENCOUNTERS, ENEMY_TYPES }=require('data');
+const { DIRECTIONS, ENCOUNTERS, ENEMY_TYPES, FIELD_TOOLS }=require('data');
 const { int, pick, shuffle }=require('rng');
 const REGIONS = [
   {name:'银纹前厅',code:'Ⅰ',color:'#9caef9',floor:'#30384a',brick:'#465169',edge:'#7d90b0',mortar:'#283247',style:'stone'},
@@ -300,7 +1800,7 @@ function populatePacks(run){
     if(run.party.length===1)troop=troop.slice(0,run.floor>=3&&i%3===1?2:1);
     else if(run.party.length===2)troop=troop.slice(0,2);
     if(elite)troop=run.party.length===1?['briar']:['sentinel','revenant',...(run.party.length===3?['moth']:[])];
-    d.packs.push({id:`pack-${run.floor}-${i}`,x,y,home:{x,y},previous:null,kind:elite?'elite':'normal',troop,name:elite?'徘徊的强敌':`${ENEMY_TYPES[troop[0]].name}小队`,alert:0,cooldown:0,engaged:false,defeated:false,members:null});
+    d.packs.push({id:`pack-${run.floor}-${i}`,x,y,home:{x,y},previous:null,kind:elite?'elite':'normal',troop,name:elite?'徘徊的强敌':`${ENEMY_TYPES[troop[0]].name}小队`,alert:0,alertUntil:0,alarmTarget:null,cooldown:0,engaged:false,defeated:false,members:null,route:patrolRoute(d,x,y),routeIndex:0,sleepUntil:0,sleepResistUntil:0,lure:null,mode:elite?'elite':'patrol'});
   }
 }
 function revealAround(run){
@@ -313,43 +1813,114 @@ function revealAround(run){
   }
 }
 function visiblePacks(run){return run.dungeon.packs.filter(p=>!p.defeated&&!p.engaged&&run.dungeon.visited[p.y]?.[p.x]);}
+/** A closed, cardinal patrol cycle. It depends only on the map and home coordinate. */
+function patrolRoute(d,sx,sy){
+  const route=[{x:sx,y:sy}],seen=new Set([key(sx,sy)]);
+  const rotation=(sx*17+sy*31)%4;
+  for(let i=0;i<5;i++){
+    const p=route.at(-1);
+    const next=[...DIRECTIONS.slice(rotation),...DIRECTIONS.slice(0,rotation)]
+      .map(v=>({x:p.x+v.x,y:p.y+v.y})).find(q=>isFloor(d,q.x,q.y)&&!seen.has(key(q.x,q.y))&&!(q.x===1&&q.y===1));
+    if(!next)break;route.push(next);seen.add(key(next.x,next.y));
+  }
+  return route.concat(route.slice(1,-1).reverse());
+}
+function packMode(run,p){
+  const now=run.dungeon.elapsed;
+  if(p.sleepUntil>now)return 'sleep';
+  if(p.cooldown>0)return 'rest';
+  if(p.kind==='elite')return 'elite';
+  if(p.alertUntil>now)return 'alarmed';
+  if(p.lure?.until>now)return 'lured';
+  const q=p.route?.[p.routeIndex??0];
+  return q&&(q.x!==p.x||q.y!==p.y)?'return':'patrol';
+}
 function nearbyPacks(run,radius=8){
   const dist=paths(run.dungeon,run.x,run.y);
-  return run.dungeon.packs.filter(p=>!p.defeated&&!p.engaged&&dist[key(p.x,p.y)]<=radius).map(p=>({id:p.id,name:p.name,kind:p.kind,x:p.x,y:p.y,distance:dist[key(p.x,p.y)],eta:Math.max(1,dist[key(p.x,p.y)]),known:!!run.dungeon.visited[p.y]?.[p.x],count:p.members?p.members.filter(e=>e.hp>0).length:p.troop.length})).sort((a,b)=>a.distance-b.distance);
+  return run.dungeon.packs.filter(p=>!p.defeated&&!p.engaged&&(dist[key(p.x,p.y)]<=radius||p.kind==='elite')).map(p=>{
+    const mode=packMode(run,p),distance=dist[key(p.x,p.y)];
+    return {id:p.id,name:p.name,kind:p.kind,x:p.x,y:p.y,distance,mode,eta:mode==='elite'||mode==='alarmed'?Math.max(1,distance):null,
+      known:!!run.dungeon.visited[p.y]?.[p.x],count:p.members?p.members.filter(e=>e.hp>0).length:p.troop.length};
+  }).sort((a,b)=>a.distance-b.distance);
 }
-/** One successful player step, or one completed battle round, advances exactly one world tick.
- * Turns, wall bumps, dialogs and page reloads do not. Occupied cells prevent overlap, not teleporting.
+/** Only a successfully resolved alarm action calls this. Merely starting combat does not. */
+function raiseAlarm(run,radius=8,duration=6){
+  if((run.field?.hushUntil||0)>run.dungeon.elapsed)return {blocked:true,count:0};
+  const dist=paths(run.dungeon,run.x,run.y);let count=0;
+  for(const p of run.dungeon.packs){
+    if(p.defeated||p.engaged||p.kind==='elite'||dist[key(p.x,p.y)]>radius)continue;
+    p.alertUntil=run.dungeon.elapsed+duration;p.alert=duration;p.alarmTarget={x:run.x,y:run.y};p.mode='alarmed';count++;
+  }
+  return {blocked:false,count};
+}
+function useFieldTool(run,id,packId=null){
+  const tool=FIELD_TOOLS[id];
+  if(run.phase!=='explore'||!tool)return {ok:false,error:'地图工具只能在进入战斗前使用。'};
+  if(!(run.fieldSupplies?.[id]>0))return {ok:false,error:'这种地图工具已经用尽。'};
+  const d=run.dungeon,now=d.elapsed;let target=null;
+  if(id==='sleep'){
+    target=d.packs.find(p=>p.id===packId&&!p.defeated&&!p.engaged);
+    if(!target||!d.visited[target.y]?.[target.x]||paths(d,run.x,run.y)[key(target.x,target.y)]>tool.range)return {ok:false,error:'请选择已探明、路径 4 格内的敌群。'};
+    if(target.sleepUntil>now||target.sleepResistUntil>now)return {ok:false,error:'目标仍在眠缚或抗性期间，不能覆盖。'};
+  }
+  if(id==='hush'&&(run.field?.hushUntil||0)>now)return {ok:false,error:'静音粉仍然生效，无需重复使用。'};
+  if(id==='lure'&&d.packs.some(p=>!p.defeated&&!p.engaged&&p.lure?.until>now))return {ok:false,error:'已有诱饵生效；先完成当前诱导。'};
+  let affected=[];
+  if(id==='lure'){
+    const dist=paths(d,run.x,run.y);
+    affected=d.packs.filter(p=>!p.defeated&&!p.engaged&&p.kind!=='elite'&&dist[key(p.x,p.y)]<=6);
+    if(!affected.length)return {ok:false,error:'路径 6 格内没有能被诱导的普通敌群。精英不会响应诱饵。'};
+  }
+  run.fieldSupplies[id]--;run.field??={hushUntil:0};
+  if(id==='sleep'){
+    const duration=target.kind==='elite'?1:3;
+    target.sleepUntil=now+duration;target.sleepResistUntil=now+duration+4;target.mode='sleep';
+  }else if(id==='hush')run.field.hushUntil=now+6;
+  else for(const p of affected){p.lure={x:run.x,y:run.y,until:now+5};p.alertUntil=0;p.alert=0;p.mode='lured';}
+  run.log.push({text:`使用「${tool.name}」${target?' → '+target.name:''}。没有推进世界节拍；效果随后续移动 / 完整战斗回合消耗。`,tone:'special'});
+  if(run.log.length>100)run.log.shift();return {ok:true};
+}
+/** One successful step / wait or one completed combat round = exactly one world tick.
+ * Normal packs follow their fixed route even during combat. Alarm responders target the
+ * alarm location; elites always know the party position. No per-frame or item movement.
  */
 function stepPacks(run,{battle=false,hold=[]}={}){
-  const d=run.dungeon,dist=paths(d,run.x,run.y),active=d.packs.filter(p=>!p.defeated&&!p.engaged);
-  d.elapsed++;
+  const d=run.dungeon,active=d.packs.filter(p=>!p.defeated&&!p.engaged);d.elapsed++;
   const occupied=new Set(active.map(p=>key(p.x,p.y)));
   for(const p of active){
     if(hold.includes(p.id)||(p.x===run.x&&p.y===run.y))continue;
-    if(p.cooldown>0){p.cooldown--;continue;}
-    const distance=dist[key(p.x,p.y)];if(battle&&distance>8)continue;
-    if(distance<=(battle?8:5))p.alert=3;else p.alert=Math.max(0,p.alert-1);
-    const old={x:p.x,y:p.y};occupied.delete(key(p.x,p.y));
-    let options=DIRECTIONS.map(v=>({x:p.x+v.x,y:p.y+v.y})).filter(a=>isFloor(d,a.x,a.y)&&!(a.x===1&&a.y===1)&&(!occupied.has(key(a.x,a.y))||(a.x===run.x&&a.y===run.y)));
-    if(p.alert){
-      options=options.filter(a=>dist[key(a.x,a.y)]<distance);
-      options.sort((a,b)=>dist[key(a.x,a.y)]-dist[key(b.x,b.y)]);
-    }else{
-      const ahead=options.filter(a=>!p.previous||a.x!==p.previous.x||a.y!==p.previous.y);
-      if(ahead.length)options=ahead;options=shuffle(run,options);
+    if(p.cooldown>0){p.cooldown--;p.mode='rest';continue;}
+    if(p.sleepUntil>=d.elapsed){p.mode='sleep';continue;}
+    p.route??=patrolRoute(d,p.home?.x??p.x,p.home?.y??p.y);p.routeIndex??=0;
+    p.alert=Math.max(0,(p.alertUntil||0)-d.elapsed);
+    let target=null,patrol=false;
+    if(p.kind==='elite'){target={x:run.x,y:run.y};p.mode='elite';}
+    else if(p.alertUntil>=d.elapsed&&p.alarmTarget){target=p.alarmTarget;p.mode='alarmed';}
+    else if(p.lure?.until>=d.elapsed){target=p.lure;p.mode='lured';}
+    else{
+      patrol=true;p.mode='patrol';target=p.route[p.routeIndex];
+      if(target.x===p.x&&target.y===p.y)target=p.route[(p.routeIndex+1)%p.route.length];
+      else p.mode='return';
     }
-    if(options.length){p.x=options[0].x;p.y=options[0].y;p.previous=old;}
+    if(!target||(p.x===target.x&&p.y===target.y))continue;
+    const dist=paths(d,target.x,target.y),distance=dist[key(p.x,p.y)];
+    occupied.delete(key(p.x,p.y));
+    const options=DIRECTIONS.map(v=>({x:p.x+v.x,y:p.y+v.y})).filter(q=>isFloor(d,q.x,q.y)&&dist[key(q.x,q.y)]<distance&&(!occupied.has(key(q.x,q.y))||(q.x===run.x&&q.y===run.y)));
+    if(options.length){
+      const next=options[0];p.previous={x:p.x,y:p.y};p.x=next.x;p.y=next.y;
+      if(patrol&&p.x===target.x&&p.y===target.y&&p.mode==='patrol')p.routeIndex=(p.routeIndex+1)%p.route.length;
+    }
     occupied.add(key(p.x,p.y));
   }
   return active.filter(p=>p.x===run.x&&p.y===run.y);
 }
 
-Object.assign(exports,{REGIONS,key,isFloor,paths,regionAt,makeDungeon,populatePacks,revealAround,visiblePacks,nearbyPacks,stepPacks});
+Object.assign(exports,{REGIONS,key,isFloor,paths,regionAt,makeDungeon,populatePacks,revealAround,visiblePacks,patrolRoute,packMode,nearbyPacks,raiseAlarm,useFieldTool,stepPacks});
 };
 modules['engine']=(exports,require)=>{
 const { VERSION, MAX_FLOOR, JOBS, SKILLS, EVOLUTIONS, STATUS, WEAPONS, BOONS, ENEMY_TYPES, ENCOUNTERS, BOSS_SPECS, DIRECTIONS, FLOORS }=require('data');
 const { hash, next, int, pick, shuffle }=require('rng');
-const { key, isFloor, paths, makeDungeon, populatePacks, revealAround, stepPacks, nearbyPacks }=require('world');
+const { key, isFloor, paths, makeDungeon, populatePacks, revealAround, stepPacks, nearbyPacks, raiseAlarm }=require('world');
 // Pure serializable state: UI, timers and rendering cannot advance combat or the world clock.
 function hashSeed(text){return hash(text);}
 function random(state){return next(state);}
@@ -365,12 +1936,12 @@ const live=items=>items.filter(p=>p.hp>0);
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const isBoss=e=>!!e.boss;
 const magicKinds=['magic','heal','cleanse','revive','sanctuary','haste','dispel','delay','echoTime','focus'];
-const magicIntents=['hex','mark','bless','enemyHeal','summon','mirror','sweepMagic'];
+const magicIntents=['alarm','hex','mark','bless','enemyHeal','summon','mirror','sweepMagic'];
 const armIntents=['heavy','hunt','sweep','corrode','cover','thorns'];
 function log(run,text,tone='info'){run.log.push({text,tone});if(run.log.length>100)run.log.shift();}
 function boonCount(run,id){return run.boons[id]||0;}
 function negativeCount(e){return Object.keys(e.status).filter(id=>STATUS[id]?.negative).length;}
-function heroStats(h){return {atk:h.atk+h.weapon.atk,mag:h.mag+h.weapon.mag,def:h.def,spd:h.spd*(h.status.haste?1.5:1)*(h.status.slow?.6:1)};}
+function heroStats(h){return {atk:h.atk+h.weapon.atk,mag:h.mag+h.weapon.mag,def:h.def};}
 function effectiveSkill(hero,id){
   const s=SKILLS[id];if(!s)return null;
   return hero.evolutions?.[id]?{...s,...EVOLUTIONS[id].patch,desc:`${s.desc} 觉醒：${EVOLUTIONS[id].desc}`}:{...s};
@@ -381,16 +1952,41 @@ function makeWeapon(id,floor=1,serial=0){
   return {...base,id,uid:`${id}-${floor}-${serial}`,atk:base.atk+(base.atk>base.mag?bonus:Math.floor(bonus/2)),mag:base.mag+(base.mag>=base.atk?bonus:Math.floor(bonus/2)),floor};
 }
 function makeHero(id,index,solo){
-  const j=JOBS[id],hp=Math.round(j.hp*(solo?1.45:1)),mp=Math.round(j.mp*(solo?1.3:1));
-  return {id:`hero-${index}`,job:id,name:j.person,maxHp:hp,hp,maxMp:mp,mp,atk:j.atk,mag:j.mag,def:j.def,spd:j.spd,weapon:makeWeapon(j.weapon),skills:[...j.skills],ranks:{},evolutions:{},status:{},resists:{},barrier:0,guard:false,phoenixUsed:false,laststandUsed:false};
+  const j=JOBS[id],hp=Math.round(j.hp*(solo?1.45:1));
+  return {id:`hero-${index}`,job:id,name:j.person,maxHp:hp,hp,atk:j.atk,mag:j.mag,def:j.def,weapon:makeWeapon(j.weapon),skills:[...j.skills],ranks:{},evolutions:{},cooldowns:{},usedRound:{},status:{},resists:{},barrier:0,guard:false,phoenixUsed:false,laststandUsed:false};
 }
+const cooldownManipulators=new Set(['haste','bloodpact']);
+function skillCooldown(hero,id){
+  const skill=SKILLS[id];if(!skill)return Infinity;
+  if(!skill.cd)return 0;
+  const rank=hero.ranks?.[id]||0;
+  return Math.max(2,skill.cd-(rank>=2?1:0)+(hero.weapon.effect==='overload'?1:0)-(hero.weapon.effect==='economy'?1:0));
+}
+function cooldownLeft(hero,id){return hero.cooldowns?.[id]||0;}
+function selectHero(run,id){
+  if(run.phase!=='battle'||run.battle.stage!=='prepare'||!run.party.some(p=>p.id===id&&p.hp>0))return false;
+  run.battle.active=id;return true;
+}
+function reduceCooldowns(h,amount,{longest=false,round=0}={}){
+  let ids=Object.keys(h.cooldowns).filter(id=>!cooldownManipulators.has(id)&&h.cooldowns[id]>0);
+  if(longest)ids=ids.sort((a,b)=>h.cooldowns[b]-h.cooldowns[a]).slice(0,1);
+  for(const id of ids)h.cooldowns[id]=Math.max(h.usedRound[id]===round?1:0,h.cooldowns[id]-amount);
+}
+function traceFrame(run,actor,label,style,start=0){
+  // Presentation snapshots are emitted by pure rules, never used to advance game time.
+  run.frames??=[];
+  run.frames.push({actorId:actor?.id||null,side:actor?.job?'party':'enemy',label,style,
+    fx:structuredClone(run.fx.slice(start)),party:structuredClone(run.party),battle:structuredClone(run.battle),log:structuredClone(run.log.slice(-30))});
+}
+function traced(run,actor,label,style,fn){const start=run.fx.length;fn();traceFrame(run,actor,label,style,start);}
+function effectStyle(s){return s.element==='fire'?'fire':s.element==='ice'?'ice':['heal','revive','sanctuary','itemHeal'].includes(s.kind)?'heal':['seal','dispel','magic'].includes(s.kind)?'magic':['physical','attack'].includes(s.kind)?'slash':'shield';}
 function createRun(jobIds,seed){
   if(!Array.isArray(jobIds)||jobIds.length<1||jobIds.length>3||new Set(jobIds).size!==jobIds.length||jobIds.some(j=>!JOBS[j]))throw new Error('请选择 1～3 个不同职业。');
   const cleanSeed=String(seed||'MOON').trim().slice(0,48)||'MOON';
-  const run={version:VERSION,seed:cleanSeed,rng:hash(cleanSeed),phase:'explore',floor:1,party:jobIds.map((j,i)=>makeHero(j,i,jobIds.length===1)),level:1,xp:0,nextXp:85,gold:0,boons:{},inventory:[],supplies:{tonic:3,ether:2,salt:2},battles:0,kills:0,steps:0,guardianDefeated:false,log:[],battle:null,rewards:[],event:null,ending:null,fx:[],serial:0,enemySerial:0,solo:jobIds.length===1,comfort:true,lastPosition:{x:1,y:1}};
+  const run={version:VERSION,seed:cleanSeed,rng:hash(cleanSeed),phase:'explore',floor:1,party:jobIds.map((j,i)=>makeHero(j,i,jobIds.length===1)),level:1,xp:0,nextXp:85,gold:0,boons:{},inventory:[],supplies:{tonic:3,ether:2,salt:2},fieldSupplies:{lure:2,sleep:1,hush:1},field:{hushUntil:0},frames:[],battles:0,kills:0,steps:0,guardianDefeated:false,log:[],battle:null,rewards:[],event:null,ending:null,fx:[],serial:0,enemySerial:0,solo:jobIds.length===1,comfort:true,lastPosition:{x:1,y:1}};
   enterFloor(run,1);
-  log(run,'v0.2 · 明雷探索：每走一格怪物也走一格；战斗每回合末附近小队移动并可能增援。','special');
-  if(run.solo)log(run,'独行誓约：生命 +45%、MP +30%、伤害 +20%。独行是挑战模式；利用有限补给与新技能。','special');
+  log(run,'v0.3 · 冷却战斗：任意切换队员施放技能，点击全队攻击才推进回合。普通怪固定巡逻，报警成功才定向增援。','special');
+  if(run.solo)log(run,'独行誓约：生命 +45%、伤害 +20%。独行是挑战模式；利用有限补给与新技能。','special');
   return run;
 }
 function reveal(run){revealAround(run);}
@@ -398,9 +1994,9 @@ function enterFloor(run,floor){
   if(floor>MAX_FLOOR)return;
   run.floor=floor;run.dungeon=makeDungeon(run,floor);run.x=1;run.y=1;run.lastPosition={x:1,y:1};
   run.dir=DIRECTIONS.findIndex(v=>isFloor(run.dungeon,1+v.x,1+v.y));
-  run.guardianDefeated=false;run.phase='explore';run.battle=null;run.rewards=[];run.event=null;
+  run.guardianDefeated=false;run.phase='explore';run.battle=null;run.rewards=[];run.event=null;run.field={hushUntil:0};
   for(const p of run.party){p.status={};p.resists={};p.guard=false;p.barrier=0;}
-  if(floor>1){run.supplies.tonic=Math.min(5,run.supplies.tonic+2);run.supplies.ether=Math.min(4,run.supplies.ether+1);run.supplies.salt=Math.min(4,run.supplies.salt+2);}
+  if(floor>1){run.fieldSupplies.lure=Math.min(3,run.fieldSupplies.lure+1);run.fieldSupplies.sleep=Math.min(2,run.fieldSupplies.sleep+1);run.fieldSupplies.hush=Math.min(2,run.fieldSupplies.hush+1);run.supplies.tonic=Math.min(5,run.supplies.tonic+2);run.supplies.ether=Math.min(4,run.supplies.ether+1);run.supplies.salt=Math.min(4,run.supplies.salt+2);}
   populatePacks(run);revealAround(run);log(run,`第 ${floor} 层 · ${FLOORS[floor-1].name} · 四个区域有不同地标、墙面和地面。`,'special');
 }
 function turn(run,delta){if(run.phase!=='explore'||!Number.isInteger(delta))return false;run.dir=((run.dir+delta)%4+4)%4;return true;}
@@ -437,11 +2033,11 @@ function resolveEvent(run,choice){
   if(run.phase!=='event'||!run.event)return false;const {type,key:k}=run.event;
   if(choice==='leave'){run.phase='explore';run.event=null;return true;}
   if(type==='shrine'&&choice==='rest'){
-    for(const p of run.party){p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*.45));p.mp=Math.min(p.maxMp,p.mp+Math.ceil(p.maxMp*.5));p.status={};}
-    log(run,'星灯休整：恢复 45% 生命、50% MP。这处灯火只够使用一次。','heal');
+    for(const p of run.party){p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*.45));p.status={};}
+    log(run,'星灯休整：恢复 45% 生命。这处灯火只够使用一次。','heal');
   }else if(type==='fountain'&&choice==='drink'){
-    for(const p of run.party){p.mp=p.maxMp;p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*.18));}
-    log(run,'月之泉恢复了 MP，并补充少量生命。','heal');
+    for(const p of run.party){p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*.28));}
+    run.supplies.tonic=Math.min(5,run.supplies.tonic+1);log(run,'月之泉恢复 28% 生命，并补充一份急救药。','heal');
   }else if(type==='altar'&&['offer','blood'].includes(choice)){
     if(choice==='offer'){if(run.gold<35)return false;run.gold-=35;}
     else for(const p of live(run.party))p.hp=Math.max(1,p.hp-Math.ceil(p.maxHp*.2));
@@ -451,9 +2047,9 @@ function resolveEvent(run,choice){
 }
 function makeEnemy(run,id,{elite=false,boss=false,packId=null}={}){
   const base=ENEMY_TYPES[id],partyFactor=run.party.length===1?.78:run.party.length===2?1.08:1.35;
-  const hp=Math.round(base.hp*(1+(run.floor-1)*(boss?.32:.34))*partyFactor*(elite?1.4:1));
+  const hp=Math.round(base.hp*(boss?1.5:1.28)*(1+(run.floor-1)*(boss?.32:.34))*partyFactor*(elite?1.4:1));
   const atkScale=(1+(run.floor-1)*.25)*(run.solo?.9:1)*(elite?1.18:1);
-  const e={...base,id:`enemy-${++run.enemySerial}`,type:id,packId,maxHp:hp,hp,atk:Math.round(base.atk*atkScale),mag:Math.round(base.mag*atkScale),def:base.def+Math.floor((run.floor-1)*1.4),spd:base.spd,status:{},resists:{},guard:false,intentIndex:0,plannedIntent:base.intent[0],targetId:null,charged:false,barrier:0,phoenixUsed:true,summoned:false,skipActions:0,delayReadyRound:0,readyRound:1};
+  const e={...base,id:`enemy-${++run.enemySerial}`,type:id,packId,maxHp:hp,hp,atk:Math.round(base.atk*atkScale),mag:Math.round(base.mag*atkScale),def:base.def+Math.floor((run.floor-1)*1.4),status:{},resists:{},guard:false,intentIndex:0,plannedIntent:base.intent[0],targetId:null,charged:false,barrier:0,phoenixUsed:true,summoned:false,alarmUsed:false,skipActions:0,delayReadyRound:0,readyRound:1};
   if(boss){
     const spec=BOSS_SPECS[run.floor-1];e.name=spec.name;e.kind=spec.kind;e.tint=spec.tint;
     e.boss={spec:run.floor-1,hpTriggered:[],hpResolved:[],queued:[],pending:null,nextTurn:3,eventSerial:0,lockNotice:false};
@@ -481,12 +2077,15 @@ function joinPacks(run,packs,initial=false){
 function startBattle(run,type='normal',origin=null,packs=null){
   if(run.phase!=='explore')return false;
   run.phase='battle';run.fx=[];
-  for(const p of run.party){p.guard=false;p.status={};p.resists={};p.barrier=0;p.phoenixUsed=false;p.laststandUsed=false;}
-  run.battle={type,origin,packIds:[],enemies:[],round:0,roundClosed:true,queue:[],active:null,serial:0,chainTarget:null,chainActor:null,chain:0,lastSkill:null,escapeAttempts:0};
+  const retry=packs?.map(p=>p.retryParty).filter(Boolean)||[];
+  for(const p of run.party){p.guard=false;p.status={};p.resists={};p.barrier=0;p.phoenixUsed=false;p.laststandUsed=false;p.cooldowns={};p.usedRound={};
+    for(const saved of retry){const prior=saved[p.id];if(!prior)continue;p.phoenixUsed||=prior.phoenixUsed;p.laststandUsed||=prior.laststandUsed;for(const [id,n]of Object.entries(prior.cooldowns||{})){p.cooldowns[id]=Math.max(n,p.cooldowns[id]||0);if(n)p.usedRound[id]=1;}}
+  }
+  run.battle={type,origin,packIds:[],enemies:[],round:0,stage:'prepare',roundClosed:true,queue:[],active:null,serial:0,chainTarget:null,chainActor:null,chain:0,lastSkill:null,escapeAttempts:0};
   if(packs)joinPacks(run,packs,true);
   else run.battle.enemies=defaultTroop(run,type).map(id=>makeEnemy(run,id,{elite:type==='elite',boss:['boss','guardian'].includes(type)}));
   for(const e of run.battle.enemies)if(e.boss){const spec=BOSS_SPECS[e.boss.spec];addStatus(run,e,spec.buff,99);log(run,`${e.name}：${spec.trait}`,'danger');}
-  nextActor(run);return true;
+  run.frames=[];newRound(run);return true;
 }
 function intentOf(enemy){
   if(enemy.skipActions>0)return 'delay';
@@ -495,18 +2094,16 @@ function intentOf(enemy){
   return intent;
 }
 function activeHero(run){return run.battle?run.party.find(p=>p.id===run.battle.active&&p.hp>0)||null:null;}
-function skillCost(hero,id){
-  const s=SKILLS[id];if(!s)return Infinity;let cost=s.cost;
-  if(cost&&!['physical','magic','heal','revive','sanctuary'].includes(s.kind)&&!s.supply)cost=Math.max(1,cost-(hero.ranks[id]||0));
-  if(cost&&hero.weapon.effect==='overload')cost+=2;if(cost&&hero.weapon.effect==='economy')cost=Math.max(1,Math.floor(cost*.65));return cost;
-}
 function skillProblem(run,h,id){
-  const s=effectiveSkill(h,id);if(!s||!['attack','guard','tonic','ether','salt',...h.skills].includes(id))return '尚未习得这个技能。';
-  if(h.mp<skillCost(h,id))return 'MP 不足；防御回复 3 MP，普攻只回复 1 MP。';
-  if(s.supply&&run.supplies[s.supply]<=0)return '这一种队伍补给已用尽。';
-  if(h.status.headbind&&magicKinds.includes(s.kind)&&!s.supply)return '封头中，无法施法。';
-  if(h.status.armbind&&s.kind==='physical')return '封腕中，无法使用物理技能。';
-  if(s.kind==='laststand'&&h.laststandUsed)return '不归之誓每场战斗只能使用一次。';
+  if(!h||h.hp<=0)return '请选择存活的队员。';
+  const skill=effectiveSkill(h,id);
+  if(!skill||!['attack','guard','tonic','ether','salt',...h.skills].includes(id))return '尚未习得这个技能。';
+  if(run.phase==='battle'&&run.battle.stage!=='prepare')return '正在结算攻击阶段。';
+  if(cooldownLeft(h,id)>0)return `冷却中：还需 ${cooldownLeft(h,id)} 回合。`;
+  if(skill.supply&&!(run.supplies[skill.supply]>0))return '这种队伍补给已用尽。';
+  if(h.status.headbind&&magicKinds.includes(skill.kind)&&!skill.supply)return '封头中，无法施法。';
+  if(h.status.armbind&&skill.kind==='physical')return '封腕中，无法使用物理技能。';
+  if(skill.kind==='laststand'&&h.laststandUsed)return '不归之誓每场战斗只能使用一次。';
   return null;
 }
 function addStatus(run,e,id,turns,power=1,extra={}){
@@ -515,7 +2112,7 @@ function addStatus(run,e,id,turns,power=1,extra={}){
   if(['headbind','armbind'].includes(id)&&(e.status[id]||(e.resists?.[id]||0)>=run.battle.round)){
     log(run,`${e.name} 暂时抵抗${STATUS[id].name}。`,'muted');return false;
   }
-  const old=e.status[id];e.status[id]={turns:Math.max(turns,old?.turns||0),power:Math.max(power,old?.power??0),applied:run.battle?.serial||0,...extra};return true;
+  const old=e.status[id];e.status[id]={turns:Math.max(turns,old?.turns||0),power:Math.max(power,old?.power??0),applied:run.battle?.serial||0,appliedRound:run.battle?.round||0,appliedStage:run.battle?.stage||'prepare',...extra};run.fx.push({id:e.id,type:STATUS[id].negative?'debuff':'buff',status:id});return true;
 }
 function cleanseEntity(e){for(const id of Object.keys(e.status))if(STATUS[id]?.negative)delete e.status[id];}
 function heal(run,e,amount){
@@ -547,18 +2144,16 @@ function hurt(run,e,amount,source=null,{direct=false}={}){
   n=Math.min(e.hp,Math.max(0,n));e.hp-=n;if(n)run.fx.push({id:e.id,type:'damage',amount:n});
   if(e.hp<=0&&!revivePhoenix(run,e)){
     log(run,`${e.name}${e.job?' 倒下了。':' 被击败。'}`,e.job?'danger':'battle');
-    if(!e.job){run.kills++;if(source?.weapon?.effect==='soulsteal'){heal(run,source,source.maxHp*.18);source.mp=Math.min(source.maxMp,source.mp+6);}}
+    if(!e.job){run.kills++;if(source?.weapon?.effect==='soulsteal'){heal(run,source,source.maxHp*.18);}}
   }
   return n;
 }
 function tickStart(run,e){
-  e.guard=false;
   for(const id of ['burn','poison'])if(e.hp>0&&e.status[id]){const n=hurt(run,e,e.status[id].power);log(run,`${e.name} 受到 ${n} 点${STATUS[id].name}伤害。`,'muted');}
-  if(e.job&&e.hp>0)e.mp=Math.min(e.maxMp,e.mp+(e.job==='chrono'?1:0)+boonCount(run,'focus'));
 }
 function tickEnd(run,e){
   for(const [id,s]of Object.entries(e.status)){
-    if(s.expiresRound!==undefined||s.persistent||s.applied===run.battle.serial)continue;
+    if(s.expiresRound!==undefined||s.persistent||(s.appliedRound===run.battle.round&&['enemy','end'].includes(s.appliedStage)))continue;
     s.turns--;if(s.turns<=0){delete e.status[id];if(['headbind','armbind'].includes(id))e.resists[id]=run.battle.round+2;}
   }
 }
@@ -607,10 +2202,10 @@ function enemyDamage(run,e,target,power,magic=false,{trigger=false}={}){
   if(target.hp<=0||e.hp<=0)return;
   if(target.status.dodge?.power>0){target.status.dodge.power--;if(!target.status.dodge.power)delete target.status.dodge;log(run,`${target.name} 的残影避开了 ${e.name}。`,'special');return;}
   let dmg=Math.max(3,(magic?e.mag:e.atk)*power-target.def*(magic?.3:.65))*(.94+next(run)*.12);
-  if(target.guard)dmg*=.35;if(target.status.protect)dmg*=1-(target.status.protect.power||.4);
+  if(target.guard)dmg*=.35;dmg*=1-boonCount(run,'swift')*.04;if(target.status.protect)dmg*=1-(target.status.protect.power||.4);
   if(target.job==='knight'&&!magic)dmg*=.82;
   if(target.status.break&&!magic)dmg*=1.3;if(target.status.marked)dmg*=1.2;
-  if(e.status.fury)dmg*=1.3;if(e.status.weak)dmg*=.75;if(e.status.rage)dmg*=e.status.rage.power;
+  if(e.status.fury)dmg*=1.3;if(e.status.haste)dmg*=1.2;if(e.status.slow)dmg*=.85;if(e.status.weak)dmg*=.75;if(e.status.rage)dmg*=e.status.rage.power;
   const dealt=hurt(run,target,dmg,e,{direct:true});
   log(run,`${e.name}${trigger?' · 预兆':''} → ${target.name} ${dealt} 伤害`,'enemy');
   if(target.hp>0&&target.status.counter&&e.hp>0){
@@ -624,9 +2219,15 @@ function enemyAct(run,e){
   if(intent==='delay'){e.skipActions--;log(run,`${e.name} 的行动被延后。`,'special');return;}
   // A seal consumes the original action, rather than stockpiling casts until it expires.
   e.intentIndex++;
+  if(intent==='alarm'){
+    if(e.alarmUsed){log(run,`${e.name} 的报警器已耗尽。`,'muted');return;}
+    e.alarmUsed=true;const alarm=raiseAlarm(run);
+    log(run,alarm.blocked?`${e.name} 的警报被静音粉阻断。`:`${e.name} 发出警报！${alarm.count} 个普通敌群向此处赶来。`,'danger');
+    run.fx.push({id:e.id,type:'alarm',blocked:alarm.blocked});return;
+  }
   if(intent==='cover'){
     for(const ally of live(run.battle.enemies))addStatus(run,ally,'protect',2,.35);
-    e.coverUntil=run.battle.round;log(run,`${e.name} 守护全队，并分担本回合单体攻击。`,'enemy');return;
+    e.coverUntil=run.battle.round+1;log(run,`${e.name} 守护全队，并分担本回合单体攻击。`,'enemy');return;
   }
   if(intent==='bless'){for(const ally of live(run.battle.enemies))addStatus(run,ally,'fury',3);log(run,'敌方支援者为全队施加狂热。','danger');return;}
   if(intent==='enemyHeal'){
@@ -642,7 +2243,7 @@ function enemyAct(run,e){
     heal(run,e,e.mag*.6);return;
   }
   if(intent==='charge'){e.charged=true;return;}
-  const party=live(run.party);let target=party.find(p=>p.id===e.targetId)||party[0];
+  const party=live(run.party);let target=(intent==='hunt'?party.find(p=>p.status.marked||p.status.poison):null)||party.find(p=>p.id===e.targetId)||party[0];
   const bait=party.find(p=>p.status.taunt);if(bait)target=bait;
   const targets=['sweep','sweepMagic'].includes(intent)?party:[target];
   for(const p of targets){
@@ -678,48 +2279,80 @@ function resolveTrigger(run,e){
   e.boss.pending=null;e.boss.lockNotice=false;
 }
 function newRound(run){
-  const b=run.battle;b.round++;b.roundClosed=false;b.chain=0;b.chainActor=null;b.chainTarget=null;
-  for(const e of live(b.enemies))if(e.boss){
-    const boss=e.boss,spec=BOSS_SPECS[boss.spec];
-    if(b.round>=13)addStatus(run,e,'rage',99,1+(b.round-12)*.12);
-    if(!boss.pending){
-      if(boss.queued.length)armTrigger(run,e,boss.queued.shift());
-      else if(b.round>=boss.nextTurn){armTrigger(run,e,{key:`turn-${b.round}`,name:spec.turnName,counter:spec.turnCounter,source:`第 ${b.round} 回合`});boss.nextTurn=b.round+spec.period;}
+  const b=run.battle;b.round++;b.serial++;b.stage='prepare';b.roundClosed=false;b.chain=0;b.chainActor=null;b.chainTarget=null;b.queue=[];
+  for(const p of run.party)p.guard=false;
+  if(!live(run.party).some(p=>p.id===b.active))b.active=live(run.party)[0]?.id||null;
+  for(const e of live(b.enemies)){
+    if(e.boss){
+      const boss=e.boss,spec=BOSS_SPECS[boss.spec];
+      if(b.round>=13)addStatus(run,e,'rage',99,1+(b.round-12)*.12);
+      if(!boss.pending){
+        if(boss.queued.length)armTrigger(run,e,boss.queued.shift());
+        else if(b.round>=boss.nextTurn){armTrigger(run,e,{key:`turn-${b.round}`,name:spec.turnName,counter:spec.turnCounter,source:`第 ${b.round} 回合`});boss.nextTurn=b.round+spec.period;}
+      }
     }
+    planEnemy(run,e);
   }
-  for(const e of live(b.enemies))planEnemy(run,e);
-  const units=[...live(run.party),...live(b.enemies).filter(e=>e.readyRound<=b.round)];
-  b.queue=units.map(e=>({id:e.id,speed:e.job?heroStats(e).spd:e.spd*(e.status.haste?1.5:1)*(e.status.slow?.6:1),tie:next(run)})).sort((a,c)=>c.speed-a.speed||c.tie-a.tie).map(e=>e.id);
 }
 function closeRound(run){
   const b=run.battle;if(b.roundClosed||b.round===0)return;
-  b.roundClosed=true;b.queue=[];
-  for(const e of live(b.enemies))if(e.boss)resolveTrigger(run,e);
-  // Round-long defenses persist through the trigger, then expire; this order is intentional.
-  for(const e of [...run.party,...b.enemies])for(const [id,s]of Object.entries(e.status))if(s.expiresRound!==undefined&&s.expiresRound<=b.round)delete e.status[id];
+  b.roundClosed=true;b.stage='end';b.queue=[];
+  for(const e of live(b.enemies))if(e.boss?.pending&&e.boss.pending.dueRound<=b.round){
+    traced(run,e,e.boss.pending.name,'omen',()=>resolveTrigger(run,e));
+  }
+  // One round means one duration/cooldown tick, not one click, item, or individual strike.
+  for(const entity of [...run.party,...b.enemies]){
+    tickEnd(run,entity);
+    for(const [id,status]of Object.entries(entity.status))if(status.expiresRound!==undefined&&status.expiresRound<=b.round)delete entity.status[id];
+  }
+  for(const p of run.party){
+    for(const id of Object.keys(p.cooldowns))p.cooldowns[id]=Math.max(0,p.cooldowns[id]-1);
+    if(p.hp<=0)continue;
+    if(b.round%3===0){if(p.job==='chrono')reduceCooldowns(p,1,{longest:true,round:b.round});if(p.weapon.effect==='mana')reduceCooldowns(p,1,{longest:true,round:b.round});}
+    if(p.weapon.effect==='lifewell')heal(run,p,p.maxHp*.02);
+    if(p.weapon.effect==='chorus'){const ally=live(run.party).sort((a,c)=>a.hp/a.maxHp-c.hp/c.maxHp)[0];if(ally)heal(run,ally,8);}
+    if(boonCount(run,'focus'))heal(run,p,p.maxHp*.01*boonCount(run,'focus'));
+  }
   if(live(run.party).length)joinPacks(run,stepPacks(run,{battle:true}));
 }
 function checkFinish(run){
   const b=run.battle;if(!b)return true;
   if(!live(run.party).length){run.phase='ended';run.ending='defeat';b.active=null;log(run,'星灯熄灭了。下一次，带着新的战术重新出发。','danger');return true;}
-  if(!live(b.enemies).length){
-    closeRound(run); // Even the final partial round advances nearby packs once before victory.
-    if(!live(run.party).length)return checkFinish(run);
-    if(!live(b.enemies).length){finishBattle(run);return true;}
-  }
+  if(!live(b.enemies).length){finishBattle(run);return true;}
+  if(!live(run.party).some(p=>p.id===b.active))b.active=live(run.party)[0].id;
   return false;
 }
-function nextActor(run){
-  for(let i=0;i<180&&run.phase==='battle';i++){
-    if(checkFinish(run))return;const b=run.battle;
-    if(!b.queue.length){if(b.round&&!b.roundClosed)closeRound(run);if(checkFinish(run))return;newRound(run);}
-    const id=b.queue.shift(),e=[...run.party,...b.enemies].find(e=>e.id===id);
-    if(!e||e.hp<=0)continue;
-    b.serial++;b.active=id;tickStart(run,e);if(checkFinish(run))return;if(e.hp<=0)continue;
-    if(e.job)return;
-    enemyAct(run,e);tickEnd(run,e);if(checkFinish(run))return;
+function attackRound(run,targetId=null,{retreat=false}={}){
+  if(run.phase!=='battle'||run.battle.stage!=='prepare')return {ok:false,error:'当前不能结束准备阶段。'};
+  const b=run.battle;
+  if(targetId&&!b.enemies.some(e=>e.hp>0&&e.id===targetId))return {ok:false,error:'请选择存活的敌人。'};
+  run.fx=[];run.frames=[];b.stage='attack';
+  for(const h of live(run.party)){
+    if(!live(b.enemies).length)break;
+    traced(run,h,h.guard?'防御':retreat?'撤退掩护':'普通攻击',h.guard||retreat?'shield':'slash',()=>{
+      tickStart(run,h);
+      if(h.hp<=0||h.guard||retreat)return;
+      const target=b.enemies.find(e=>e.id===targetId&&e.hp>0)||live(b.enemies)[0];
+      if(target)damageTarget(run,h,target,{...SKILLS.attack,name:'普通攻击'},0);
+    });
   }
-  if(run.phase==='battle'&&!activeHero(run))throw new Error('Turn scheduler did not reach a player action.');
+  b.stage='enemy';
+  // Enemy formation order, never a speed race. New summons cannot act in their arrival round.
+  for(const enemy of [...live(b.enemies)].filter(e=>e.readyRound<=b.round)){
+    if(!live(run.party).length)break;
+    if(enemy.hp<=0)continue;
+    const intent=intentOf(enemy);
+    traced(run,enemy,enemy.boss?.pending?.dueRound===b.round?'预兆蓄势':intent,intent==='alarm'?'alarm':['hex','sweepMagic'].includes(intent)?'fire':['enemyHeal','bless','cover','mirror','thorns','summon'].includes(intent)?'shield':'slash',()=>{
+      enemy.guard=false;tickStart(run,enemy);
+      if(enemy.hp<=0)return;
+      if(enemy.boss?.pending?.dueRound===b.round)return; // An omen replaces its normal attack.
+      enemyAct(run,enemy);
+    });
+  }
+  if(!live(run.party).length){checkFinish(run);return {ok:true};}
+  closeRound(run);
+  if(!checkFinish(run))newRound(run);
+  return {ok:true};
 }
 function applySkillStatus(run,h,target,s){
   if(!s.status||target.hp<=0)return;
@@ -775,9 +2408,11 @@ function damageTarget(run,h,target,s,rank,extraScale=1){
   if(s.spreadPoison&&poisoned)for(const other of live(b.enemies).filter(e=>e!==target))applySkillStatus(run,h,other,s);
   if(effect==='cleave'&&s.target==='enemy')for(const other of live(b.enemies).filter(e=>e!==target)){hurt(run,other,dealt*.25,h,{direct:true});bossHit(run,other);}
 }
-function act(run,skillId,targetId=null){
+function act(run,skillId,targetId=null,heroId=null){
   if(run.phase!=='battle')return {ok:false,error:'不在战斗中。'};
-  const h=activeHero(run);if(!h)return {ok:false,error:'尚未轮到我方行动。'};
+  if(run.battle.stage!=='prepare')return {ok:false,error:'正在结算攻击阶段。'};
+  const h=heroId?run.party.find(p=>p.id===heroId&&p.hp>0):activeHero(run);if(!h)return {ok:false,error:'请选择存活的队员。'};
+  if(skillId==='attack')return attackRound(run,targetId);
   if(skillId==='escape')return escapeBattle(run,h);
   const problem=skillProblem(run,h,skillId);if(problem)return {ok:false,error:problem};
   const s=effectiveSkill(h,skillId),b=run.battle;
@@ -794,7 +2429,8 @@ function act(run,skillId,targetId=null){
     if(!e.boss&&(e.skipActions>0||e.delayReadyRound>b.round))return {ok:false,error:'目标暂时抵抗行动延后。'};
   }
   // No RNG or resources are touched until all ownership, target and availability checks pass.
-  h.mp-=skillCost(h,skillId);if(s.supply)run.supplies[s.supply]--;run.fx=[];b.lastSkill=skillId;
+  if(s.supply)run.supplies[s.supply]--;run.fx=[];run.frames=[];b.lastSkill=skillId;
+  if(s.cd){h.cooldowns[skillId]=skillCooldown(h,skillId);h.usedRound[skillId]=b.round;}
   const rank=h.ranks[skillId]||0,scale=1+rank*.12,stats=heroStats(h);
   const roundBuff=(p,id,power=1,extra={})=>addStatus(run,p,id,1,power,{expiresRound:b.round,...extra});
   if(['physical','magic','attack'].includes(s.kind)){
@@ -803,24 +2439,23 @@ function act(run,skillId,targetId=null){
     if(focused)delete h.status.focus;if(echo)delete h.status.echo;
     for(let pass=0;pass<repeats+(echo?1:0);pass++)for(let hit=0;hit<hits;hit++)for(const e of targets)if(h.hp>0&&e.hp>0)damageTarget(run,h,e,s,rank,pass>=repeats?.6:focused?.9:1);
     if(s.kind==='physical')delete h.status.pierce;
-    if(skillId==='attack')h.mp=Math.min(h.maxMp,h.mp+1);
     if(skillId==='starfall')roundBuff(h,'counter',1.1,{charges:1});
-  }else if(s.kind==='guard'){h.guard=true;h.mp=Math.min(h.maxMp,h.mp+3);log(run,`${h.name} 防御，回复 3 MP。`,'heal');}
+  }else if(s.kind==='guard'){h.guard=!h.guard;log(run,`${h.name} ${h.guard?'进入防御姿态，本轮不普通攻击':'解除防御，参加全队攻击'}。`,'special');}
   else if(s.kind==='aegis'){
     for(const p of live(run.party))roundBuff(p,'protect',.4);
     addStatus(run,h,'taunt',2);if(s.retaliate)roundBuff(h,'counter',1.1,{charges:1});log(run,`${h.name} 展开壁垒：本回合全队减伤，自己吸引攻击。`,'special');
   }else if(s.kind==='counter'){roundBuff(h,'protect',.5);roundBuff(h,'counter',1.1);addStatus(run,h,'taunt',2);}
   else if(s.kind==='intercept'){for(const p of targets){roundBuff(p,'protect',.6);roundBuff(p,'immune');}}
   else if(s.kind==='heal'){
-    const p=targets[0],amount=(stats.mag*1.65+12)*scale*(h.job==='shrine'?1.15:1),actual=heal(run,p,amount);
+    const p=targets[0],amount=(stats.mag*1.65+12)*scale*(h.job==='shrine'?1.15:1)*(1+boonCount(run,'spirit')*.1),actual=heal(run,p,amount);
     if(s.overflow){p.barrier=Math.min(Math.ceil(p.maxHp*.25),p.barrier+Math.max(0,Math.round(amount)-actual));log(run,`${p.name} 获得 ${p.barrier} 点余辉护盾。`,'special');}
   }else if(s.kind==='cleanse'){for(const p of targets){cleanseEntity(p);if(s.immunity)roundBuff(p,'immune');}log(run,'净铃解除了全队异常。','heal');}
   else if(s.kind==='revive'){
     const p=targets[0];if(p.hp<=0){p.hp=Math.min(p.maxHp,Math.ceil(p.maxHp*.35*scale));p.status={};run.fx.push({id:p.id,type:'heal',amount:p.hp});}else heal(run,p,p.maxHp*.35*scale);
-  }else if(s.kind==='sanctuary'){for(const p of targets){heal(run,p,(stats.mag+12)*scale*1.15);cleanseEntity(p);roundBuff(p,'immune');}}
+  }else if(s.kind==='sanctuary'){for(const p of targets){heal(run,p,(stats.mag+12)*scale*1.15*(1+boonCount(run,'spirit')*.1));cleanseEntity(p);roundBuff(p,'immune');}}
   else if(s.kind==='seal'){for(const e of targets)addStatus(run,e,'headbind',s.turns);}
   else if(s.kind==='phantom'){roundBuff(h,'dodge',2);roundBuff(h,'taunt');}
-  else if(s.kind==='haste'){for(const p of targets)addStatus(run,p,'haste',3);}
+  else if(s.kind==='haste'){for(const p of targets){reduceCooldowns(p,1,{round:b.round});addStatus(run,p,'haste',2);}}
   else if(s.kind==='dispel')dispel(run,targets[0],s.dispel);
   else if(s.kind==='delay'){
     const e=targets[0];if(e.boss){e.boss.pending.dueRound++;e.boss.pending.delayed=true;log(run,`预兆延至第 ${e.boss.pending.dueRound} 回合末，仍须完成解除条件。`,'special');}
@@ -828,27 +2463,31 @@ function act(run,skillId,targetId=null){
   }else if(s.kind==='focus')addStatus(run,h,'focus',99,1,{persistent:true});
   else if(s.kind==='echoTime')addStatus(run,targets[0],'echo',99,1,{persistent:true});
   else if(s.kind==='bloodpact'){
-    h.hp=Math.max(1,h.hp-Math.ceil(h.maxHp*.18));h.mp=Math.min(h.maxMp,h.mp+8+rank*2);addStatus(run,h,'fury',3);
+    h.hp=Math.max(1,h.hp-Math.ceil(h.maxHp*.18));reduceCooldowns(h,1,{round:b.round});addStatus(run,h,'fury',2);
     if(s.pierce)addStatus(run,h,'pierce',99,1,{persistent:true});
   }else if(s.kind==='laststand'){h.laststandUsed=true;roundBuff(h,'laststand');}
   else if(s.kind==='itemHeal')heal(run,targets[0],targets[0].maxHp*.35);
-  else if(s.kind==='itemMp')targets[0].mp=Math.min(targets[0].maxMp,targets[0].mp+14);
-  if(h.hp>0){
-    if(h.weapon.effect==='lifewell')heal(run,h,h.maxHp*.02);
-    if(h.weapon.effect==='mana')h.mp=Math.min(h.maxMp,h.mp+1);
-    if(h.weapon.effect==='chorus'){const p=live(run.party).sort((a,c)=>a.hp/a.maxHp-c.hp/c.maxHp)[0];if(p)heal(run,p,8);}
-  }
-  tickEnd(run,h);if(!checkFinish(run))nextActor(run);return {ok:true};
+  else if(s.kind==='itemCooldown')reduceCooldowns(targets[0],1,{round:b.round});
+  traceFrame(run,h,s.name,effectStyle(s));
+  checkFinish(run);return {ok:true};
 }
+function useSupply(run,id,targetId){
+  if(run.phase==='battle')return act(run,id,targetId);
+  if(run.phase!=='explore'||id!=='tonic')return {ok:false,error:'探索中只有急救药可直接治疗；地图工具请使用战前工具。'};
+  const h=run.party.find(p=>p.id===targetId&&p.hp>0);
+  if(!h||h.hp>=h.maxHp||!(run.supplies.tonic>0))return {ok:false,error:'请选择受伤且存活的队友，并确认还有急救药。'};
+  run.supplies.tonic--;run.fx=[];run.frames=[];heal(run,h,h.maxHp*.35);log(run,`使用急救药治疗 ${h.name}；不推进时间。`,'heal');return {ok:true};
+}
+
 function escapeBattle(run,h){
   const b=run.battle;if(['guardian','boss'].includes(b.type))return {ok:false,error:'月门封闭，首领战不能撤退。'};
-  run.fx=[];b.escapeAttempts++;
+  run.fx=[];run.frames=[];b.escapeAttempts++;
   if(b.escapeAttempts>=2||next(run)<.7){
-    for(const p of run.dungeon.packs.filter(p=>b.packIds.includes(p.id))){p.members=b.enemies.filter(e=>e.packId===p.id);p.defeated=!live(p.members).length;p.engaged=false;p.cooldown=2;}
+    for(const p of run.dungeon.packs.filter(p=>b.packIds.includes(p.id))){p.members=b.enemies.filter(e=>e.packId===p.id);p.defeated=!live(p.members).length;p.engaged=false;p.cooldown=2;p.retryParty=Object.fromEntries(run.party.map(h=>[h.id,{cooldowns:{...h.cooldowns},phoenixUsed:h.phoenixUsed,laststandUsed:h.laststandUsed}]));}
     for(const p of run.party){p.status={};p.guard=false;p.barrier=0;}
-    run.battle=null;run.phase='explore';log(run,'成功撤退。敌人保留剩余生命，在原地整顿两次移动；现在应离开这一格。','muted');return {ok:true};
+    run.battle=null;run.phase='explore';log(run,'成功撤退。敌人保留剩余生命，在原地整顿两次移动；重返同一战斗不重置技能冷却或一次性保命。现在应离开这一格。','muted');return {ok:true};
   }
-  log(run,'撤退失败；下次撤退必定成功。','danger');tickEnd(run,h);nextActor(run);return {ok:true};
+  log(run,'撤退失败；失去本轮攻击机会，敌方行动。下次撤退必定成功。','danger');return attackRound(run,null,{retreat:true});
 }
 function finishBattle(run){
   const b=run.battle;run.battles++;
@@ -856,12 +2495,12 @@ function finishBattle(run){
   const xp=18+run.floor*8+b.enemies.length*7+(b.type!=='normal'?25:0),coins=int(run,12,22)*run.floor;run.xp+=xp;run.gold+=coins;
   for(const p of run.party){
     if(p.hp<=0)p.hp=Math.ceil(p.maxHp*.1);
-    p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*(.02+boonCount(run,'victory')*.04)));p.mp=Math.min(p.maxMp,p.mp+1);p.status={};p.resists={};p.guard=false;p.barrier=0;
+    p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*(.02+boonCount(run,'victory')*.04)));p.status={};p.resists={};p.guard=false;p.barrier=0;
   }
   while(run.xp>=run.nextXp&&run.level<12){
     run.xp-=run.nextXp;run.level++;run.nextXp=65+run.level*35;
-    for(const p of run.party){p.maxHp+=5;p.hp=Math.min(p.maxHp,p.hp+5);p.maxMp+=2;p.mp=Math.min(p.maxMp,p.mp+2);p[JOBS[p.job].growth]++;if(p.job==='knight'&&run.level%2===0)p.def++;}
-    log(run,`Lv.${run.level}：职业主属性成长；不再大量回满生命与 MP。`,'special');
+    for(const p of run.party){p.maxHp+=5;p.hp=Math.min(p.maxHp,p.hp+5);p[JOBS[p.job].growth]++;if(p.job==='knight'&&run.level%2===0)p.def++;}
+    log(run,`Lv.${run.level}：职业主属性成长；仅补充新增生命上限。`,'special');
   }
   log(run,`战斗胜利 · 经验 +${xp} · 星砂 +${coins}`,'loot');
   if(b.origin&&run.dungeon.events[b.origin]&&['guardian','boss'].includes(b.type))run.guardianDefeated=true;
@@ -904,7 +2543,7 @@ function takeReward(run,index,heroId=null){
   if(r.type==='boon'){
     const boon=BOONS.find(b=>b.id===r.id);if(!boon||boonCount(run,boon.id)>=boon.cap)return {ok:false,error:'祝福已达到上限。'};
     run.boons[boon.id]=boonCount(run,boon.id)+1;
-    if(boon.type==='stat')for(const p of run.party){p[boon.stat]+=boon.value;if(boon.stat==='maxHp')p.hp=Math.min(p.maxHp,p.hp+boon.value);if(boon.stat==='maxMp')p.mp=Math.min(p.maxMp,p.mp+boon.value);}
+    if(boon.type==='stat')for(const p of run.party){p[boon.stat]+=boon.value;if(boon.stat==='maxHp')p.hp=Math.min(p.maxHp,p.hp+boon.value);}
     log(run,`获得祝福「${boon.name}」。`,'loot');
   }else if(['skill','learn','evolve'].includes(r.type)){
     const p=run.party.find(p=>p.id===r.heroId),allowed=p&&[...JOBS[p.job].skills,...JOBS[p.job].advanced].includes(r.skillId);
@@ -929,10 +2568,10 @@ function equipWeapon(run,heroId,uid){
   if(run.phase!=='explore')return false;const p=run.party.find(p=>p.id===heroId),i=run.inventory.findIndex(w=>w.uid===uid);
   if(!p||i<0)return false;[p.weapon,run.inventory[i]]=[run.inventory[i],p.weapon];log(run,`${p.name} 换上了「${p.weapon.name}」。`,'loot');return true;
 }
-function serializeRun(run){return JSON.stringify(run);}
+function serializeRun(run){const {fx,frames,...state}=run;return JSON.stringify(state);}
 function restoreRun(text){
   let r;try{r=JSON.parse(text);}catch{throw new Error('存档无法读取。');}
-  if(r?.version!==VERSION)throw new Error('v0.2 战术规则需要新的一局；v0.1 存档未删除，但不兼容新规则。');
+  if(r?.version!==VERSION)throw new Error('v0.3 改用冷却制与双方回合，需要开始新局；旧版存档保留且未删除。');
   const fail=msg=>{throw new Error(`存档损坏：${msg}`);};
   if(!['explore','battle','reward','event','ended'].includes(r.phase)||!Array.isArray(r.party)||r.party.length<1||r.party.length>3||!Number.isInteger(r.floor)||r.floor<1||r.floor>MAX_FLOOR||!Number.isInteger(r.rng))fail('冒险结构');
   const d=r.dungeon;
@@ -945,8 +2584,9 @@ function restoreRun(text){
     if(!JOBS[p.job]||!WEAPONS[p.weapon?.id]||!Array.isArray(p.skills)||!p.ranks||!p.evolutions||!p.status||!p.resists)fail('角色');
     const allowed=[...JOBS[p.job].skills,...JOBS[p.job].advanced];
     if(new Set(p.skills).size!==p.skills.length||p.skills.some(id=>!allowed.includes(id))||Object.entries(p.ranks).some(([id,n])=>!p.skills.includes(id)||!Number.isInteger(n)||n<0||n>2)||Object.keys(p.evolutions).some(id=>!EVOLUTIONS[id]||!p.skills.includes(id)))fail('技能');
-    for(const k of ['hp','maxHp','mp','maxMp','atk','mag','def','spd','barrier'])if(!Number.isFinite(p[k])||p[k]<0)fail('角色数值');
-    if(p.maxHp<1||p.hp>p.maxHp||p.mp>p.maxMp)fail('角色上限');
+    for(const k of ['hp','maxHp','atk','mag','def','barrier'])if(!Number.isFinite(p[k])||p[k]<0)fail('角色数值');
+    if(p.maxHp<1||p.hp>p.maxHp)fail('角色上限');
+    if(!p.cooldowns||!p.usedRound||Object.entries(p.cooldowns).some(([id,n])=>!p.skills.includes(id)||!Number.isInteger(n)||n<0||n>30)||Object.entries(p.usedRound).some(([id,n])=>!p.skills.includes(id)||!Number.isInteger(n)||n<0))fail('技能冷却');
   }
   if(!r.supplies||['tonic','ether','salt'].some(k=>!Number.isInteger(r.supplies[k])||r.supplies[k]<0||r.supplies[k]>99))fail('补给');
   if(!Array.isArray(r.log)||!Array.isArray(r.inventory)||!Array.isArray(r.rewards)||!r.boons)fail('记录');
@@ -954,7 +2594,7 @@ function restoreRun(text){
   if(new Set(d.packs.map(p=>p.id)).size!==d.packs.length||d.packs.some(p=>!isFloor(d,p.x,p.y)||!Array.isArray(p.troop)||p.troop.some(id=>!ENEMY_TYPES[id])))fail('敌方小队');
   if(r.phase==='battle'){
     const b=r.battle;
-    if(!b||!Array.isArray(b.enemies)||!Array.isArray(b.queue)||!Number.isInteger(b.round)||b.round<1||!r.party.some(p=>p.id===b.active&&p.hp>0))fail('战斗');
+    if(!b||!Array.isArray(b.enemies)||b.stage!=='prepare'||!Array.isArray(b.queue)||!Number.isInteger(b.round)||b.round<1||!r.party.some(p=>p.id===b.active&&p.hp>0))fail('战斗');
     if(new Set(b.enemies.map(e=>e.id)).size!==b.enemies.length||b.enemies.some(e=>!ENEMY_TYPES[e.type]||!Number.isFinite(e.hp)||e.hp<0||e.hp>e.maxHp||!e.status||!e.resists))fail('敌人');
     const ids=[...r.party,...b.enemies].map(e=>e.id);if(b.queue.some(id=>!ids.includes(id)))fail('行动序列');
     for(const e of b.enemies)if(e.boss){const x=e.boss;if(!BOSS_SPECS[x.spec]||!Array.isArray(x.queued)||!Array.isArray(x.hpTriggered)||!Array.isArray(x.hpResolved))fail('首领');if(x.pending&&(!Number.isInteger(x.pending.dueRound)||x.pending.dueRound<x.pending.bornRound))fail('预兆');}
@@ -963,10 +2603,18 @@ function restoreRun(text){
   }
   if(r.phase==='event'&&(!r.event||!d.events[r.event.key]))fail('事件');
   if(r.phase==='reward'&&(r.rewards.length!==3||r.rewards.some(x=>!['boon','weapon','skill','learn','evolve'].includes(x.type))))fail('奖励');
-  r.fx=[];return r;
+  if(!r.fieldSupplies||['lure','sleep','hush'].some(id=>!Number.isInteger(r.fieldSupplies[id])||r.fieldSupplies[id]<0||r.fieldSupplies[id]>99)||!r.field||!Number.isInteger(r.field.hushUntil))fail('地图补给');
+  for(const p of d.packs){
+    if(!Array.isArray(p.route)||!p.route.length||p.route.some(q=>!isFloor(d,q.x,q.y))||!Number.isInteger(p.routeIndex)||p.routeIndex<0||p.routeIndex>=p.route.length)fail('巡逻路线');
+    for(let i=0;i<p.route.length;i++){const a=p.route[i],b=p.route[(i+1)%p.route.length];if(Math.abs(a.x-b.x)+Math.abs(a.y-b.y)>1)fail('巡逻连通性');}
+    for(const id of ['sleepUntil','sleepResistUntil','alertUntil','cooldown'])if(!Number.isInteger(p[id])||p[id]<0)fail('世界状态');
+    if(p.alarmTarget&&!isFloor(d,p.alarmTarget.x,p.alarmTarget.y))fail('报警坐标');
+    if(p.lure&&(!isFloor(d,p.lure.x,p.lure.y)||!Number.isInteger(p.lure.until)))fail('诱饵');
+  }
+  r.fx=[];r.frames=[];return r;
 }
 
-Object.assign(exports,{hashSeed,random,integer,choose,shuffled,cellKey,walkable,distances,generateDungeon,reinforcementInfo,boonCount,negativeCount,heroStats,effectiveSkill,makeWeapon,createRun,reveal,turn,move,waitTurn,currentEvent,interact,resolveEvent,startBattle,intentOf,activeHero,skillCost,skillProblem,counterText,bossWarnings,act,growthChoices,openRewards,takeReward,equipWeapon,serializeRun,restoreRun});
+Object.assign(exports,{hashSeed,random,integer,choose,shuffled,cellKey,walkable,distances,generateDungeon,reinforcementInfo,boonCount,negativeCount,heroStats,effectiveSkill,makeWeapon,skillCooldown,cooldownLeft,selectHero,createRun,reveal,turn,move,waitTurn,currentEvent,interact,resolveEvent,startBattle,intentOf,activeHero,skillProblem,counterText,bossWarnings,attackRound,act,useSupply,growthChoices,openRewards,takeReward,equipWeapon,serializeRun,restoreRun});
 };
 modules['art']=(exports,require)=>{
 /** Original, self-contained vector artwork. No remote assets or third-party character art. */
@@ -1584,18 +3232,19 @@ class AudioSystem {
 Object.assign(exports,{AudioSystem});
 };
 modules['app']=(exports,require)=>{
-const { SAVE_KEY, MAX_FLOOR, JOBS, SKILLS, EVOLUTIONS, STATUS, BOONS, INTENTS, RARITIES, DIRECTIONS, FLOORS }=require('data');
-const { createRun, move, turn, interact, currentEvent, resolveEvent, activeHero, act, intentOf, takeReward, equipWeapon, heroStats, skillCost, serializeRun, restoreRun, cellKey, waitTurn, effectiveSkill, skillProblem, reinforcementInfo, bossWarnings, counterText }=require('engine');
+const { SAVE_KEY, FIELD_TOOLS, MAX_FLOOR, JOBS, SKILLS, EVOLUTIONS, STATUS, BOONS, INTENTS, RARITIES, DIRECTIONS, FLOORS }=require('data');
+const { createRun, move, turn, interact, currentEvent, resolveEvent, activeHero, act, intentOf, takeReward, equipWeapon, heroStats, skillCooldown, cooldownLeft, selectHero, useSupply, serializeRun, restoreRun, cellKey, waitTurn, effectiveSkill, skillProblem, reinforcementInfo, bossWarnings, counterText }=require('engine');
 const { icon, portraitUri, enemyUri, objectSvg, svgUri }=require('art');
 const { DungeonRenderer }=require('renderer');
 const { AudioSystem }=require('audio');
-const { REGIONS, regionAt, visiblePacks }=require('world');
+const { REGIONS, regionAt, visiblePacks, packMode, useFieldTool, paths }=require('world');
 const ROOT=document.getElementById('app'), MODAL=document.getElementById('modal-root');
 const AUDIO=new AudioSystem();
 const PORTRAITS=Object.fromEntries(Object.keys(JOBS).map(id=>[id,portraitUri(id)]));
 const ENEMY_IMAGES=new Map();
+const MODE_NAMES={patrol:'定轨巡逻',return:'返回巡线',alarmed:'警报集结',elite:'精英追踪',lured:'诱导中',sleep:'眠缚',rest:'整顿'};
 let run=null,renderer=null,toastTimer=null,modalKey='',lastFocus=null;
-const ui={selection:['knight','mage','shrine'],modal:null,modalData:null,rewardIndex:null,selectedEnemy:null,pendingSkill:null,busy:false,seedDraft:'',screen:'landing',lastMove:0,storageError:false};
+const ui={selection:['knight','mage','shrine'],modal:null,modalData:null,rewardIndex:null,selectedEnemy:null,pendingSkill:null,busy:false,seedDraft:'',screen:'landing',lastMove:0,storageError:false,presentation:null,playback:null,animationToken:0,showPatrol:true};
 const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const e=escapeHtml;
 function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),3200);}
@@ -1607,12 +3256,12 @@ function soundButton(){return `<button class="icon-button" data-action="sound" a
 function selectionDescription(){
   const ids=ui.selection;
   if(!ids.length)return ['旅程由你决定','选择一至三个职业。每个职业都有不同的战斗节奏。'];
-  if(ids.length===1)return ['独行者的誓约','单人：生命 +45%、MP +30%、伤害 +20%。敌人强度随队伍人数调整。'];
+  if(ids.length===1)return ['独行者的誓约','单人：生命 +45%、伤害 +20%。敌人强度随队伍人数调整。'];
   const synergies=[];
   if(ids.includes('knight')&&(ids.includes('ninja')||ids.includes('reaver')))synergies.push('破甲 → 物理追击');
   if(ids.includes('mage')&&ids.includes('ninja'))synergies.push('燃烧 → 猎影增伤');
   if(ids.includes('shrine'))synergies.push('治疗与净化分工');
-  if(ids.includes('chrono'))synergies.push('全队加速与时间支援');
+  if(ids.includes('chrono'))synergies.push('冷却调配与时间支援');
   if(!synergies.length)synergies.push('让攻击技能衔接，构筑联携；普攻不累积联携');
   return [ids.map(id=>JOBS[id].name).join(' / '),synergies.join('　·　')];
 }
@@ -1620,7 +3269,7 @@ function renderLanding(){
   ui.screen='landing';renderer?.destroy();renderer=null;
   const saved=readSave(),canResume=saved&&saved.phase!=='ended';
   const [line,sub]=selectionDescription();
-  ROOT.innerHTML=`<header class="page-head">${brand()}<div class="header-actions"><span class="edition"><i class="dot"></i>ROGUELIKE DRPG · 0.2.1</span>${soundButton()}<button class="icon-button" data-action="help" aria-label="游戏说明">${icon('help',18)}</button></div></header>
+  ROOT.innerHTML=`<header class="page-head">${brand()}<div class="header-actions"><span class="edition"><i class="dot"></i>ROGUELIKE DRPG · 0.3.0</span>${soundButton()}<button class="icon-button" data-action="help" aria-label="游戏说明">${icon('help',18)}</button></div></header>
   <main class="landing">
     <section class="hero-intro">
       <div class="intro-copy"><div class="eyebrow">A NEW MOON. A NEW BEGINNING.</div><h1>月蝕の迷宮</h1><div class="intro-en">E C L I P S E　L A B Y R I N T H</div><div class="intro-sub">以微小的星火，<br>踏入无月之夜。</div><p>在不断重生的迷宫中，编织属于你的职业、武器与祝福。<br>每一次坠落，都是另一段故事的开端。</p><div class="feature-line"><span>${icon('eye',15)} 第一人称探索</span><span>${icon('sword',15)} 回合制战斗</span><span>${icon('star',15)} 随机构筑</span></div></div>
@@ -1639,7 +3288,7 @@ function mountGame(){
   ui.screen='game';renderer?.destroy();
   ROOT.innerHTML=`<main class="game-shell"><header class="game-head">${brand()}<div id="top-stats" class="head-run"></div><div class="header-actions"><span id="sound-button">${soundButton()}</span><button class="icon-button" data-action="help" aria-label="游戏说明">${icon('help',18)}</button><button class="icon-button" data-action="menu" aria-label="冒险菜单">${icon('menu',18)}</button></div></header>
     <div class="game-grid"><section class="viewport-panel" aria-label="第一人称迷宫视图"><div class="stage" id="stage"><canvas id="dungeon-canvas" aria-label="第一人称三维迷宫"></canvas><div id="stage-hud" class="stage-hud"></div></div><div id="stage-footer" class="stage-footer"></div></section><section id="command-panel" class="command-panel" aria-label="行动指令"></section><section id="party-strip" class="party-strip" aria-label="冒险队伍"></section><aside class="side-column"><section class="side-card map-card"><div class="card-title"><span>${icon('map',14)} 探索地图</span><small id="exploration-percent"></small></div><button class="map-wrapper" id="minimap" data-action="map" aria-label="展开已探索地图"></button><div class="map-legend"><span><i></i> 月门</span><span class="treasure"><i></i> 宝箱</span><span class="rest"><i></i> 休息</span><span class="foe-legend">◆ 明雷</span></div></section><section id="objective" class="side-card objective"></section><section class="side-card journal-card"><div class="card-title"><span>${icon('moon',14)} 旅途回响</span><small>JOURNAL</small></div><div id="journal" class="journal" aria-live="polite" aria-relevant="additions text"></div></section><section class="side-card boon-card"><div class="card-title"><span>${icon('star',14)} 星之祝福</span><button class="ghost" data-action="inventory" aria-label="查看全部祝福">${icon('arrow',12)}</button></div><div id="boon-overview" class="boon-overview"></div></section><div class="side-foot">YOU ARE NOT LOST. NOT YET.</div></aside></div><footer id="game-foot" class="game-foot"></footer></main>`;
-  renderer=new DungeonRenderer(document.getElementById('dungeon-canvas'),()=>run);
+  renderer=new DungeonRenderer(document.getElementById('dungeon-canvas'),()=>ui.presentation||run);
   updateGame();
 }
 function mapSvg(large=false){
@@ -1656,9 +3305,10 @@ function mapSvg(large=false){
     }
   }
   for(const l of d.landmarks||[])if(d.visited[l.y]?.[l.x])shapes+=`<text x="${pad+l.x*tile+6}" y="${pad+l.y*tile+9}" text-anchor="middle" fill="${REGIONS[l.zone].color}" font-size="8" font-weight="bold">${REGIONS[l.zone].code}</text>`;
+  if(large&&ui.showPatrol)for(const mob of visiblePacks(run).filter(p=>p.kind!=='elite'))for(const q of mob.route||[])if(d.visited[q.y]?.[q.x])shapes+=`<circle cx="${pad+q.x*tile+6}" cy="${pad+q.y*tile+6}" r="1.4" fill="#92b4ba" opacity=".7"/>`;
   for(const mob of visiblePacks(run)){
     const cx=pad+mob.x*tile+6,cy=pad+mob.y*tile+6;
-    shapes+=`<g><title>${e(mob.name)} · ${mob.troop.length} 体 · ${mob.alert?'追踪':'巡逻'}</title><path d="M${cx},${cy-4.5} ${cx+4.5},${cy} ${cx},${cy+4.5} ${cx-4.5},${cy}Z" fill="${mob.kind==='elite'?'#ffbb65':'#f2869f'}" stroke="#301522" stroke-width=".8"/>${mob.alert?`<circle cx="${cx}" cy="${cy}" r="6" fill="none" stroke="#f2869f" stroke-width=".65"/>`:''}</g>`;
+    shapes+=`<g><title>${e(mob.name)} · ${mob.troop.length} 体 · ${MODE_NAMES[packMode(run,mob)]}</title><path d="M${cx},${cy-4.5} ${cx+4.5},${cy} ${cx},${cy+4.5} ${cx-4.5},${cy}Z" fill="${mob.kind==='elite'?'#ffbb65':'#f2869f'}" stroke="#301522" stroke-width=".8"/>${mob.alert?`<circle cx="${cx}" cy="${cy}" r="6" fill="none" stroke="#f2869f" stroke-width=".65"/>`:''}</g>`;
   }
   const px=pad+run.x*tile+6,py=pad+run.y*tile+6;
   shapes+=`<circle cx="${px}" cy="${py}" r="8" fill="#ded0ef22"/><g transform="translate(${px} ${py}) rotate(${run.dir*90})"><path d="M0-5 4.5 4 0 2-4.5 4Z" fill="#f7e7ff" stroke="#514569" stroke-width=".8"/></g>`;
@@ -1667,26 +3317,34 @@ function mapSvg(large=false){
 function exploration(){let seen=0,total=0;for(let y=0;y<run.dungeon.size;y++)for(let x=0;x<run.dungeon.size;x++)if(run.dungeon.tiles[y][x]===0){total++;if(run.dungeon.visited[y][x])seen++;}return Math.round(seen/total*100);}
 function statusHtml(entity){return `<span class="status-list">${entity.guard?'<span class="status-badge" style="--status-color:#b9c6e1">防御</span>':''}${entity.barrier?`<span class="status-badge" style="--status-color:#9bddbf">护盾 ${entity.barrier}</span>`:''}${Object.entries(entity.status).filter(([id])=>STATUS[id]).map(([id,s])=>`<span class="status-badge" style="--status-color:${STATUS[id].color}" title="${STATUS[id].name}：${s.expiresRound!==undefined?'本回合有效':s.persistent?'生效后消耗':`剩余 ${s.turns} 次行动`}${STATUS[id].dispellable?' · 可驱散':''}">${STATUS[id].name}${s.turns<10?`<sup>${s.expiresRound!==undefined?'本轮':s.turns}</sup>`:''}</span>`).join('')}</span>`;}
 function popHtml(entity){const effects=run.fx.filter(f=>f.id===entity.id);const damage=effects.filter(f=>f.type==='damage').reduce((s,f)=>s+f.amount,0),healing=effects.filter(f=>f.type==='heal').reduce((s,f)=>s+f.amount,0);return damage?`<span class="damage-pop">${damage}</span>`:healing?`<span class="damage-pop heal-number">+${healing}</span>`:'';}
-function effectClass(entity){return run.fx.some(f=>f.id===entity.id&&f.type==='damage')?'damaged':run.fx.some(f=>f.id===entity.id&&f.type==='heal')?'healed':'';}
+function effectClass(entity){
+  const fx=run.fx||[],style=ui.playback?.style||'slash';
+  const classes=[];
+  if(ui.playback?.actorId===entity.id)classes.push('combat-acting',`acting-${style}`);
+  if(fx.some(f=>f.id===entity.id&&f.type==='damage'))classes.push('damaged',`impact-${style}`);
+  if(fx.some(f=>f.id===entity.id&&f.type==='heal'))classes.push('healed','impact-heal');
+  if(fx.some(f=>f.id===entity.id&&['buff','debuff','alarm'].includes(f.type)))classes.push(`impact-${style}`);
+  return classes.join(' ');
+}
 function eventLabel(event){if(!event)return '';return {chest:'打开遗落的宝箱',shrine:'在星灯下休息',fountain:'饮用月之泉',altar:'聆听神像的低语',elite:'挑战徘徊的精英',stairs:run.guardianDefeated?'走入下一层迷宫':run.floor===5?'面对蚀月的圣女':'挑战月门守卫'}[event.type];}
 function eventIcon(type){return {chest:'chest',shrine:'star',fountain:'drop',altar:'moon',elite:'sword',stairs:'stairs'}[type]||'star';}
 function renderExploreHud(){
   const floor=FLOORS[run.floor-1],event=currentEvent(run),dir=DIRECTIONS[run.dir],zone=regionAt(run.dungeon,run.x,run.y),threat=reinforcementInfo(run)[0];
-  return `<div class="floor-heading"><div class="eyebrow">TACTICAL EXPLORATION / B${run.floor}</div><h2>${floor.name}</h2><div class="zone-badge" style="--zone:${zone.color}">${zone.code} · ${zone.name}</div></div><div class="floor-number"><strong>B${String(run.floor).padStart(2,'0')}</strong><span>OF 05 FLOORS</span></div><div class="compass"><span>${DIRECTIONS[(run.dir+3)%4].short}</span><span class="north">${icon('up',12)} ${dir.short}</span><span>${DIRECTIONS[(run.dir+1)%4].short}</span></div><span class="crosshair"></span><p class="explore-caption">${threat?`${threat.known?e(threat.name):'未知脚步'} · 路径距离 ${threat.distance} 格`:'观察红色明雷，选择开战的位置。'}</p><span class="position-label"><i></i> ${String(run.x).padStart(2,'0')} : ${String(run.y).padStart(2,'0')}</span>${event?`<button class="interaction" data-action="interact">${icon(eventIcon(event.type),18)}<span>${eventLabel(event)}</span><kbd>F</kbd></button>`:''}`;
+  return `<div class="floor-heading"><div class="eyebrow">TACTICAL EXPLORATION / B${run.floor}</div><h2>${floor.name}</h2><div class="zone-badge" style="--zone:${zone.color}">${zone.code} · ${zone.name}</div></div><div class="floor-number"><strong>B${String(run.floor).padStart(2,'0')}</strong><span>OF 05 FLOORS</span></div><div class="compass"><span>${DIRECTIONS[(run.dir+3)%4].short}</span><span class="north">${icon('up',12)} ${dir.short}</span><span>${DIRECTIONS[(run.dir+1)%4].short}</span></div><span class="crosshair"></span><p class="explore-caption">${threat?`${threat.known?e(threat.name):'未知脚步'} · 路径距离 ${threat.distance} 格 · ${MODE_NAMES[threat.mode]}`:'观察红色明雷，选择开战的位置。'}</p><span class="position-label"><i></i> ${String(run.x).padStart(2,'0')} : ${String(run.y).padStart(2,'0')}</span>${event?`<button class="interaction" data-action="interact">${icon(eventIcon(event.type),18)}<span>${eventLabel(event)}</span><kbd>F</kbd></button>`:''}`;
 }
 function enemyImage(enemy){const key=`${enemy.kind}|${enemy.tint}`;if(!ENEMY_IMAGES.has(key))ENEMY_IMAGES.set(key,enemyUri(enemy.kind,enemy.tint));return ENEMY_IMAGES.get(key);}
 function renderBattleHud(){
-  const b=run.battle,alive=b.enemies.filter(p=>p.hp>0);
+  const b=run.battle,alive=b.enemies.filter(p=>p.hp>0||(ui.busy&&run.fx.some(f=>f.id===p.id&&f.type==='damage')));
   if(!alive.some(p=>p.id===ui.selectedEnemy))ui.selectedEnemy=alive[0]?.id||null;
   const units=[...run.party,...b.enemies],order=[b.active,...b.queue.filter(id=>units.find(u=>u.id===id)?.hp>0)].slice(0,9);
-  return `<div class="floor-heading"><div class="eyebrow">${['boss','guardian'].includes(b.type)?'PHASE / TRIGGER BATTLE':'VISIBLE ENCOUNTER'}</div><h2>${b.type==='boss'?'无月的终章':b.type==='guardian'?'月门的试炼':'与暗影交锋'}</h2><div class="jp">注意脚步声。战斗不会冻结迷宫。</div></div><div class="round-label"><small>ROUND</small><strong>${String(b.round).padStart(2,'0')}</strong></div><div class="floor-number"><strong>B${String(run.floor).padStart(2,'0')}</strong><span>TACTICAL DRPG</span></div><div class="enemy-line tactical-enemies" aria-label="敌方阵容，可横向滚动">${alive.map(enemy=>{
+  return `<div class="floor-heading"><div class="eyebrow">${['boss','guardian'].includes(b.type)?'PHASE / TRIGGER BATTLE':'VISIBLE ENCOUNTER'}</div><h2>${b.type==='boss'?'无月的终章':b.type==='guardian'?'月门的试炼':'与暗影交锋'}</h2><div class="jp">${ui.playback?e(ui.playback.label):'技能准备不耗时 · 攻击后双方交替行动'}</div></div><div class="round-label"><small>ROUND</small><strong>${String(b.round).padStart(2,'0')}</strong></div><div class="floor-number"><strong>B${String(run.floor).padStart(2,'0')}</strong><span>TACTICAL DRPG</span></div><div class="enemy-line tactical-enemies" aria-label="敌方阵容，可横向滚动">${alive.map(enemy=>{
     const intent=INTENTS[intentOf(enemy)]||INTENTS.attack,weak={ice:'冰',fire:'火',light:'光'}[enemy.weak],target=run.party.find(p=>p.id===enemy.targetId);
     return `<button class="enemy-card ${enemy.boss?'boss':''} ${ui.selectedEnemy===enemy.id?'selected':''} ${effectClass(enemy)}" data-action="target" data-id="${enemy.id}" aria-pressed="${ui.selectedEnemy===enemy.id}" aria-label="选择${e(enemy.name)}，生命 ${enemy.hp}/${enemy.maxHp}，${intent.name}" title="${e(enemy.hint)}"><span class="enemy-intent">${icon(intent.icon,12)} ${intent.name}</span><span class="enemy-art"><img src="${enemyImage(enemy)}" alt="${e(enemy.name)}"></span><span class="enemy-weak">${enemy.ritualFor?'◆ 仪式侍从':enemy.role} · 弱${weak}</span><span class="enemy-caption">${ui.selectedEnemy===enemy.id?'<span class="target-arrow">▾</span>':''}<strong>${e(enemy.name)}</strong><span class="bar"><i style="width:${Math.max(0,enemy.hp/enemy.maxHp*100)}%"></i>${enemy.boss?bossWarnings(run).find(w=>w.enemyId===enemy.id)?.thresholds.map(t=>`<em class="hp-threshold ${t.done?'resolved':''}" style="left:${t.at*100}%" title="${Math.round(t.at*100)}% 血线预兆"></em>`).join(''):''}</span><span class="hp-number">${enemy.hp} / ${enemy.maxHp}</span>${statusHtml(enemy)}</span>${popHtml(enemy)}</button>`;
-  }).join('')}</div><div class="battle-stage-bottom"><div class="turn-order"><span>行动顺序</span>${order.map((id,i)=>{const unit=units.find(p=>p.id===id);return unit?`<span class="turn-token ${unit.job?'':'foe'} ${i===0?'current':''}" title="${e(unit.name)}">${unit.job?e(unit.name[0]):icon('sword',12)}</span>`:'';}).join('')}</div>${b.chain>0?`<span class="chain-pill">技能联携 × ${b.chain+1}</span>`:'<span class="combat-note">点击敌人查看战术</span>'}</div>`;
+  }).join('')}</div><div class="battle-stage-bottom"><div class="turn-order team-phase"><span>${ui.playback?(ui.playback.side==='enemy'?'敌方行动':'我方行动'):'我方准备'}</span><b>技能 / 物品</b><span>→</span><b>全队攻击</b><span>→</span><b>敌方</b></div>${b.chain>0?`<span class="chain-pill">技能联携 × ${b.chain+1}</span>`:'<span class="combat-note">点击敌人查看战术</span>'}</div>`;
 }
 function renderExploreCommands(){
   const event=currentEvent(run);
-  return `<div class="explore-command"><div class="command-copy"><div class="eyebrow">ONE STEP. ONE WORLD TICK.</div><h3>${event?eventLabel(event):'先选战场，再选对手。'}</h3><p>转向与查看地图不耗时。移动或等待，怪物也前进一步。</p></div><div class="dpad" aria-label="迷宫方向控制"><button data-action="turn-left" aria-label="向左转">${icon('turnleft',17)}<small>A</small></button><button class="move-forward" data-action="forward" aria-label="向前移动">${icon('up',18)}<small>W</small></button><button data-action="turn-right" aria-label="向右转">${icon('turnright',17)}<small>D</small></button><button data-action="strafe-left" aria-label="向左平移">${icon('left',17)}<small>Q</small></button><button data-action="back" aria-label="向后移动">${icon('down',18)}<small>S</small></button><button data-action="strafe-right" aria-label="向右平移">${icon('right',17)}<small>E</small></button></div><div class="command-shortcuts"><button data-action="interact" ${!event?'disabled':''}>${icon(event?eventIcon(event.type):'star',20)}<span>调查 F</span></button><button data-action="wait" title="等待一拍：怪物行动，玩家原地不动">${icon('clock',20)}<span>等待 Space</span></button><button data-action="map">${icon('map',20)}<span>地图 M</span></button><button data-action="inventory">${icon('bag',20)}<span>行囊 I</span></button></div></div>`;
+  return `<div class="explore-command"><div class="command-copy"><div class="eyebrow">ONE STEP. ONE WORLD TICK.</div><h3>${event?eventLabel(event):'先选战场，再选对手。'}</h3><p>普通怪固定巡逻，报警才集结；精英持续追踪。地图工具不耗时。</p></div><div class="dpad" aria-label="迷宫方向控制"><button data-action="turn-left" aria-label="向左转">${icon('turnleft',17)}<small>A</small></button><button class="move-forward" data-action="forward" aria-label="向前移动">${icon('up',18)}<small>W</small></button><button data-action="turn-right" aria-label="向右转">${icon('turnright',17)}<small>D</small></button><button data-action="strafe-left" aria-label="向左平移">${icon('left',17)}<small>Q</small></button><button data-action="back" aria-label="向后移动">${icon('down',18)}<small>S</small></button><button data-action="strafe-right" aria-label="向右平移">${icon('right',17)}<small>E</small></button></div><div class="command-shortcuts"><button data-action="interact" ${!event?'disabled':''}>${icon(event?eventIcon(event.type):'star',20)}<span>调查 F</span></button><button data-action="wait" title="等待一拍：怪物行动，玩家原地不动">${icon('clock',20)}<span>等待 Space</span></button><button data-action="map">${icon('map',20)}<span>地图 M</span></button><button data-action="field">${icon('bag',20)}<span>战前工具 T</span></button></div></div>`;
 }
 function renderBattleCommands(){
   const hero=activeHero(run);if(!hero)return '';
@@ -1698,36 +3356,45 @@ function renderBattleCommands(){
     const ready=o.counter==='hits'?o.hits>=o.required:o.counter==='adds'?!run.battle.enemies.some(a=>a.hp>0&&a.ritualFor===o.id):o.counter==='dispel'?!enemy.status.veil:o.counter==='seal'?!!enemy.status.headbind||!enemy.status.veil:run.party.filter(p=>p.hp>0).every(p=>p.guard||p.status.protect);
     return `<section class="omen-panel ${ready?'ready':''}" aria-label="首领预兆"><div><span class="omen-tag">${o.dueRound===run.battle.round?'本回合末':`R${o.dueRound} 回合末`} · ${e(o.source)}</span><strong>${e(o.name)}</strong><span class="omen-progress">${e(count)}${o.delayed?' · 已延期':''}</span></div><p>${e(counterText(o))}</p>${w.queued.length?`<small>后续血线预兆：${e(w.queued.join(' / '))}</small>`:''}</section>`;
   }).join('');
-  const reinforcements=`<div class="reinforcement-strip ${incoming.some(p=>p.distance<=2)?'urgent':''}">${icon('map',15)} ${incoming.length?incoming.slice(0,3).map(p=>`${p.known?e(p.name):'未知脚步'}：最短 ${p.eta} 回合`).join('　/　'):'附近 8 格路径内无游荡增援'}<span>每个回合末移动 1 格</span></div>`;
-  const intel=selected?`<div class="enemy-intel"><b>${e(selected.name)} · ${e(selected.role)}</b><span>${e(selected.hint)}</span>${selected.boss?'':`<small>当前意图：${INTENTS[intentOf(selected)]?.name||'攻击'}${['cover','bless','enemyHeal','summon','mirror','thorns'].includes(intentOf(selected))?'':` → ${['sweep','sweepMagic'].includes(intentOf(selected))?'全队':e(run.party.find(p=>p.id===selected.targetId)?.name||'队伍')}`}</small>`}</div>`:'';
-  const title=`<div class="battle-command-header"><span class="turn-title">${icon('star',16)} ${e(hero.name)} 的回合 <small>${JOBS[hero.job].role}</small></span><button class="flee" data-action="flee" ${['guardian','boss'].includes(run.battle.type)||ui.busy?'disabled':''} title="首次 70% 撤退，失败后下次保证成功；首领战不可逃离。">${icon('exit',14)} 撤退</button></div>`;
+  const reinforcements=`<div class="reinforcement-strip ${incoming.some(p=>['alarmed','elite'].includes(p.mode)&&p.distance<=3)?'urgent':''}">${icon('map',15)} ${incoming.length?incoming.slice(0,3).map(p=>`${p.known?e(p.name):'未知脚步'}：${MODE_NAMES[p.mode]} / ${p.distance} 格`).join('　/　'):'附近 8 格路径内无游荡增援'}<span>仅完整回合末移动 · 警报成功才引怪</span></div>`;
+  const intel=selected?`<div class="enemy-intel"><b>${e(selected.name)} · ${e(selected.role)}</b><span>${e(selected.hint)}</span>${selected.boss?'':`<small>当前意图：${INTENTS[intentOf(selected)]?.name||'攻击'}${['alarm','cover','bless','enemyHeal','summon','mirror','thorns'].includes(intentOf(selected))?'':` → ${['sweep','sweepMagic'].includes(intentOf(selected))?'全队':e(run.party.find(p=>p.id===selected.targetId)?.name||'队伍')}`}</small>`}</div>`:'';
+  const title=`<div class="battle-command-header"><span class="turn-title">${icon('star',16)} 我方准备 <small>技能和物品不推进回合</small></span><button class="flee" data-action="flee" ${['guardian','boss'].includes(run.battle.type)||ui.busy?'disabled':''} title="首次 70% 成功，失败会让敌方行动一次；首领战不可撤退。">${icon('exit',14)} 撤退</button></div>`;
+  const tabs=`<div class="hero-tabs" role="group" aria-label="选择技能使用者">${run.party.map(p=>`<button data-action="select-hero" data-id="${p.id}" aria-pressed="${p.id===hero.id}" ${p.hp<=0||ui.busy?'disabled':''} class="${p.id===hero.id?'chosen':''}"><b>${e(p.name)}</b><small>${p.hp<=0?'倒下':p.skills.filter(id=>!skillProblem(run,p,id)).length+' 技能就绪'}${p.guard?' · 防御':''}</small></button>`).join('')}</div>`;
   if(ui.pendingSkill)return `<div class="battle-command">${omens}${reinforcements}${title}<div class="target-prompt"><span>${icon('heart',22)} ${effectiveSkill(hero,ui.pendingSkill).name}：点击下方队友。</span><button class="secondary" data-action="cancel-target">取消</button></div></div>`;
-  const ids=['attack','guard',...hero.skills];
-  const buttons=ids.map((id,i)=>{
-    const skill=effectiveSkill(hero,id),cost=skillCost(hero,id),rank=hero.ranks[id]||0,problem=skillProblem(run,hero,id);
-    return `<button class="skill-button ${id==='attack'?'basic':''} ${hero.evolutions[id]?'evolved':''}" data-action="skill" data-skill="${id}" ${problem||ui.busy?'disabled':''} title="${e(problem||skill.desc)}" aria-label="${e(skill.name)}，消耗 ${cost} MP。${e(skill.desc)}"><span class="skill-top">${icon(skill.icon,18)}<span>${cost?`${cost} MP`:id==='attack'?'+1 MP':id==='guard'?'+3 MP':id==='bloodpact'?`+${8+rank*2} MP`:'0 MP'}</span></span><strong>${e(skill.name)}${rank?`<span class="rank">+${rank}</span>`:''}${hero.evolutions[id]?'<span class="awakened-mark">✦</span>':''}</strong><small class="description">${e(skill.desc)}</small><span class="hotkey">${i+1}</span></button>`;
+  const buttons=hero.skills.map((id,i)=>{
+    const skill=effectiveSkill(hero,id),cooldown=skillCooldown(hero,id),remaining=cooldownLeft(hero,id),rank=hero.ranks[id]||0,problem=skillProblem(run,hero,id);
+    return `<button class="skill-button ${remaining?'cooling':''} ${hero.evolutions[id]?'evolved':''}" data-action="skill" data-skill="${id}" ${problem||ui.busy?'disabled':''} title="${e(problem||skill.desc)}" aria-label="${e(skill.name)}，${remaining?'冷却剩余 '+remaining:'就绪，基础冷却 '+cooldown} 回合。${e(skill.desc)}"><span class="skill-top">${icon(skill.icon,18)}<span>${remaining?'剩余 '+remaining+' 回合':'READY · CD '+cooldown}</span></span><strong>${e(skill.name)}${rank?`<span class="rank">+${rank}</span>`:''}${hero.evolutions[id]?'<span class="awakened-mark">✦</span>':''}</strong><small class="description">${e(skill.desc)}</small><span class="hotkey">${i+3}</span></button>`;
   }).join('');
-  return `<div class="battle-command">${omens}${reinforcements}${intel}${title}<div class="skill-grid tactical-skills">${buttons}</div><div class="supply-row"><small>队伍补给 · 使用消耗行动</small>${['tonic','ether','salt'].map(id=>`<button data-action="skill" data-skill="${id}" ${skillProblem(run,hero,id)||ui.busy?'disabled':''} title="${e(SKILLS[id].desc)}">${icon(SKILLS[id].icon,14)} ${SKILLS[id].name}<b>×${run.supplies[id]}</b></button>`).join('')}</div></div>`;
+  const controls=ui.busy?`<span class="tiny muted">正在播放行动 · 可用右下角按钮或 Esc 跳过演出</span>`:`<button class="secondary ${hero.guard?'guard-selected':''}" data-action="skill" data-skill="guard" aria-pressed="${hero.guard}">${icon('shield',17)} ${hero.guard?'解除':'设为'}防御 · ${e(hero.name)}</button><button class="primary team-attack" data-action="skill" data-skill="attack">${icon('sword',20)} 全队攻击 <small>结束回合 · Enter / 1</small></button>`;
+  return `<div class="battle-command">${omens}${reinforcements}${intel}${title}${tabs}<div class="skill-grid tactical-skills cooldown-skills">${buttons}</div><div class="supply-row"><small>即时补给 · 不耗回合</small>${['tonic','ether','salt'].map(id=>`<button data-action="skill" data-skill="${id}" ${skillProblem(run,hero,id)||ui.busy?'disabled':''} title="${e(SKILLS[id].desc)}">${icon(SKILLS[id].icon,14)} ${SKILLS[id].name}<b>×${run.supplies[id]}</b></button>`).join('')}</div><div class="team-controls">${controls}</div></div>`;
 }
+
 function renderParty(){
-  const active=activeHero(run),pending=ui.pendingSkill?effectiveSkill(active,ui.pendingSkill):null;
-  return run.party.map(p=>{const job=JOBS[p.job];return `<button class="party-card ${active?.id===p.id?'active':''} ${p.hp<=0?'downed':''} ${pending&&(p.hp>0||pending.kind==='revive')?'targetable':''} ${effectClass(p)}" style="--job-color:${job.color}" data-action="party" data-id="${p.id}" aria-label="${e(p.name)}，${job.name}，生命 ${p.hp}/${p.maxHp}，MP ${p.mp}/${p.maxMp}${pending?'，点击选择为技能目标':'，查看角色信息'}"><span class="party-face"><img src="${PORTRAITS[p.job]}" alt=""></span><span class="party-info"><span class="party-name">${e(p.name)}<small>${active?.id===p.id?'YOUR TURN':job.jp}</small></span><span class="party-role">Lv.${run.level}　${job.name}</span><span class="bar-line"><span class="label">HP</span><span class="bar ${p.hp/p.maxHp<.3?'low':''}"><i style="width:${p.hp/p.maxHp*100}%"></i></span><span class="value">${p.hp}/${p.maxHp}</span></span><span class="bar-line"><span class="label">MP</span><span class="bar mp"><i style="width:${p.mp/p.maxMp*100}%"></i></span><span class="value">${p.mp}/${p.maxMp}</span></span><span class="party-weapon">${icon('sword',10)} ${e(p.weapon.name)}</span>${statusHtml(p)}</span>${popHtml(p)}</button>`;}).join('');
+  const active=activeHero(run),pending=ui.pendingSkill&&active?effectiveSkill(active,ui.pendingSkill):null;
+  return run.party.map(p=>{const job=JOBS[p.job],ready=p.skills.filter(id=>!cooldownLeft(p,id)).length;
+    return `<button class="party-card ${active?.id===p.id?'active':''} ${p.hp<=0?'downed':''} ${pending&&(p.hp>0||pending.kind==='revive')?'targetable':''} ${effectClass(p)}" style="--job-color:${job.color}" data-action="party" data-id="${p.id}" aria-label="${e(p.name)}，${job.name}，生命 ${p.hp}/${p.maxHp}${pending?'，选择为技能目标':run.phase==='battle'?'，点击切换技能使用者':'，查看角色信息'}"><span class="party-face"><img src="${PORTRAITS[p.job]}" alt=""></span><span class="party-info"><span class="party-name">${e(p.name)}<small>${p.guard?'GUARD':active?.id===p.id?'SELECTED':job.jp}</small></span><span class="party-role">Lv.${run.level}　${job.name}</span><span class="bar-line"><span class="label">HP</span><span class="bar ${p.hp/p.maxHp<.3?'low':''}"><i style="width:${p.hp/p.maxHp*100}%"></i></span><span class="value">${p.hp}/${p.maxHp}</span></span><span class="hero-cooldowns">${run.phase==='battle'?`${ready} / ${p.skills.length} 技能就绪${p.guard?' · 本轮不普通攻击':''}`:'独立技能冷却 · 战前工具不耗时'}</span><span class="party-weapon">${icon('sword',10)} ${e(p.weapon.name)}</span>${statusHtml(p)}</span>${popHtml(p)}</button>`;
+  }).join('');
 }
 function boonChips(limit=Infinity){const entries=Object.entries(run.boons);if(!entries.length)return '<span class="tiny muted">未获得祝福。旅途才刚刚开始。</span>';return entries.slice(0,limit).map(([id,n])=>{const boon=BOONS.find(x=>x.id===id);return boon?`<span class="boon-chip" title="${e(boon.desc)} 已获取 ${n} 次">${icon(boon.icon,12)} ${boon.name}${n>1?`<b>×${n}</b>`:''}</span>`:'';}).join('')+(entries.length>limit?`<span class="boon-chip">+${entries.length-limit}</span>`:'');}
 function updateGame(){
+  const actual=run;
+  try{if(ui.presentation)run=ui.presentation;drawGame();}
+  finally{run=actual;}
+}
+function drawGame(){
   if(!run)return;
   const battle=run.phase==='battle';
   document.getElementById('top-stats').innerHTML=`<span class="level">${icon('star',15)} LV.<b>${run.level}</b></span><span class="gold">${icon('drop',14)} <b>${run.gold}</b> 星砂</span><span class="steps">${run.steps} 步</span><span class="seed">SEED ${e(run.seed)}</span>`;
   ROOT.classList.toggle('comfort-mode',run.comfort!==false);document.getElementById('stage-hud').innerHTML=battle?renderBattleHud():renderExploreHud();
   const incoming=reinforcementInfo(run),event=currentEvent(run);
-  document.getElementById('stage-footer').innerHTML=battle?`<span class="path-label">${icon('sword',13)} 战斗 · 回合末预兆与增援</span><span class="combat-note">${ui.pendingSkill?'选择我方目标':'选择目标查看战术说明'}</span>`:`<span class="path-label">${icon('moon',13)} ${run.guardianDefeated?'月门已开启':event?'发现可调查事物':'明雷探索'}</span><span class="combat-note">${incoming[0]?`最近脚步：${incoming[0].distance} 格`:'未听见附近脚步'} · 世界节拍 ${run.dungeon.elapsed}</span>`;
+  document.getElementById('stage-footer').innerHTML=battle?`<span class="path-label">${icon('sword',13)} 战斗 · CD / 我方 → 敌方</span><span class="combat-note">${ui.pendingSkill?'选择我方目标':'选择目标查看战术说明'}</span>`:`<span class="path-label">${icon('moon',13)} ${run.guardianDefeated?'月门已开启':event?'发现可调查事物':'明雷探索'}</span><span class="combat-note">${incoming[0]?`最近脚步：${incoming[0].distance} 格`:'未听见附近脚步'} · 世界节拍 ${run.dungeon.elapsed}</span>`;
   document.getElementById('command-panel').innerHTML=battle?renderBattleCommands():renderExploreCommands();
   const partyEl=document.getElementById('party-strip');partyEl.style.setProperty('--party-size',run.party.length);partyEl.innerHTML=renderParty();
   document.getElementById('minimap').innerHTML=mapSvg();document.getElementById('exploration-percent').textContent=`${exploration()}%`;
-  document.getElementById('objective').innerHTML=`<div class="eyebrow">${run.guardianDefeated?'GATE OPENED':'CURRENT OBJECTIVE'}</div><p>${run.guardianDefeated?'前往月门，深入下一层。':run.floor===5?'找到王座，结束这场月蚀。':'找到月门，击败本层守卫。'}</p><small>${run.guardianDefeated?'回到地图上的绿色月门标记。':'附近敌人会在战斗中靠近；不要在包围圈内开战。'}</small>`;
+  document.getElementById('objective').innerHTML=`<div class="eyebrow">${run.guardianDefeated?'GATE OPENED':'CURRENT OBJECTIVE'}</div><p>${run.guardianDefeated?'前往月门，深入下一层。':run.floor===5?'找到王座，结束这场月蚀。':'找到月门，击败本层守卫。'}</p><small>${run.guardianDefeated?'回到地图上的绿色月门标记。':'普通怪沿巡线前进；先阻断哨祭报警。精英不需警报就会追来。'}</small>`;
   const journal=document.getElementById('journal');journal.innerHTML=run.log.slice(-9).map(l=>`<p class="log-entry ${['special','heal','loot','danger','enemy','player','muted','battle'].includes(l.tone)?l.tone:''}">${e(l.text)}</p>`).join('');journal.scrollTop=journal.scrollHeight;
   document.getElementById('boon-overview').innerHTML=boonChips(5);
-  document.getElementById('game-foot').innerHTML=`<span>${run.solo?'独行誓约生效 · ':''}本局自动保存 · ${run.battles} 次战斗</span><span class="keyboard-tip">WASD 移动转向　Q/E 平移　Space 等待　M 地图</span><span class="xp-track">LV.${run.level}<i><b style="width:${run.xp/run.nextXp*100}%"></b></i>${run.xp}/${run.nextXp}</span>`;
+  document.getElementById('game-foot').innerHTML=`<span>${run.solo?'独行誓约生效 · ':''}本局自动保存 · ${run.battles} 次战斗</span><span class="keyboard-tip">WASD 移动转向　Space 等待　T 战前工具　Enter 全队攻击</span><span class="xp-track">LV.${run.level}<i><b style="width:${run.xp/run.nextXp*100}%"></b></i>${run.xp}/${run.nextXp}</span>`;
   renderModal();
 }
 function setModal(name,data=null){ui.modal=name;ui.modalData=data;renderModal();}
@@ -1747,7 +3414,7 @@ function rewardCard(reward,index){
     const h=run.party.find(p=>p.id===reward.heroId),art=SKILLS[reward.skillId],rank=(h.ranks[art.id]||0)+1;
     const title=reward.type==='learn'?'习得新技能':reward.type==='evolve'?'机制觉醒':'技能熟练度';
     const name=reward.type==='evolve'?EVOLUTIONS[art.id].name:art.name;
-    const description=reward.type==='learn'?`新增一个可用指令。${art.desc}`:reward.type==='evolve'?EVOLUTIONS[art.id].desc:`${['physical','magic','heal','revive','sanctuary'].includes(art.kind)?`伤害 / 治疗效能 ${100+rank*12}%。`:art.kind==='bloodpact'?`回蓝提高至 ${8+rank*2} MP。`:`MP 消耗减少 ${rank}（最低 1）。`}${EVOLUTIONS[art.id]&&!h.evolutions[art.id]?'达到 +1 后，奖励池加入此技能的机制觉醒。':'不增加状态持续时间。'}`;
+    const description=reward.type==='learn'?`新增一个可用指令。${art.desc}`:reward.type==='evolve'?EVOLUTIONS[art.id].desc:`${['physical','magic','heal','revive','sanctuary'].includes(art.kind)?`伤害 / 治疗效能 ${100+rank*12}%。`:`熟练度 +2 时冷却缩短 1 回合（最低 2）；+1 开放觉醒。`}${EVOLUTIONS[art.id]&&!h.evolutions[art.id]?'达到 +1 后，奖励池加入此技能的机制觉醒。':'不增加状态持续时间。'}`;
     return `<button class="reward-card ${reward.type==='evolve'?'evolution-card':''}" data-action="reward" data-index="${index}"><span class="rarity">${icon('star',12)} ${title} · ${e(h.name)}</span><span class="reward-art">${icon(art.icon,42)}</span><h3>${e(name)} ${reward.type==='skill'?`<span class="gold">+${rank}</span>`:''}</h3><p>${e(description)}</p><span class="reward-footer">${reward.type==='learn'?'拓展这个职业的战术':reward.type==='evolve'?'让技能发生质变':'磨练这一门技艺'} ${icon('arrow',17)}</span></button>`;
   }
   const w=reward.weapon,r=RARITIES[w.rarity];
@@ -1768,21 +3435,25 @@ function rewardModal(){
 }
 function eventModal(){
   const type=run.event.type;
-  const data={shrine:{title:'一盏尚未熄灭的星灯',en:'A MOMENT OF SOLACE',text:'灯火微微摇曳。这里似乎没有黑暗能够靠近。',choices:[['rest','在此休息','全队恢复 45% 生命与 50% MP，倒下的同伴重新醒来。','免费 · 仅一次','heart']]},fountain:{title:'倒映着满月的泉水',en:'THE MOONWELL',text:'抬头是漆黑的穹顶。低头，却是一轮完整的月亮。',choices:[['drink','饮下月之泉','全队 MP 完全恢复，并恢复 18% 生命。','免费 · 仅一次','drop']]},altar:{title:'无名神像的低语',en:'A PRICE FOR A PROMISE',text:'神像没有眼睛，却似乎一直注视着你。它需要一份交换。',choices:[['offer','献上星砂','获得一次祝福选择，武器奖励保证为传说品质。','35 星砂','star'],['blood','以鲜血立誓','全队失去生命上限的 20%（最低剩余 1），换取一次祝福选择。','生命代价','heart']]}}[type];
+  const data={shrine:{title:'一盏尚未熄灭的星灯',en:'A MOMENT OF SOLACE',text:'灯火微微摇曳。这里似乎没有黑暗能够靠近。',choices:[['rest','在此休息','全队恢复 45% 生命，倒下的同伴重新醒来。','免费 · 仅一次','heart']]},fountain:{title:'倒映着满月的泉水',en:'THE MOONWELL',text:'抬头是漆黑的穹顶。低头，却是一轮完整的月亮。',choices:[['drink','饮下月之泉','全队恢复 28% 生命，并补充 1 份急救药。','免费 · 仅一次','drop']]},altar:{title:'无名神像的低语',en:'A PRICE FOR A PROMISE',text:'神像没有眼睛，却似乎一直注视着你。它需要一份交换。',choices:[['offer','献上星砂','获得一次祝福选择，武器奖励保证为传说品质。','35 星砂','star'],['blood','以鲜血立誓','全队失去生命上限的 20%（最低剩余 1），换取一次祝福选择。','生命代价','heart']]}}[type];
   const choices=data.choices.map(([choice,title,desc,cost,ico])=>`<button class="event-choice" data-action="event" data-choice="${choice}" ${choice==='offer'&&run.gold<35?'disabled':''}>${icon(ico,23)}<span class="choice-copy"><strong>${title}</strong><small>${desc}</small></span><span class="cost">${cost}</span></button>`).join('');
   return dialog(data.title,data.en,data.text,`<div class="event-art"><img src="${svgUri(objectSvg(type,'#c2b0e8'))}" alt="${data.title}"></div><div class="choice-stack">${choices}<button class="ghost" data-action="event" data-choice="leave">暂时离开 ${icon('arrow',14)}</button></div>`,{narrow:true,closable:false});
 }
 function endModal(){const win=run.ending==='victory';return dialog(win?'终有黎明。':'星灯，暂时熄灭了。',win?'THE END OF THE ECLIPSE':'EVERY END IS A BEGINNING',win?'你走过没有月亮的夜晚，也把星光带到了故事的尽头。':'迷宫会改变形状，而你会带着新的想法，再一次出发。',`<div class="result-icon">${win?'☼':'☾'}</div><div class="result-party">${run.party.map(p=>`<img src="${PORTRAITS[p.job]}" alt="${e(p.name)}">`).join('')}</div><div class="result-stats"><span><strong>B${run.floor}</strong><small>最深抵达</small></span><span><strong>${run.level}</strong><small>队伍等级</small></span><span><strong>${run.battles}</strong><small>战斗胜利</small></span><span><strong>${run.steps}</strong><small>探索步数</small></span></div><div class="center-actions"><button class="primary" data-action="again">重新点亮星灯 ${icon('arrow',18)}</button><button class="secondary" data-action="object-motion">${icon('star',18)} 物件动画：${run.objectMotion===true?'开启（系统减弱动态优先）':'关闭（静态舒适）'}</button><button class="secondary" data-action="return-title">回到序章</button></div><p class="modal-hint">SEED ${e(run.seed)} · 新一局将清空所有等级、武器、技能强化与祝福。</p>`,{closable:false,extra:win?'result-victory':''});}
-function helpModal(){return dialog('这一次，带着战术前行','FIELD GUIDE / v0.2','战斗难在选择、资源与地形，不在猜测隐藏规则。',`<div class="help-grid"><section class="help-block"><h3>01 / 明雷与地形</h3><p>W/S 前后，A/D 转向，Q/E 平移，Space 等待，F 调查，M 地图。红色菱形是游荡小队，金色是强敌。每次成功移动或等待，它们也移动一格。转向、撞墙、查看地图不耗时。怪物只显示在已探索区域；脚步提示提供附近的最短路径距离。</p></section><section class="help-block"><h3>02 / 增援时钟</h3><p>每个战斗回合末，路径 8 格以内的游荡小队移动一格。来到战斗格子后加入，下一轮行动；场上最多 6 个敌人，满员时其他小队原地等待。击杀结束的最后一个未完整回合也结算一次移动。不要背靠多个敌人开战。</p></section><section class="help-block"><h3>03 / Boss 预兆</h3><p>首领有回合触发与血线触发。预兆会在回合开始给出完整应对窗口，在指定回合末发动。驱散仪式结界、封头、击杀仪式侍从或累计命中可以取消对应招式。无法取消时用防御和壁垒止损。血线有一次相位锁，不能一击跳过；最后 1 HP 受未结算的血线预兆保护。</p></section><section class="help-block"><h3>04 / 职业与成长</h3><p>每职业初始只有两个专精技能。奖励池可习得 3 个高阶技能；部分从第 2 / 3 层开放。初始技能熟练度 +1 后可抽取机制觉醒，带来群体化、驱散、连击、传播、溢出护盾等变化。熟练度最多 +2，祝福有层数上限。巫女没有免费攻击治疗，忍者和术士没有自疗。</p></section><section class="help-block"><h3>05 / 资源与操作</h3><p>按 1 普攻、2 防御、3～7 技能，也可点击。普攻只回 1 MP，防御回 3 MP 且承伤 -65%。有限急救药、以太滴、破咒盐为全队共享，使用消耗一次行动。每次下层补充 2 药、1 以太、2 盐，有携带上限。守护可叠加防御，骑士与巫女的时机分工很重要。</p></section><section class="help-block"><h3>06 / 反制与舒适视角</h3><p>封头压制法术、治疗与强化；封腕压制重击、猎杀等动作；解除后 2 回合抗性，不能无限续封。每个预兆只能延期一次。首领从第 13 回合起每轮叠加暴走，不能无限防御耗蓝。菜单的舒适视角默认开启：即时转向、固定镜头、关闭闪屏与漂浮粒子。</p></section></div><div class="help-note">仍是 1～3 人、五层、武器单装备槽、每局从零。每把武器只有一个固有效果。v0.1 存档与新规则不兼容，旧存档保留但不会当作新局读取。单人是高风险挑战，不保证所有编队与种子都能通关。</div>`,{wide:true});}
+function helpModal(){return dialog('先布置，再出手','FIELD GUIDE / v0.3','独立 CD · 我方准备 → 全队攻击 → 敌方行动',`<div class="help-grid"><section class="help-block"><h3>01 / 准备阶段</h3><p>自由切换队员、连续使用不同的就绪技能。同一回合可以先破甲、再火冰融解、再治疗。技能没有 MP，使用后进入独立冷却；冷却只随完整战斗回合减少。CD 3 的技能在 R1 用过后，R4 可再次使用。</p></section><section class="help-block"><h3>02 / 全队攻击</h3><p>按 Enter / 1 或点击全队攻击，未防御的存活队员各攻击一次，然后敌方按阵容顺序行动，不看速度。按 2 切换当前队员防御：本轮承伤 -65%，但不普通攻击；仍可释放技能。3～7 使用当前队员技能，[ / ] 切换队员。</p></section><section class="help-block"><h3>03 / 物品与时钟</h3><p>急救药、时砂滴、破咒盐都是有限即时补给，不会让怪物行动、移动或使状态过期。时砂和加速不能无限刷新：冷却操纵技能不互刷，本回合已经用过的技能最低保留 1 CD。武器的回合末治疗每轮只触发一次。</p></section><section class="help-block"><h3>04 / 巡逻与警报</h3><p>普通敌群沿固定路线前进，即使玩家靠近也不自动追击。只有鸣月哨祭的警报成功，路径 8 格内普通敌群才向警报地点移动 6 拍；杀死或封头可阻断。精英始终定位玩家，每拍追一格。巡逻路过战场也可能意外加入；新增援下一轮才行动。</p></section><section class="help-block"><h3>05 / 战前工具</h3><p>T 打开工具：诱导铃在当前格留 5 拍诱饵（普通怪 / 路径 6 格），眠缚铃停住已探明 4 格内的一队（普通 3 拍、精英 1 拍），静音粉阻断未来 6 拍警报。使用不耗时，但后续移动、等待、完整战斗回合消耗持续时间。精英免疫诱导。下层有限补充。</p></section><section class="help-block"><h3>06 / 预兆与舒适</h3><p>Boss 预兆保留完整准备窗口，按提示驱散、封头、清理侍从或多段命中。预兆取代该轮普通攻击；不能取消时防御止损。技能发生血线变化后，下一准备回合才预告。第 13 回合起逐渐暴走。战斗演出可跳过；系统减弱动态关闭位移动画，不影响结算。</p></section></div><div class="help-note">W/S 前后、A/D 转向、Q/E 平移、Space 等待、F 调查、M 地图（可显示已探索巡线）。1～3 人、五层、武器唯一装备槽与单一固有效果不变。本版需要新局；v0.2 存档未删除。</div>`,{wide:true});}
 function classesModal(){return dialog('六种星火，六种答案','JOB COMPENDIUM','明确分工，保留弱点。独行需要有限补给与局内技能弥补短板。',`<div class="choice-stack">${Object.values(JOBS).map(j=>`<button class="event-choice" data-action="class-detail" data-job="${j.id}"><span style="height:48px;width:48px;overflow:hidden;position:relative;border-radius:7px;background:${j.color}11;flex-shrink:0"><img src="${PORTRAITS[j.id]}" style="width:80px;max-width:none;position:absolute;left:-16px;top:-18px" alt=""></span><span class="choice-copy"><strong style="color:${j.color}">${j.name} · ${j.person}</strong><small>${j.role} / ${j.passiveDesc}</small></span>${icon('right',16)}</button>`).join('')}</div>`);}
 function heroModal(id,isClass=false){
   const hero=isClass?null:run.party.find(p=>p.id===id),job=JOBS[isClass?id:hero.job],stats=hero?heroStats(hero):job;
-  const header=`<div class="hero-detail"><div class="hero-detail-art"><img src="${PORTRAITS[job.id]}" alt="${job.person}"></div><div class="hero-detail-copy"><div class="eyebrow">${job.roman} / ${job.jp}</div><h2>${job.person}</h2><div class="job-title">${job.name} · ${job.role}</div><p>${job.synopsis}</p><div class="hero-stats">${[['生命',hero?`${hero.hp}/${hero.maxHp}`:job.hp],['MP',hero?`${hero.mp}/${hero.maxMp}`:job.mp],['攻击',Math.floor(stats.atk)],['魔力',Math.floor(stats.mag)],['防御',stats.def],['速度',Math.floor(stats.spd)]].map(([label,value])=>`<span class="hero-stat">${label}<b>${value}</b></span>`).join('')}</div><div class="passive"><b>职业被动 · ${job.passive}</b>${job.passiveDesc}</div></div></div>`;
-  const skills=[...job.skills,...job.advanced].map(id=>{const s=hero?effectiveSkill(hero,id):SKILLS[id],rank=hero?.ranks[id]||0;const learned=hero?hero.skills.includes(id):job.skills.includes(id);return `<div class="skill-detail ${!learned?'locked-art':''}">${icon(s.icon,21)}<span><strong>${s.name}${!learned?` <small>未习得 · B${SKILLS[id].minFloor||1} 起</small>`:hero?.evolutions[id]?'<small class="gold"> ✦觉醒</small>':''}${rank?` <span class="gold">+${rank}</span>`:''}</strong><p>${s.desc}${rank?` 当前强化 +${rank}。`:''}</p></span><span class="mp">${hero?skillCost(hero,id):s.cost} MP</span></div>`;}).join('');
+  const header=`<div class="hero-detail"><div class="hero-detail-art"><img src="${PORTRAITS[job.id]}" alt="${job.person}"></div><div class="hero-detail-copy"><div class="eyebrow">${job.roman} / ${job.jp}</div><h2>${job.person}</h2><div class="job-title">${job.name} · ${job.role}</div><p>${job.synopsis}</p><div class="hero-stats">${[['生命',hero?`${hero.hp}/${hero.maxHp}`:job.hp],['攻击',Math.floor(stats.atk)],['魔力',Math.floor(stats.mag)],['防御',stats.def]].map(([label,value])=>`<span class="hero-stat">${label}<b>${value}</b></span>`).join('')}</div><div class="passive"><b>职业被动 · ${job.passive}</b>${job.passiveDesc}</div></div></div>`;
+  const skills=[...job.skills,...job.advanced].map(id=>{const s=hero?effectiveSkill(hero,id):SKILLS[id],rank=hero?.ranks[id]||0;const learned=hero?hero.skills.includes(id):job.skills.includes(id);return `<div class="skill-detail ${!learned?'locked-art':''}">${icon(s.icon,21)}<span><strong>${s.name}${!learned?` <small>未习得 · B${SKILLS[id].minFloor||1} 起</small>`:hero?.evolutions[id]?'<small class="gold"> ✦觉醒</small>':''}${rank?` <span class="gold">+${rank}</span>`:''}</strong><p>${s.desc}${rank?` 当前强化 +${rank}。`:''}</p></span><span class="mp">CD ${hero?skillCooldown(hero,id):s.cd}</span></div>`;}).join('');
   return `<div class="modal-backdrop"><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1"><h2 id="dialog-title" class="sr-only">${job.person} 的职业信息</h2><button class="icon-button modal-close" data-action="close" aria-label="关闭">${icon('close',16)}</button>${header}<div class="divider"></div>${skills}${hero?`<div class="help-note">当前武器：${e(hero.weapon.name)}<br>「${e(hero.weapon.effectName)}」${e(hero.weapon.desc)}</div>`:'<p class="modal-hint">以上为职业基础数值，不含起始武器和独行誓约加成。</p>'}</section></div>`;
 }
 function weaponPanel(w,owner=null){const r=RARITIES[w.rarity];return `<${owner?'div':'button'} class="inventory-weapon" ${!owner?`data-action="choose-bag-weapon" data-uid="${e(w.uid)}" ${run.phase!=='explore'?'disabled':''}`:''}><span class="owner"><span style="color:${r.color}">${r.name} · ${e(w.type)}</span>${owner?`<b>${e(owner)} / 已装备</b>`:'<b>备用武器</b>'}</span><h3>${e(w.name)}</h3><span class="weapon-stats"><span>攻击 +${w.atk}</span><span>魔力 +${w.mag}</span></span><div class="weapon-effect"><b>固有效果 · ${e(w.effectName)}</b>${e(w.desc)}</div>${!owner?`<p>${run.phase==='explore'?'点击选择装备者':'战斗中不可更换武器'}</p>`:''}</${owner?'div':'button'}>`;}
-function inventoryModal(){return dialog('沿途拾起的星光','THE TRAVELER’S INVENTORY',`只有武器，没有护甲或饰品槽。现在拥有 ${run.gold} 星砂。`,`<div class="help-note">共享补给：急救药 ×${run.supplies.tonic} / 以太滴 ×${run.supplies.ether} / 破咒盐 ×${run.supplies.salt}。战斗中使用消耗行动。</div><div class="inventory-heading">当前武器 <small>每人只装备一把</small></div><div class="inventory-grid">${run.party.map(p=>weaponPanel(p.weapon,p.name)).join('')}</div><div class="inventory-heading">行囊中的武器 <small>${run.inventory.length} 把</small></div><div class="inventory-grid">${run.inventory.length?run.inventory.map(w=>weaponPanel(w)).join(''):'<p class="empty-note">旧武器会在更换装备后放入这里。</p>'}</div><div class="inventory-heading">本局祝福 <small>仅在这一次冒险中生效</small></div><div class="all-boons">${boonChips()}</div><div class="inventory-heading">技能觉醒</div>${run.party.map(p=>`<p class="small muted" style="margin-bottom:8px"><span style="color:${JOBS[p.job].color}">${e(p.name)}</span>　${p.skills.map(id=>`${effectiveSkill(p,id).name}${p.evolutions[id]?' ✦':p.ranks[id]?` +${p.ranks[id]}`:''}`).join(' / ')}</p>`).join('')}`,{wide:true});}
+function inventoryModal(){return dialog('沿途拾起的星光','THE TRAVELER’S INVENTORY',`只有武器，没有护甲或饰品槽。现在拥有 ${run.gold} 星砂。`,`<div class="help-note">共享补给：急救药 ×${run.supplies.tonic} / 时砂滴 ×${run.supplies.ether} / 破咒盐 ×${run.supplies.salt}。技能与物品使用都不推进回合。</div><div class="inventory-heading">当前武器 <small>每人只装备一把</small></div><div class="inventory-grid">${run.party.map(p=>weaponPanel(p.weapon,p.name)).join('')}</div><div class="inventory-heading">行囊中的武器 <small>${run.inventory.length} 把</small></div><div class="inventory-grid">${run.inventory.length?run.inventory.map(w=>weaponPanel(w)).join(''):'<p class="empty-note">旧武器会在更换装备后放入这里。</p>'}</div><div class="inventory-heading">本局祝福 <small>仅在这一次冒险中生效</small></div><div class="all-boons">${boonChips()}</div><div class="inventory-heading">技能觉醒</div>${run.party.map(p=>`<p class="small muted" style="margin-bottom:8px"><span style="color:${JOBS[p.job].color}">${e(p.name)}</span>　${p.skills.map(id=>`${effectiveSkill(p,id).name}${p.evolutions[id]?' ✦':p.ranks[id]?` +${p.ranks[id]}`:''}`).join(' / ')}</p>`).join('')}`,{wide:true});}
+function fieldModal(){
+  const nearby=reinforcementInfo(run).filter(p=>p.known&&p.distance<=4),remaining=Math.max(0,(run.field?.hushUntil||0)-run.dungeon.elapsed);
+  return dialog('让迷宫成为你的战术','FIELD TOOLS / 不推进时间',`世界节拍 ${run.dungeon.elapsed} · ${remaining?'静音保护剩余 '+remaining+' 拍':'普通怪固定巡逻；精英持续定位'}`,`<div class="field-tools">${Object.entries(FIELD_TOOLS).map(([id,t])=>`<section class="field-tool"><h3>${icon(t.icon,20)} ${t.name}<span>×${run.fieldSupplies[id]}</span></h3><p>${e(t.desc)}</p>${id==='sleep'?`<label>选择敌群<select id="field-pack"><option value="">请选择目标</option>${nearby.map(p=>`<option value="${p.id}">${e(p.name)} / ${p.distance} 格 / ${MODE_NAMES[p.mode]}</option>`).join('')}</select></label>`:''}<button class="secondary" data-action="field-use" data-tool="${id}" ${!run.fieldSupplies[id]?'disabled':''}>使用${t.name}</button></section>`).join('')}</div><div class="help-note">急救药 ×${run.supplies.tonic}：探索中也可不耗时治疗。${run.party.map(p=>`<button class="ghost" data-action="field-heal" data-id="${p.id}" ${!run.supplies.tonic||p.hp<=0||p.hp===p.maxHp?'disabled':''}>治疗 ${e(p.name)}（${p.hp}/${p.maxHp}）</button>`).join('')}</div>`,{wide:true});
+}
 function menuModal(){return dialog('星灯仍在这里','PAUSE & REFLECT',`SEED ${e(run.seed)} · 第 ${run.floor} 层 · 本局已自动保存`,`<div class="menu-choices"><button class="secondary" data-action="close">${icon('arrow',18)} 继续探索</button><button class="secondary" data-action="inventory">${icon('bag',18)} 查看装备与祝福</button><button class="secondary" data-action="help">${icon('help',18)} 查看冒险指南</button><button class="secondary" data-action="comfort">${icon('eye',18)} 舒适视角：${run.comfort!==false?'开启（即时转向 / 无闪屏）':'关闭（平滑移动）'}</button><button class="secondary" data-action="object-motion">${icon('star',18)} 物件动画：${run.objectMotion===true?'开启（系统减弱动态优先）':'关闭（静态舒适）'}</button><button class="secondary" data-action="return-title">${icon('moon',18)} 返回序章（保留本局存档）</button><button class="secondary danger-text" data-action="restart-confirm">${icon('exit',18)} 放弃本局，重新编队</button></div>`,{narrow:true});}
 function renderModal(){
   let html='',key='';
@@ -1795,7 +3466,8 @@ function renderModal(){
     else if(ui.modal==='class')html=heroModal(ui.modalData,true);
     else if(ui.modal==='hero'&&run)html=heroModal(ui.modalData);
     else if(ui.modal==='inventory'&&run)html=inventoryModal();
-    else if(ui.modal==='map'&&run)html=dialog('把走过的路，记在心里。','MAP / '+FLOORS[run.floor-1].jp,`已探索 ${exploration()}% · 坐标 ${run.x}, ${run.y} · 面向${DIRECTIONS[run.dir].label}`,`<div class="large-map">${mapSvg(true)}</div><p class="modal-hint">红菱形：游荡小队　金菱形：强敌　圆环：正在追踪<br>Ⅰ～Ⅳ 为区域地标。已探索区域内的明雷位置实时随回合更新；未知区域仍保留迷雾。</p>`,{narrow:true});
+    else if(ui.modal==='map'&&run)html=dialog('把走过的路，记在心里。','MAP / '+FLOORS[run.floor-1].jp,`已探索 ${exploration()}% · 坐标 ${run.x}, ${run.y} · 面向${DIRECTIONS[run.dir].label}`,`<button class="secondary" data-action="patrol-toggle">${ui.showPatrol?'隐藏':'显示'}已探索巡逻路线</button><div class="large-map">${mapSvg(true)}</div><p class="modal-hint">红菱形：游荡小队　金菱形：强敌　圆环：警报集结<br>Ⅰ～Ⅳ 为区域地标。已探索区域内的明雷位置实时随回合更新；未知区域仍保留迷雾。</p>`,{narrow:true});
+    else if(ui.modal==='field'&&run)html=fieldModal();
     else if(ui.modal==='menu'&&run)html=menuModal();
     else if(ui.modal==='equip-bag'&&run){const w=run.inventory.find(w=>w.uid===ui.modalData);if(w)html=dialog(e(w.name),'CHANGE YOUR WEAPON',`「${e(w.effectName)}」${e(w.desc)}`,equipChoices(w,'equip-bag'));}
     else if(ui.modal==='confirm-start')html=dialog('开始一段新的旅程？','A NEW BEGINNING','新的冒险会覆盖当前存档。旧局的等级、武器、祝福和技能强化都不会保留。',`<div class="center-actions"><button class="secondary" data-action="close">保留旧局</button><button class="primary" data-action="confirm-start">从零开始 ${icon('arrow',18)}</button></div>`,{narrow:true});
@@ -1811,13 +3483,13 @@ function renderModal(){
   MODAL.innerHTML=html;modalKey=key;MODAL.querySelector('.dialog')?.focus({preventScroll:true});
 }
 function beginRun(){
-  run=createRun(ui.selection,ui.seedDraft.trim()||seedCode());ui.modal=null;ui.modalData=null;ui.rewardIndex=null;ui.pendingSkill=null;ui.selectedEnemy=null;ui.busy=false;modalKey='';
+  run=createRun(ui.selection,ui.seedDraft.trim()||seedCode());ui.modal=null;ui.modalData=null;ui.rewardIndex=null;ui.pendingSkill=null;ui.selectedEnemy=null;ui.busy=false;ui.presentation=null;ui.playback=null;ui.animationToken++;modalKey='';
   save();mountGame();AUDIO.sfx('magic');
 }
 function goTitle({clear=false}={}){
   if(run)ui.selection=run.party.map(p=>p.job);
   if(clear){try{localStorage.removeItem(SAVE_KEY);}catch{}}else save();
-  run=null;ui.modal=null;ui.modalData=null;ui.pendingSkill=null;ui.rewardIndex=null;ui.busy=false;ui.seedDraft='';modalKey='';renderLanding();
+  run=null;ui.modal=null;ui.modalData=null;ui.pendingSkill=null;ui.rewardIndex=null;ui.busy=false;ui.presentation=null;ui.playback=null;ui.animationToken++;ui.seedDraft='';modalKey='';renderLanding();
 }
 function mutateExplore(action){
   if(!run||run.phase!=='explore'||ui.modal||ui.busy)return;
@@ -1833,22 +3505,46 @@ function mutateExplore(action){
   else if(run.phase==='reward')AUDIO.sfx('magic');else AUDIO.sfx('move');
   save();updateGame();
 }
+function finishPlayback(){
+  document.getElementById('combat-skip')?.remove();
+  ui.animationToken++;ui.busy=false;ui.presentation=null;ui.playback=null;
+  if(run){run.fx=[];run.frames=[];}if(ui.screen==='game')updateGame();
+}
+async function playFrames(before,frames){
+  const actual=run,token=++ui.animationToken;
+  ui.busy=true;ui.presentation=before;ui.presentation.phase='battle';ui.presentation.fx=[];
+  document.getElementById('combat-skip')?.remove();
+  const skip=document.createElement('button');skip.id='combat-skip';skip.className='secondary combat-skip';skip.dataset.action='skip-animation';skip.textContent='跳过演出 · Esc';skip.setAttribute('aria-label','跳过演出，不跳过结算');document.body.appendChild(skip);
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  try{
+    for(const frame of frames){
+      if(token!==ui.animationToken||run!==actual)return;
+      ui.playback={...frame,label:INTENTS[frame.label]?.name||frame.label};ui.presentation.fx=[];
+      updateGame();AUDIO.sfx(frame.style==='heal'?'heal':['magic','fire','ice','omen'].includes(frame.style)?'magic':'attack');
+      await sleep(reduced?40:140);if(token!==ui.animationToken||run!==actual)return;
+      ui.presentation.party=frame.party;ui.presentation.battle=frame.battle;ui.presentation.log=frame.log;ui.presentation.fx=frame.fx;
+      updateGame();await sleep(reduced?70:260);
+    }
+  }finally{if(token===ui.animationToken&&run===actual)finishPlayback();}
+}
 function useSkill(id,target=null){
   if(!run||run.phase!=='battle'||ui.busy||ui.modal)return;
   const hero=activeHero(run);if(!hero)return;const skill=effectiveSkill(hero,id);
   if(id!=='escape'&&skill?.target==='ally'&&!target){ui.pendingSkill=id;updateGame();toast('请选择下方的一名队友。');return;}
-  const targetId=target||ui.selectedEnemy||run.battle.enemies.find(p=>p.hp>0)?.id;
-  const result=act(run,id,targetId);
+  const targetId=target||(run.battle.enemies.some(p=>p.id===ui.selectedEnemy&&p.hp>0)?ui.selectedEnemy:null)||run.battle.enemies.find(p=>p.hp>0)?.id;
+  const before=structuredClone(run),result=act(run,id,targetId);
   if(!result.ok){toast(result.error);return;}
-  ui.pendingSkill=null;ui.busy=true;
-  AUDIO.sfx(run.phase==='reward'||run.ending==='victory'?'victory':['magic','heal','aegis','revive','haste','rewind'].includes(skill?.kind)?'magic':'attack');
-  renderer?.pulse();save();updateGame();
-  const current=run;
-  setTimeout(()=>{if(run!==current)return;ui.busy=false;run.fx=[];if(ui.screen==='game')updateGame();},420);
+  ui.pendingSkill=null;save();
+  const frames=run.frames||[];
+  if(frames.length&&id!=='guard')playFrames(before,frames).catch(error=>{console.error(error);finishPlayback();});
+  else{run.fx=[];updateGame();}
 }
 function handleAction(button){
   const action=button.dataset.action;
   if(button.disabled)return;
+  if(action==='skip-animation'){finishPlayback();return;}
+  if(ui.busy&&action!=='sound')return;
   if(action==='job'){
     ui.seedDraft=document.getElementById('seed-input')?.value||ui.seedDraft;
     const id=button.dataset.job,index=ui.selection.indexOf(id);
@@ -1867,7 +3563,7 @@ function handleAction(button){
   if(action==='help'){setModal('help');return;}
   if(action==='classes'){setModal('classes');return;}
   if(action==='class-detail'){setModal('class',button.dataset.job);return;}
-  if(action==='map'||action==='inventory'||action==='menu'){if(run)setModal(action);return;}
+  if(action==='map'||action==='inventory'||action==='menu'||action==='field'){if(run)setModal(action);return;}
   if(action==='return-title'){goTitle();return;}
   if(action==='again'){goTitle({clear:true});return;}
   if(action==='restart-confirm'){setModal('confirm-abandon');return;}
@@ -1876,13 +3572,23 @@ function handleAction(button){
   if(!run)return;
   if(action==='object-motion'){run.objectMotion=run.objectMotion!==true;modalKey='';save();updateGame();return;}
   if(action==='comfort'){run.comfort=run.comfort===false;modalKey='';save();updateGame();return;}
+  if(action==='patrol-toggle'){ui.showPatrol=!ui.showPatrol;modalKey='';renderModal();return;}
+  if(action==='field-use'){
+    const result=useFieldTool(run,button.dataset.tool,document.getElementById('field-pack')?.value||null);
+    if(!result.ok){toast(result.error);return;}modalKey='';save();updateGame();return;
+  }
+  if(action==='field-heal'){
+    const result=useSupply(run,'tonic',button.dataset.id);if(!result.ok){toast(result.error);return;}
+    modalKey='';save();updateGame();return;
+  }
+  if(action==='select-hero'){if(selectHero(run,button.dataset.id)){ui.pendingSkill=null;save();updateGame();}return;}
   if(action==='target'){ui.selectedEnemy=button.dataset.id;AUDIO.sfx('select');updateGame();return;}
   if(action==='skill'){useSkill(button.dataset.skill);return;}
   if(action==='flee'){useSkill('escape');return;}
   if(action==='cancel-target'){ui.pendingSkill=null;updateGame();return;}
   if(action==='party'){
     if(ui.pendingSkill){useSkill(ui.pendingSkill,button.dataset.id);return;}
-    setModal('hero',button.dataset.id);return;
+    if(run.phase==='battle'){if(selectHero(run,button.dataset.id)){save();updateGame();}}else setModal('hero',button.dataset.id);return;
   }
   if(action==='reward'){
     const index=Number(button.dataset.index),reward=run.rewards[index];if(!reward)return;
@@ -1916,11 +3622,15 @@ document.addEventListener('keydown',event=>{
     if(event.shiftKey&&(document.activeElement===first||document.activeElement===MODAL.querySelector('.dialog'))){event.preventDefault();last.focus();}
     else if(!event.shiftKey&&(document.activeElement===last||document.activeElement===MODAL.querySelector('.dialog'))){event.preventDefault();first.focus();}return;
   }
+  if(ui.busy){if(event.key==='Escape'){event.preventDefault();finishPlayback();}return;}
   if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
   if(event.key==='Escape'){if(MODAL.innerHTML)closeModal();else if(ui.pendingSkill){ui.pendingSkill=null;updateGame();}else if(run)setModal('menu');return;}
   if(MODAL.innerHTML||!run)return;
   const key=event.key.toLowerCase();
   if(key==='m'){event.preventDefault();setModal('map');return;}
+  if(key==='t'&&run.phase==='explore'){event.preventDefault();setModal('field');return;}
+  if(run.phase==='battle'&&key==='enter'){event.preventDefault();useSkill('attack');return;}
+  if(run.phase==='battle'&&['[',']'].includes(key)){event.preventDefault();const living=run.party.filter(p=>p.hp>0),i=living.findIndex(p=>p.id===run.battle.active);selectHero(run,living[(i+(key===']'?1:living.length-1))%living.length].id);ui.pendingSkill=null;save();updateGame();return;}
   if(key==='i'){event.preventDefault();setModal('inventory');return;}
   if(key==='h'){event.preventDefault();setModal('help');return;}
   if(run.phase==='battle'&&/^[1-9]$/.test(key)){event.preventDefault();const p=activeHero(run);const id=p?['attack','guard',...p.skills][Number(key)-1]:null;if(id)useSkill(id);return;}

@@ -1,4 +1,4 @@
-import { DIRECTIONS, ENCOUNTERS, ENEMY_TYPES } from './data.js';
+import { DIRECTIONS, ENCOUNTERS, ENEMY_TYPES, FIELD_TOOLS } from './data.js';
 import { int, pick, shuffle } from './rng.js';
 
 export const REGIONS = [
@@ -71,7 +71,7 @@ export function populatePacks(run){
     if(run.party.length===1)troop=troop.slice(0,run.floor>=3&&i%3===1?2:1);
     else if(run.party.length===2)troop=troop.slice(0,2);
     if(elite)troop=run.party.length===1?['briar']:['sentinel','revenant',...(run.party.length===3?['moth']:[])];
-    d.packs.push({id:`pack-${run.floor}-${i}`,x,y,home:{x,y},previous:null,kind:elite?'elite':'normal',troop,name:elite?'徘徊的强敌':`${ENEMY_TYPES[troop[0]].name}小队`,alert:0,cooldown:0,engaged:false,defeated:false,members:null});
+    d.packs.push({id:`pack-${run.floor}-${i}`,x,y,home:{x,y},previous:null,kind:elite?'elite':'normal',troop,name:elite?'徘徊的强敌':`${ENEMY_TYPES[troop[0]].name}小队`,alert:0,alertUntil:0,alarmTarget:null,cooldown:0,engaged:false,defeated:false,members:null,route:patrolRoute(d,x,y),routeIndex:0,sleepUntil:0,sleepResistUntil:0,lure:null,mode:elite?'elite':'patrol'});
   }
 }
 export function revealAround(run){
@@ -84,32 +84,103 @@ export function revealAround(run){
   }
 }
 export function visiblePacks(run){return run.dungeon.packs.filter(p=>!p.defeated&&!p.engaged&&run.dungeon.visited[p.y]?.[p.x]);}
+/** A closed, cardinal patrol cycle. It depends only on the map and home coordinate. */
+export function patrolRoute(d,sx,sy){
+  const route=[{x:sx,y:sy}],seen=new Set([key(sx,sy)]);
+  const rotation=(sx*17+sy*31)%4;
+  for(let i=0;i<5;i++){
+    const p=route.at(-1);
+    const next=[...DIRECTIONS.slice(rotation),...DIRECTIONS.slice(0,rotation)]
+      .map(v=>({x:p.x+v.x,y:p.y+v.y})).find(q=>isFloor(d,q.x,q.y)&&!seen.has(key(q.x,q.y))&&!(q.x===1&&q.y===1));
+    if(!next)break;route.push(next);seen.add(key(next.x,next.y));
+  }
+  return route.concat(route.slice(1,-1).reverse());
+}
+export function packMode(run,p){
+  const now=run.dungeon.elapsed;
+  if(p.sleepUntil>now)return 'sleep';
+  if(p.cooldown>0)return 'rest';
+  if(p.kind==='elite')return 'elite';
+  if(p.alertUntil>now)return 'alarmed';
+  if(p.lure?.until>now)return 'lured';
+  const q=p.route?.[p.routeIndex??0];
+  return q&&(q.x!==p.x||q.y!==p.y)?'return':'patrol';
+}
 export function nearbyPacks(run,radius=8){
   const dist=paths(run.dungeon,run.x,run.y);
-  return run.dungeon.packs.filter(p=>!p.defeated&&!p.engaged&&dist[key(p.x,p.y)]<=radius).map(p=>({id:p.id,name:p.name,kind:p.kind,x:p.x,y:p.y,distance:dist[key(p.x,p.y)],eta:Math.max(1,dist[key(p.x,p.y)]),known:!!run.dungeon.visited[p.y]?.[p.x],count:p.members?p.members.filter(e=>e.hp>0).length:p.troop.length})).sort((a,b)=>a.distance-b.distance);
+  return run.dungeon.packs.filter(p=>!p.defeated&&!p.engaged&&(dist[key(p.x,p.y)]<=radius||p.kind==='elite')).map(p=>{
+    const mode=packMode(run,p),distance=dist[key(p.x,p.y)];
+    return {id:p.id,name:p.name,kind:p.kind,x:p.x,y:p.y,distance,mode,eta:mode==='elite'||mode==='alarmed'?Math.max(1,distance):null,
+      known:!!run.dungeon.visited[p.y]?.[p.x],count:p.members?p.members.filter(e=>e.hp>0).length:p.troop.length};
+  }).sort((a,b)=>a.distance-b.distance);
 }
-/** One successful player step, or one completed battle round, advances exactly one world tick.
- * Turns, wall bumps, dialogs and page reloads do not. Occupied cells prevent overlap, not teleporting.
+/** Only a successfully resolved alarm action calls this. Merely starting combat does not. */
+export function raiseAlarm(run,radius=8,duration=6){
+  if((run.field?.hushUntil||0)>run.dungeon.elapsed)return {blocked:true,count:0};
+  const dist=paths(run.dungeon,run.x,run.y);let count=0;
+  for(const p of run.dungeon.packs){
+    if(p.defeated||p.engaged||p.kind==='elite'||dist[key(p.x,p.y)]>radius)continue;
+    p.alertUntil=run.dungeon.elapsed+duration;p.alert=duration;p.alarmTarget={x:run.x,y:run.y};p.mode='alarmed';count++;
+  }
+  return {blocked:false,count};
+}
+export function useFieldTool(run,id,packId=null){
+  const tool=FIELD_TOOLS[id];
+  if(run.phase!=='explore'||!tool)return {ok:false,error:'地图工具只能在进入战斗前使用。'};
+  if(!(run.fieldSupplies?.[id]>0))return {ok:false,error:'这种地图工具已经用尽。'};
+  const d=run.dungeon,now=d.elapsed;let target=null;
+  if(id==='sleep'){
+    target=d.packs.find(p=>p.id===packId&&!p.defeated&&!p.engaged);
+    if(!target||!d.visited[target.y]?.[target.x]||paths(d,run.x,run.y)[key(target.x,target.y)]>tool.range)return {ok:false,error:'请选择已探明、路径 4 格内的敌群。'};
+    if(target.sleepUntil>now||target.sleepResistUntil>now)return {ok:false,error:'目标仍在眠缚或抗性期间，不能覆盖。'};
+  }
+  if(id==='hush'&&(run.field?.hushUntil||0)>now)return {ok:false,error:'静音粉仍然生效，无需重复使用。'};
+  if(id==='lure'&&d.packs.some(p=>!p.defeated&&!p.engaged&&p.lure?.until>now))return {ok:false,error:'已有诱饵生效；先完成当前诱导。'};
+  let affected=[];
+  if(id==='lure'){
+    const dist=paths(d,run.x,run.y);
+    affected=d.packs.filter(p=>!p.defeated&&!p.engaged&&p.kind!=='elite'&&dist[key(p.x,p.y)]<=6);
+    if(!affected.length)return {ok:false,error:'路径 6 格内没有能被诱导的普通敌群。精英不会响应诱饵。'};
+  }
+  run.fieldSupplies[id]--;run.field??={hushUntil:0};
+  if(id==='sleep'){
+    const duration=target.kind==='elite'?1:3;
+    target.sleepUntil=now+duration;target.sleepResistUntil=now+duration+4;target.mode='sleep';
+  }else if(id==='hush')run.field.hushUntil=now+6;
+  else for(const p of affected){p.lure={x:run.x,y:run.y,until:now+5};p.alertUntil=0;p.alert=0;p.mode='lured';}
+  run.log.push({text:`使用「${tool.name}」${target?' → '+target.name:''}。没有推进世界节拍；效果随后续移动 / 完整战斗回合消耗。`,tone:'special'});
+  if(run.log.length>100)run.log.shift();return {ok:true};
+}
+/** One successful step / wait or one completed combat round = exactly one world tick.
+ * Normal packs follow their fixed route even during combat. Alarm responders target the
+ * alarm location; elites always know the party position. No per-frame or item movement.
  */
 export function stepPacks(run,{battle=false,hold=[]}={}){
-  const d=run.dungeon,dist=paths(d,run.x,run.y),active=d.packs.filter(p=>!p.defeated&&!p.engaged);
-  d.elapsed++;
+  const d=run.dungeon,active=d.packs.filter(p=>!p.defeated&&!p.engaged);d.elapsed++;
   const occupied=new Set(active.map(p=>key(p.x,p.y)));
   for(const p of active){
     if(hold.includes(p.id)||(p.x===run.x&&p.y===run.y))continue;
-    if(p.cooldown>0){p.cooldown--;continue;}
-    const distance=dist[key(p.x,p.y)];if(battle&&distance>8)continue;
-    if(distance<=(battle?8:5))p.alert=3;else p.alert=Math.max(0,p.alert-1);
-    const old={x:p.x,y:p.y};occupied.delete(key(p.x,p.y));
-    let options=DIRECTIONS.map(v=>({x:p.x+v.x,y:p.y+v.y})).filter(a=>isFloor(d,a.x,a.y)&&!(a.x===1&&a.y===1)&&(!occupied.has(key(a.x,a.y))||(a.x===run.x&&a.y===run.y)));
-    if(p.alert){
-      options=options.filter(a=>dist[key(a.x,a.y)]<distance);
-      options.sort((a,b)=>dist[key(a.x,a.y)]-dist[key(b.x,b.y)]);
-    }else{
-      const ahead=options.filter(a=>!p.previous||a.x!==p.previous.x||a.y!==p.previous.y);
-      if(ahead.length)options=ahead;options=shuffle(run,options);
+    if(p.cooldown>0){p.cooldown--;p.mode='rest';continue;}
+    if(p.sleepUntil>=d.elapsed){p.mode='sleep';continue;}
+    p.route??=patrolRoute(d,p.home?.x??p.x,p.home?.y??p.y);p.routeIndex??=0;
+    p.alert=Math.max(0,(p.alertUntil||0)-d.elapsed);
+    let target=null,patrol=false;
+    if(p.kind==='elite'){target={x:run.x,y:run.y};p.mode='elite';}
+    else if(p.alertUntil>=d.elapsed&&p.alarmTarget){target=p.alarmTarget;p.mode='alarmed';}
+    else if(p.lure?.until>=d.elapsed){target=p.lure;p.mode='lured';}
+    else{
+      patrol=true;p.mode='patrol';target=p.route[p.routeIndex];
+      if(target.x===p.x&&target.y===p.y)target=p.route[(p.routeIndex+1)%p.route.length];
+      else p.mode='return';
     }
-    if(options.length){p.x=options[0].x;p.y=options[0].y;p.previous=old;}
+    if(!target||(p.x===target.x&&p.y===target.y))continue;
+    const dist=paths(d,target.x,target.y),distance=dist[key(p.x,p.y)];
+    occupied.delete(key(p.x,p.y));
+    const options=DIRECTIONS.map(v=>({x:p.x+v.x,y:p.y+v.y})).filter(q=>isFloor(d,q.x,q.y)&&dist[key(q.x,q.y)]<distance&&(!occupied.has(key(q.x,q.y))||(q.x===run.x&&q.y===run.y)));
+    if(options.length){
+      const next=options[0];p.previous={x:p.x,y:p.y};p.x=next.x;p.y=next.y;
+      if(patrol&&p.x===target.x&&p.y===target.y&&p.mode==='patrol')p.routeIndex=(p.routeIndex+1)%p.route.length;
+    }
     occupied.add(key(p.x,p.y));
   }
   return active.filter(p=>p.x===run.x&&p.y===run.y);

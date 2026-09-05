@@ -36,8 +36,15 @@ that is a safety net, not a substitute for step 5. Concurrent pushes fail safely
   `npm run test:render` and the pixel suite `python tests/render_browser.py`.
 - `scripts/build.mjs`: deterministic closed-world ESM bundler.
 
-Do not advance RNG or world time from rendering/timers. Only successful movement/waiting
-and completed combat rounds move enemies. Reinforcements act **next round**, never
+Do not advance RNG or world time from rendering/timers. Combat presentation frames are
+cosmetic, not persisted; skipping animations cannot alter the already-resolved outcome. Only successful movement/waiting
+and completed combat rounds move enemies. Skills, items, hero selection, guard toggles and
+field tools must never advance cooldowns, status durations, enemy actions or world time.
+The only battle commit is Attack (or an explicitly warned failed retreat).
+Use independent skill CDs and alternating party/enemy sides, never MP or speed initiative.
+Ordinary packs follow deterministic patrols; only a successfully resolved alarm attracts
+nearby packs. Elites track globally. Field tools are finite, validated and non-turn-consuming.
+Preserve cooldowns and consumed one-shot survival effects when re-entering escaped packs. Reinforcements act **next round**, never
 immediately. Keep a full visible player-response window for boss omens, and preserve
 pending omens / learned arts / pack identity through saves. Invalid commands must not
 consume resources or RNG. Controls cannot infinitely refresh the same seal.
@@ -46,11 +53,14 @@ consume resources or RNG. Controls cannot infinitely refresh the same seal.
 
 `npm test`: deterministic Node tests; includes 750 map-connectivity cases.
 `npm run balance`: isolated fixed-policy diagnostic, **not** human win-rate data.
-`python tests/browser_smoke.py`: optional Python Playwright + Chromium UI suite.
+`python tests/browser_smoke.py`: Python Playwright + Chromium UI suite.
+`python tests/battle_browser.py`: preparation/attack/field-item and staged enemy animation checks.
+`python tests/render_browser.py`: keep SVG rasterization, occlusion and pixel regressions.
 Set `CHROMIUM_PATH` when Chromium is elsewhere. Browser suite uses in-memory Storage;
 do not call that native-storage or Safari verification. Its screenshots are generated
 locally. Read `docs/QA.md` for exactly what has been measured.
 
-v0.2 uses `eclipse-labyrinth.run.v2`. v0.1 saves remain untouched but are not migrated.
+v0.3 uses `eclipse-labyrinth.run.v3`. Older v1/v2 saves remain untouched and are not migrated.
+Read docs/V03.md as the current design; older QA/design documents are historical.
 Do not promise all party combinations/seeds can win; record balance changes in
 `CHANGELOG.md`. Keep user-facing documentation in Chinese.

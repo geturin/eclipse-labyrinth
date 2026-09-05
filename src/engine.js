@@ -1,6 +1,6 @@
 import { VERSION, MAX_FLOOR, JOBS, SKILLS, EVOLUTIONS, STATUS, WEAPONS, BOONS, ENEMY_TYPES, ENCOUNTERS, BOSS_SPECS, DIRECTIONS, FLOORS } from './data.js';
 import { hash, next, int, pick, shuffle } from './rng.js';
-import { key, isFloor, paths, makeDungeon, populatePacks, revealAround, stepPacks, nearbyPacks } from './world.js';
+import { key, isFloor, paths, makeDungeon, populatePacks, revealAround, stepPacks, nearbyPacks, raiseAlarm } from './world.js';
 
 // Pure serializable state: UI, timers and rendering cannot advance combat or the world clock.
 export function hashSeed(text){return hash(text);}
@@ -17,12 +17,12 @@ const live=items=>items.filter(p=>p.hp>0);
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const isBoss=e=>!!e.boss;
 const magicKinds=['magic','heal','cleanse','revive','sanctuary','haste','dispel','delay','echoTime','focus'];
-const magicIntents=['hex','mark','bless','enemyHeal','summon','mirror','sweepMagic'];
+const magicIntents=['alarm','hex','mark','bless','enemyHeal','summon','mirror','sweepMagic'];
 const armIntents=['heavy','hunt','sweep','corrode','cover','thorns'];
 function log(run,text,tone='info'){run.log.push({text,tone});if(run.log.length>100)run.log.shift();}
 export function boonCount(run,id){return run.boons[id]||0;}
 export function negativeCount(e){return Object.keys(e.status).filter(id=>STATUS[id]?.negative).length;}
-export function heroStats(h){return {atk:h.atk+h.weapon.atk,mag:h.mag+h.weapon.mag,def:h.def,spd:h.spd*(h.status.haste?1.5:1)*(h.status.slow?.6:1)};}
+export function heroStats(h){return {atk:h.atk+h.weapon.atk,mag:h.mag+h.weapon.mag,def:h.def};}
 export function effectiveSkill(hero,id){
   const s=SKILLS[id];if(!s)return null;
   return hero.evolutions?.[id]?{...s,...EVOLUTIONS[id].patch,desc:`${s.desc} 觉醒：${EVOLUTIONS[id].desc}`}:{...s};
@@ -33,16 +33,41 @@ export function makeWeapon(id,floor=1,serial=0){
   return {...base,id,uid:`${id}-${floor}-${serial}`,atk:base.atk+(base.atk>base.mag?bonus:Math.floor(bonus/2)),mag:base.mag+(base.mag>=base.atk?bonus:Math.floor(bonus/2)),floor};
 }
 function makeHero(id,index,solo){
-  const j=JOBS[id],hp=Math.round(j.hp*(solo?1.45:1)),mp=Math.round(j.mp*(solo?1.3:1));
-  return {id:`hero-${index}`,job:id,name:j.person,maxHp:hp,hp,maxMp:mp,mp,atk:j.atk,mag:j.mag,def:j.def,spd:j.spd,weapon:makeWeapon(j.weapon),skills:[...j.skills],ranks:{},evolutions:{},status:{},resists:{},barrier:0,guard:false,phoenixUsed:false,laststandUsed:false};
+  const j=JOBS[id],hp=Math.round(j.hp*(solo?1.45:1));
+  return {id:`hero-${index}`,job:id,name:j.person,maxHp:hp,hp,atk:j.atk,mag:j.mag,def:j.def,weapon:makeWeapon(j.weapon),skills:[...j.skills],ranks:{},evolutions:{},cooldowns:{},usedRound:{},status:{},resists:{},barrier:0,guard:false,phoenixUsed:false,laststandUsed:false};
 }
+const cooldownManipulators=new Set(['haste','bloodpact']);
+export function skillCooldown(hero,id){
+  const skill=SKILLS[id];if(!skill)return Infinity;
+  if(!skill.cd)return 0;
+  const rank=hero.ranks?.[id]||0;
+  return Math.max(2,skill.cd-(rank>=2?1:0)+(hero.weapon.effect==='overload'?1:0)-(hero.weapon.effect==='economy'?1:0));
+}
+export function cooldownLeft(hero,id){return hero.cooldowns?.[id]||0;}
+export function selectHero(run,id){
+  if(run.phase!=='battle'||run.battle.stage!=='prepare'||!run.party.some(p=>p.id===id&&p.hp>0))return false;
+  run.battle.active=id;return true;
+}
+function reduceCooldowns(h,amount,{longest=false,round=0}={}){
+  let ids=Object.keys(h.cooldowns).filter(id=>!cooldownManipulators.has(id)&&h.cooldowns[id]>0);
+  if(longest)ids=ids.sort((a,b)=>h.cooldowns[b]-h.cooldowns[a]).slice(0,1);
+  for(const id of ids)h.cooldowns[id]=Math.max(h.usedRound[id]===round?1:0,h.cooldowns[id]-amount);
+}
+function traceFrame(run,actor,label,style,start=0){
+  // Presentation snapshots are emitted by pure rules, never used to advance game time.
+  run.frames??=[];
+  run.frames.push({actorId:actor?.id||null,side:actor?.job?'party':'enemy',label,style,
+    fx:structuredClone(run.fx.slice(start)),party:structuredClone(run.party),battle:structuredClone(run.battle),log:structuredClone(run.log.slice(-30))});
+}
+function traced(run,actor,label,style,fn){const start=run.fx.length;fn();traceFrame(run,actor,label,style,start);}
+function effectStyle(s){return s.element==='fire'?'fire':s.element==='ice'?'ice':['heal','revive','sanctuary','itemHeal'].includes(s.kind)?'heal':['seal','dispel','magic'].includes(s.kind)?'magic':['physical','attack'].includes(s.kind)?'slash':'shield';}
 export function createRun(jobIds,seed){
   if(!Array.isArray(jobIds)||jobIds.length<1||jobIds.length>3||new Set(jobIds).size!==jobIds.length||jobIds.some(j=>!JOBS[j]))throw new Error('请选择 1～3 个不同职业。');
   const cleanSeed=String(seed||'MOON').trim().slice(0,48)||'MOON';
-  const run={version:VERSION,seed:cleanSeed,rng:hash(cleanSeed),phase:'explore',floor:1,party:jobIds.map((j,i)=>makeHero(j,i,jobIds.length===1)),level:1,xp:0,nextXp:85,gold:0,boons:{},inventory:[],supplies:{tonic:3,ether:2,salt:2},battles:0,kills:0,steps:0,guardianDefeated:false,log:[],battle:null,rewards:[],event:null,ending:null,fx:[],serial:0,enemySerial:0,solo:jobIds.length===1,comfort:true,lastPosition:{x:1,y:1}};
+  const run={version:VERSION,seed:cleanSeed,rng:hash(cleanSeed),phase:'explore',floor:1,party:jobIds.map((j,i)=>makeHero(j,i,jobIds.length===1)),level:1,xp:0,nextXp:85,gold:0,boons:{},inventory:[],supplies:{tonic:3,ether:2,salt:2},fieldSupplies:{lure:2,sleep:1,hush:1},field:{hushUntil:0},frames:[],battles:0,kills:0,steps:0,guardianDefeated:false,log:[],battle:null,rewards:[],event:null,ending:null,fx:[],serial:0,enemySerial:0,solo:jobIds.length===1,comfort:true,lastPosition:{x:1,y:1}};
   enterFloor(run,1);
-  log(run,'v0.2 · 明雷探索：每走一格怪物也走一格；战斗每回合末附近小队移动并可能增援。','special');
-  if(run.solo)log(run,'独行誓约：生命 +45%、MP +30%、伤害 +20%。独行是挑战模式；利用有限补给与新技能。','special');
+  log(run,'v0.3 · 冷却战斗：任意切换队员施放技能，点击全队攻击才推进回合。普通怪固定巡逻，报警成功才定向增援。','special');
+  if(run.solo)log(run,'独行誓约：生命 +45%、伤害 +20%。独行是挑战模式；利用有限补给与新技能。','special');
   return run;
 }
 export function reveal(run){revealAround(run);}
@@ -50,9 +75,9 @@ function enterFloor(run,floor){
   if(floor>MAX_FLOOR)return;
   run.floor=floor;run.dungeon=makeDungeon(run,floor);run.x=1;run.y=1;run.lastPosition={x:1,y:1};
   run.dir=DIRECTIONS.findIndex(v=>isFloor(run.dungeon,1+v.x,1+v.y));
-  run.guardianDefeated=false;run.phase='explore';run.battle=null;run.rewards=[];run.event=null;
+  run.guardianDefeated=false;run.phase='explore';run.battle=null;run.rewards=[];run.event=null;run.field={hushUntil:0};
   for(const p of run.party){p.status={};p.resists={};p.guard=false;p.barrier=0;}
-  if(floor>1){run.supplies.tonic=Math.min(5,run.supplies.tonic+2);run.supplies.ether=Math.min(4,run.supplies.ether+1);run.supplies.salt=Math.min(4,run.supplies.salt+2);}
+  if(floor>1){run.fieldSupplies.lure=Math.min(3,run.fieldSupplies.lure+1);run.fieldSupplies.sleep=Math.min(2,run.fieldSupplies.sleep+1);run.fieldSupplies.hush=Math.min(2,run.fieldSupplies.hush+1);run.supplies.tonic=Math.min(5,run.supplies.tonic+2);run.supplies.ether=Math.min(4,run.supplies.ether+1);run.supplies.salt=Math.min(4,run.supplies.salt+2);}
   populatePacks(run);revealAround(run);log(run,`第 ${floor} 层 · ${FLOORS[floor-1].name} · 四个区域有不同地标、墙面和地面。`,'special');
 }
 export function turn(run,delta){if(run.phase!=='explore'||!Number.isInteger(delta))return false;run.dir=((run.dir+delta)%4+4)%4;return true;}
@@ -89,11 +114,11 @@ export function resolveEvent(run,choice){
   if(run.phase!=='event'||!run.event)return false;const {type,key:k}=run.event;
   if(choice==='leave'){run.phase='explore';run.event=null;return true;}
   if(type==='shrine'&&choice==='rest'){
-    for(const p of run.party){p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*.45));p.mp=Math.min(p.maxMp,p.mp+Math.ceil(p.maxMp*.5));p.status={};}
-    log(run,'星灯休整：恢复 45% 生命、50% MP。这处灯火只够使用一次。','heal');
+    for(const p of run.party){p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*.45));p.status={};}
+    log(run,'星灯休整：恢复 45% 生命。这处灯火只够使用一次。','heal');
   }else if(type==='fountain'&&choice==='drink'){
-    for(const p of run.party){p.mp=p.maxMp;p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*.18));}
-    log(run,'月之泉恢复了 MP，并补充少量生命。','heal');
+    for(const p of run.party){p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*.28));}
+    run.supplies.tonic=Math.min(5,run.supplies.tonic+1);log(run,'月之泉恢复 28% 生命，并补充一份急救药。','heal');
   }else if(type==='altar'&&['offer','blood'].includes(choice)){
     if(choice==='offer'){if(run.gold<35)return false;run.gold-=35;}
     else for(const p of live(run.party))p.hp=Math.max(1,p.hp-Math.ceil(p.maxHp*.2));
@@ -103,9 +128,9 @@ export function resolveEvent(run,choice){
 }
 function makeEnemy(run,id,{elite=false,boss=false,packId=null}={}){
   const base=ENEMY_TYPES[id],partyFactor=run.party.length===1?.78:run.party.length===2?1.08:1.35;
-  const hp=Math.round(base.hp*(1+(run.floor-1)*(boss?.32:.34))*partyFactor*(elite?1.4:1));
+  const hp=Math.round(base.hp*(boss?1.5:1.28)*(1+(run.floor-1)*(boss?.32:.34))*partyFactor*(elite?1.4:1));
   const atkScale=(1+(run.floor-1)*.25)*(run.solo?.9:1)*(elite?1.18:1);
-  const e={...base,id:`enemy-${++run.enemySerial}`,type:id,packId,maxHp:hp,hp,atk:Math.round(base.atk*atkScale),mag:Math.round(base.mag*atkScale),def:base.def+Math.floor((run.floor-1)*1.4),spd:base.spd,status:{},resists:{},guard:false,intentIndex:0,plannedIntent:base.intent[0],targetId:null,charged:false,barrier:0,phoenixUsed:true,summoned:false,skipActions:0,delayReadyRound:0,readyRound:1};
+  const e={...base,id:`enemy-${++run.enemySerial}`,type:id,packId,maxHp:hp,hp,atk:Math.round(base.atk*atkScale),mag:Math.round(base.mag*atkScale),def:base.def+Math.floor((run.floor-1)*1.4),status:{},resists:{},guard:false,intentIndex:0,plannedIntent:base.intent[0],targetId:null,charged:false,barrier:0,phoenixUsed:true,summoned:false,alarmUsed:false,skipActions:0,delayReadyRound:0,readyRound:1};
   if(boss){
     const spec=BOSS_SPECS[run.floor-1];e.name=spec.name;e.kind=spec.kind;e.tint=spec.tint;
     e.boss={spec:run.floor-1,hpTriggered:[],hpResolved:[],queued:[],pending:null,nextTurn:3,eventSerial:0,lockNotice:false};
@@ -133,12 +158,15 @@ function joinPacks(run,packs,initial=false){
 export function startBattle(run,type='normal',origin=null,packs=null){
   if(run.phase!=='explore')return false;
   run.phase='battle';run.fx=[];
-  for(const p of run.party){p.guard=false;p.status={};p.resists={};p.barrier=0;p.phoenixUsed=false;p.laststandUsed=false;}
-  run.battle={type,origin,packIds:[],enemies:[],round:0,roundClosed:true,queue:[],active:null,serial:0,chainTarget:null,chainActor:null,chain:0,lastSkill:null,escapeAttempts:0};
+  const retry=packs?.map(p=>p.retryParty).filter(Boolean)||[];
+  for(const p of run.party){p.guard=false;p.status={};p.resists={};p.barrier=0;p.phoenixUsed=false;p.laststandUsed=false;p.cooldowns={};p.usedRound={};
+    for(const saved of retry){const prior=saved[p.id];if(!prior)continue;p.phoenixUsed||=prior.phoenixUsed;p.laststandUsed||=prior.laststandUsed;for(const [id,n]of Object.entries(prior.cooldowns||{})){p.cooldowns[id]=Math.max(n,p.cooldowns[id]||0);if(n)p.usedRound[id]=1;}}
+  }
+  run.battle={type,origin,packIds:[],enemies:[],round:0,stage:'prepare',roundClosed:true,queue:[],active:null,serial:0,chainTarget:null,chainActor:null,chain:0,lastSkill:null,escapeAttempts:0};
   if(packs)joinPacks(run,packs,true);
   else run.battle.enemies=defaultTroop(run,type).map(id=>makeEnemy(run,id,{elite:type==='elite',boss:['boss','guardian'].includes(type)}));
   for(const e of run.battle.enemies)if(e.boss){const spec=BOSS_SPECS[e.boss.spec];addStatus(run,e,spec.buff,99);log(run,`${e.name}：${spec.trait}`,'danger');}
-  nextActor(run);return true;
+  run.frames=[];newRound(run);return true;
 }
 export function intentOf(enemy){
   if(enemy.skipActions>0)return 'delay';
@@ -147,18 +175,16 @@ export function intentOf(enemy){
   return intent;
 }
 export function activeHero(run){return run.battle?run.party.find(p=>p.id===run.battle.active&&p.hp>0)||null:null;}
-export function skillCost(hero,id){
-  const s=SKILLS[id];if(!s)return Infinity;let cost=s.cost;
-  if(cost&&!['physical','magic','heal','revive','sanctuary'].includes(s.kind)&&!s.supply)cost=Math.max(1,cost-(hero.ranks[id]||0));
-  if(cost&&hero.weapon.effect==='overload')cost+=2;if(cost&&hero.weapon.effect==='economy')cost=Math.max(1,Math.floor(cost*.65));return cost;
-}
 export function skillProblem(run,h,id){
-  const s=effectiveSkill(h,id);if(!s||!['attack','guard','tonic','ether','salt',...h.skills].includes(id))return '尚未习得这个技能。';
-  if(h.mp<skillCost(h,id))return 'MP 不足；防御回复 3 MP，普攻只回复 1 MP。';
-  if(s.supply&&run.supplies[s.supply]<=0)return '这一种队伍补给已用尽。';
-  if(h.status.headbind&&magicKinds.includes(s.kind)&&!s.supply)return '封头中，无法施法。';
-  if(h.status.armbind&&s.kind==='physical')return '封腕中，无法使用物理技能。';
-  if(s.kind==='laststand'&&h.laststandUsed)return '不归之誓每场战斗只能使用一次。';
+  if(!h||h.hp<=0)return '请选择存活的队员。';
+  const skill=effectiveSkill(h,id);
+  if(!skill||!['attack','guard','tonic','ether','salt',...h.skills].includes(id))return '尚未习得这个技能。';
+  if(run.phase==='battle'&&run.battle.stage!=='prepare')return '正在结算攻击阶段。';
+  if(cooldownLeft(h,id)>0)return `冷却中：还需 ${cooldownLeft(h,id)} 回合。`;
+  if(skill.supply&&!(run.supplies[skill.supply]>0))return '这种队伍补给已用尽。';
+  if(h.status.headbind&&magicKinds.includes(skill.kind)&&!skill.supply)return '封头中，无法施法。';
+  if(h.status.armbind&&skill.kind==='physical')return '封腕中，无法使用物理技能。';
+  if(skill.kind==='laststand'&&h.laststandUsed)return '不归之誓每场战斗只能使用一次。';
   return null;
 }
 function addStatus(run,e,id,turns,power=1,extra={}){
@@ -167,7 +193,7 @@ function addStatus(run,e,id,turns,power=1,extra={}){
   if(['headbind','armbind'].includes(id)&&(e.status[id]||(e.resists?.[id]||0)>=run.battle.round)){
     log(run,`${e.name} 暂时抵抗${STATUS[id].name}。`,'muted');return false;
   }
-  const old=e.status[id];e.status[id]={turns:Math.max(turns,old?.turns||0),power:Math.max(power,old?.power??0),applied:run.battle?.serial||0,...extra};return true;
+  const old=e.status[id];e.status[id]={turns:Math.max(turns,old?.turns||0),power:Math.max(power,old?.power??0),applied:run.battle?.serial||0,appliedRound:run.battle?.round||0,appliedStage:run.battle?.stage||'prepare',...extra};run.fx.push({id:e.id,type:STATUS[id].negative?'debuff':'buff',status:id});return true;
 }
 function cleanseEntity(e){for(const id of Object.keys(e.status))if(STATUS[id]?.negative)delete e.status[id];}
 function heal(run,e,amount){
@@ -199,18 +225,16 @@ function hurt(run,e,amount,source=null,{direct=false}={}){
   n=Math.min(e.hp,Math.max(0,n));e.hp-=n;if(n)run.fx.push({id:e.id,type:'damage',amount:n});
   if(e.hp<=0&&!revivePhoenix(run,e)){
     log(run,`${e.name}${e.job?' 倒下了。':' 被击败。'}`,e.job?'danger':'battle');
-    if(!e.job){run.kills++;if(source?.weapon?.effect==='soulsteal'){heal(run,source,source.maxHp*.18);source.mp=Math.min(source.maxMp,source.mp+6);}}
+    if(!e.job){run.kills++;if(source?.weapon?.effect==='soulsteal'){heal(run,source,source.maxHp*.18);}}
   }
   return n;
 }
 function tickStart(run,e){
-  e.guard=false;
   for(const id of ['burn','poison'])if(e.hp>0&&e.status[id]){const n=hurt(run,e,e.status[id].power);log(run,`${e.name} 受到 ${n} 点${STATUS[id].name}伤害。`,'muted');}
-  if(e.job&&e.hp>0)e.mp=Math.min(e.maxMp,e.mp+(e.job==='chrono'?1:0)+boonCount(run,'focus'));
 }
 function tickEnd(run,e){
   for(const [id,s]of Object.entries(e.status)){
-    if(s.expiresRound!==undefined||s.persistent||s.applied===run.battle.serial)continue;
+    if(s.expiresRound!==undefined||s.persistent||(s.appliedRound===run.battle.round&&['enemy','end'].includes(s.appliedStage)))continue;
     s.turns--;if(s.turns<=0){delete e.status[id];if(['headbind','armbind'].includes(id))e.resists[id]=run.battle.round+2;}
   }
 }
@@ -259,10 +283,10 @@ function enemyDamage(run,e,target,power,magic=false,{trigger=false}={}){
   if(target.hp<=0||e.hp<=0)return;
   if(target.status.dodge?.power>0){target.status.dodge.power--;if(!target.status.dodge.power)delete target.status.dodge;log(run,`${target.name} 的残影避开了 ${e.name}。`,'special');return;}
   let dmg=Math.max(3,(magic?e.mag:e.atk)*power-target.def*(magic?.3:.65))*(.94+next(run)*.12);
-  if(target.guard)dmg*=.35;if(target.status.protect)dmg*=1-(target.status.protect.power||.4);
+  if(target.guard)dmg*=.35;dmg*=1-boonCount(run,'swift')*.04;if(target.status.protect)dmg*=1-(target.status.protect.power||.4);
   if(target.job==='knight'&&!magic)dmg*=.82;
   if(target.status.break&&!magic)dmg*=1.3;if(target.status.marked)dmg*=1.2;
-  if(e.status.fury)dmg*=1.3;if(e.status.weak)dmg*=.75;if(e.status.rage)dmg*=e.status.rage.power;
+  if(e.status.fury)dmg*=1.3;if(e.status.haste)dmg*=1.2;if(e.status.slow)dmg*=.85;if(e.status.weak)dmg*=.75;if(e.status.rage)dmg*=e.status.rage.power;
   const dealt=hurt(run,target,dmg,e,{direct:true});
   log(run,`${e.name}${trigger?' · 预兆':''} → ${target.name} ${dealt} 伤害`,'enemy');
   if(target.hp>0&&target.status.counter&&e.hp>0){
@@ -276,9 +300,15 @@ function enemyAct(run,e){
   if(intent==='delay'){e.skipActions--;log(run,`${e.name} 的行动被延后。`,'special');return;}
   // A seal consumes the original action, rather than stockpiling casts until it expires.
   e.intentIndex++;
+  if(intent==='alarm'){
+    if(e.alarmUsed){log(run,`${e.name} 的报警器已耗尽。`,'muted');return;}
+    e.alarmUsed=true;const alarm=raiseAlarm(run);
+    log(run,alarm.blocked?`${e.name} 的警报被静音粉阻断。`:`${e.name} 发出警报！${alarm.count} 个普通敌群向此处赶来。`,'danger');
+    run.fx.push({id:e.id,type:'alarm',blocked:alarm.blocked});return;
+  }
   if(intent==='cover'){
     for(const ally of live(run.battle.enemies))addStatus(run,ally,'protect',2,.35);
-    e.coverUntil=run.battle.round;log(run,`${e.name} 守护全队，并分担本回合单体攻击。`,'enemy');return;
+    e.coverUntil=run.battle.round+1;log(run,`${e.name} 守护全队，并分担本回合单体攻击。`,'enemy');return;
   }
   if(intent==='bless'){for(const ally of live(run.battle.enemies))addStatus(run,ally,'fury',3);log(run,'敌方支援者为全队施加狂热。','danger');return;}
   if(intent==='enemyHeal'){
@@ -294,7 +324,7 @@ function enemyAct(run,e){
     heal(run,e,e.mag*.6);return;
   }
   if(intent==='charge'){e.charged=true;return;}
-  const party=live(run.party);let target=party.find(p=>p.id===e.targetId)||party[0];
+  const party=live(run.party);let target=(intent==='hunt'?party.find(p=>p.status.marked||p.status.poison):null)||party.find(p=>p.id===e.targetId)||party[0];
   const bait=party.find(p=>p.status.taunt);if(bait)target=bait;
   const targets=['sweep','sweepMagic'].includes(intent)?party:[target];
   for(const p of targets){
@@ -330,48 +360,80 @@ function resolveTrigger(run,e){
   e.boss.pending=null;e.boss.lockNotice=false;
 }
 function newRound(run){
-  const b=run.battle;b.round++;b.roundClosed=false;b.chain=0;b.chainActor=null;b.chainTarget=null;
-  for(const e of live(b.enemies))if(e.boss){
-    const boss=e.boss,spec=BOSS_SPECS[boss.spec];
-    if(b.round>=13)addStatus(run,e,'rage',99,1+(b.round-12)*.12);
-    if(!boss.pending){
-      if(boss.queued.length)armTrigger(run,e,boss.queued.shift());
-      else if(b.round>=boss.nextTurn){armTrigger(run,e,{key:`turn-${b.round}`,name:spec.turnName,counter:spec.turnCounter,source:`第 ${b.round} 回合`});boss.nextTurn=b.round+spec.period;}
+  const b=run.battle;b.round++;b.serial++;b.stage='prepare';b.roundClosed=false;b.chain=0;b.chainActor=null;b.chainTarget=null;b.queue=[];
+  for(const p of run.party)p.guard=false;
+  if(!live(run.party).some(p=>p.id===b.active))b.active=live(run.party)[0]?.id||null;
+  for(const e of live(b.enemies)){
+    if(e.boss){
+      const boss=e.boss,spec=BOSS_SPECS[boss.spec];
+      if(b.round>=13)addStatus(run,e,'rage',99,1+(b.round-12)*.12);
+      if(!boss.pending){
+        if(boss.queued.length)armTrigger(run,e,boss.queued.shift());
+        else if(b.round>=boss.nextTurn){armTrigger(run,e,{key:`turn-${b.round}`,name:spec.turnName,counter:spec.turnCounter,source:`第 ${b.round} 回合`});boss.nextTurn=b.round+spec.period;}
+      }
     }
+    planEnemy(run,e);
   }
-  for(const e of live(b.enemies))planEnemy(run,e);
-  const units=[...live(run.party),...live(b.enemies).filter(e=>e.readyRound<=b.round)];
-  b.queue=units.map(e=>({id:e.id,speed:e.job?heroStats(e).spd:e.spd*(e.status.haste?1.5:1)*(e.status.slow?.6:1),tie:next(run)})).sort((a,c)=>c.speed-a.speed||c.tie-a.tie).map(e=>e.id);
 }
 function closeRound(run){
   const b=run.battle;if(b.roundClosed||b.round===0)return;
-  b.roundClosed=true;b.queue=[];
-  for(const e of live(b.enemies))if(e.boss)resolveTrigger(run,e);
-  // Round-long defenses persist through the trigger, then expire; this order is intentional.
-  for(const e of [...run.party,...b.enemies])for(const [id,s]of Object.entries(e.status))if(s.expiresRound!==undefined&&s.expiresRound<=b.round)delete e.status[id];
+  b.roundClosed=true;b.stage='end';b.queue=[];
+  for(const e of live(b.enemies))if(e.boss?.pending&&e.boss.pending.dueRound<=b.round){
+    traced(run,e,e.boss.pending.name,'omen',()=>resolveTrigger(run,e));
+  }
+  // One round means one duration/cooldown tick, not one click, item, or individual strike.
+  for(const entity of [...run.party,...b.enemies]){
+    tickEnd(run,entity);
+    for(const [id,status]of Object.entries(entity.status))if(status.expiresRound!==undefined&&status.expiresRound<=b.round)delete entity.status[id];
+  }
+  for(const p of run.party){
+    for(const id of Object.keys(p.cooldowns))p.cooldowns[id]=Math.max(0,p.cooldowns[id]-1);
+    if(p.hp<=0)continue;
+    if(b.round%3===0){if(p.job==='chrono')reduceCooldowns(p,1,{longest:true,round:b.round});if(p.weapon.effect==='mana')reduceCooldowns(p,1,{longest:true,round:b.round});}
+    if(p.weapon.effect==='lifewell')heal(run,p,p.maxHp*.02);
+    if(p.weapon.effect==='chorus'){const ally=live(run.party).sort((a,c)=>a.hp/a.maxHp-c.hp/c.maxHp)[0];if(ally)heal(run,ally,8);}
+    if(boonCount(run,'focus'))heal(run,p,p.maxHp*.01*boonCount(run,'focus'));
+  }
   if(live(run.party).length)joinPacks(run,stepPacks(run,{battle:true}));
 }
 function checkFinish(run){
   const b=run.battle;if(!b)return true;
   if(!live(run.party).length){run.phase='ended';run.ending='defeat';b.active=null;log(run,'星灯熄灭了。下一次，带着新的战术重新出发。','danger');return true;}
-  if(!live(b.enemies).length){
-    closeRound(run); // Even the final partial round advances nearby packs once before victory.
-    if(!live(run.party).length)return checkFinish(run);
-    if(!live(b.enemies).length){finishBattle(run);return true;}
-  }
+  if(!live(b.enemies).length){finishBattle(run);return true;}
+  if(!live(run.party).some(p=>p.id===b.active))b.active=live(run.party)[0].id;
   return false;
 }
-function nextActor(run){
-  for(let i=0;i<180&&run.phase==='battle';i++){
-    if(checkFinish(run))return;const b=run.battle;
-    if(!b.queue.length){if(b.round&&!b.roundClosed)closeRound(run);if(checkFinish(run))return;newRound(run);}
-    const id=b.queue.shift(),e=[...run.party,...b.enemies].find(e=>e.id===id);
-    if(!e||e.hp<=0)continue;
-    b.serial++;b.active=id;tickStart(run,e);if(checkFinish(run))return;if(e.hp<=0)continue;
-    if(e.job)return;
-    enemyAct(run,e);tickEnd(run,e);if(checkFinish(run))return;
+export function attackRound(run,targetId=null,{retreat=false}={}){
+  if(run.phase!=='battle'||run.battle.stage!=='prepare')return {ok:false,error:'当前不能结束准备阶段。'};
+  const b=run.battle;
+  if(targetId&&!b.enemies.some(e=>e.hp>0&&e.id===targetId))return {ok:false,error:'请选择存活的敌人。'};
+  run.fx=[];run.frames=[];b.stage='attack';
+  for(const h of live(run.party)){
+    if(!live(b.enemies).length)break;
+    traced(run,h,h.guard?'防御':retreat?'撤退掩护':'普通攻击',h.guard||retreat?'shield':'slash',()=>{
+      tickStart(run,h);
+      if(h.hp<=0||h.guard||retreat)return;
+      const target=b.enemies.find(e=>e.id===targetId&&e.hp>0)||live(b.enemies)[0];
+      if(target)damageTarget(run,h,target,{...SKILLS.attack,name:'普通攻击'},0);
+    });
   }
-  if(run.phase==='battle'&&!activeHero(run))throw new Error('Turn scheduler did not reach a player action.');
+  b.stage='enemy';
+  // Enemy formation order, never a speed race. New summons cannot act in their arrival round.
+  for(const enemy of [...live(b.enemies)].filter(e=>e.readyRound<=b.round)){
+    if(!live(run.party).length)break;
+    if(enemy.hp<=0)continue;
+    const intent=intentOf(enemy);
+    traced(run,enemy,enemy.boss?.pending?.dueRound===b.round?'预兆蓄势':intent,intent==='alarm'?'alarm':['hex','sweepMagic'].includes(intent)?'fire':['enemyHeal','bless','cover','mirror','thorns','summon'].includes(intent)?'shield':'slash',()=>{
+      enemy.guard=false;tickStart(run,enemy);
+      if(enemy.hp<=0)return;
+      if(enemy.boss?.pending?.dueRound===b.round)return; // An omen replaces its normal attack.
+      enemyAct(run,enemy);
+    });
+  }
+  if(!live(run.party).length){checkFinish(run);return {ok:true};}
+  closeRound(run);
+  if(!checkFinish(run))newRound(run);
+  return {ok:true};
 }
 function applySkillStatus(run,h,target,s){
   if(!s.status||target.hp<=0)return;
@@ -427,9 +489,11 @@ function damageTarget(run,h,target,s,rank,extraScale=1){
   if(s.spreadPoison&&poisoned)for(const other of live(b.enemies).filter(e=>e!==target))applySkillStatus(run,h,other,s);
   if(effect==='cleave'&&s.target==='enemy')for(const other of live(b.enemies).filter(e=>e!==target)){hurt(run,other,dealt*.25,h,{direct:true});bossHit(run,other);}
 }
-export function act(run,skillId,targetId=null){
+export function act(run,skillId,targetId=null,heroId=null){
   if(run.phase!=='battle')return {ok:false,error:'不在战斗中。'};
-  const h=activeHero(run);if(!h)return {ok:false,error:'尚未轮到我方行动。'};
+  if(run.battle.stage!=='prepare')return {ok:false,error:'正在结算攻击阶段。'};
+  const h=heroId?run.party.find(p=>p.id===heroId&&p.hp>0):activeHero(run);if(!h)return {ok:false,error:'请选择存活的队员。'};
+  if(skillId==='attack')return attackRound(run,targetId);
   if(skillId==='escape')return escapeBattle(run,h);
   const problem=skillProblem(run,h,skillId);if(problem)return {ok:false,error:problem};
   const s=effectiveSkill(h,skillId),b=run.battle;
@@ -446,7 +510,8 @@ export function act(run,skillId,targetId=null){
     if(!e.boss&&(e.skipActions>0||e.delayReadyRound>b.round))return {ok:false,error:'目标暂时抵抗行动延后。'};
   }
   // No RNG or resources are touched until all ownership, target and availability checks pass.
-  h.mp-=skillCost(h,skillId);if(s.supply)run.supplies[s.supply]--;run.fx=[];b.lastSkill=skillId;
+  if(s.supply)run.supplies[s.supply]--;run.fx=[];run.frames=[];b.lastSkill=skillId;
+  if(s.cd){h.cooldowns[skillId]=skillCooldown(h,skillId);h.usedRound[skillId]=b.round;}
   const rank=h.ranks[skillId]||0,scale=1+rank*.12,stats=heroStats(h);
   const roundBuff=(p,id,power=1,extra={})=>addStatus(run,p,id,1,power,{expiresRound:b.round,...extra});
   if(['physical','magic','attack'].includes(s.kind)){
@@ -455,24 +520,23 @@ export function act(run,skillId,targetId=null){
     if(focused)delete h.status.focus;if(echo)delete h.status.echo;
     for(let pass=0;pass<repeats+(echo?1:0);pass++)for(let hit=0;hit<hits;hit++)for(const e of targets)if(h.hp>0&&e.hp>0)damageTarget(run,h,e,s,rank,pass>=repeats?.6:focused?.9:1);
     if(s.kind==='physical')delete h.status.pierce;
-    if(skillId==='attack')h.mp=Math.min(h.maxMp,h.mp+1);
     if(skillId==='starfall')roundBuff(h,'counter',1.1,{charges:1});
-  }else if(s.kind==='guard'){h.guard=true;h.mp=Math.min(h.maxMp,h.mp+3);log(run,`${h.name} 防御，回复 3 MP。`,'heal');}
+  }else if(s.kind==='guard'){h.guard=!h.guard;log(run,`${h.name} ${h.guard?'进入防御姿态，本轮不普通攻击':'解除防御，参加全队攻击'}。`,'special');}
   else if(s.kind==='aegis'){
     for(const p of live(run.party))roundBuff(p,'protect',.4);
     addStatus(run,h,'taunt',2);if(s.retaliate)roundBuff(h,'counter',1.1,{charges:1});log(run,`${h.name} 展开壁垒：本回合全队减伤，自己吸引攻击。`,'special');
   }else if(s.kind==='counter'){roundBuff(h,'protect',.5);roundBuff(h,'counter',1.1);addStatus(run,h,'taunt',2);}
   else if(s.kind==='intercept'){for(const p of targets){roundBuff(p,'protect',.6);roundBuff(p,'immune');}}
   else if(s.kind==='heal'){
-    const p=targets[0],amount=(stats.mag*1.65+12)*scale*(h.job==='shrine'?1.15:1),actual=heal(run,p,amount);
+    const p=targets[0],amount=(stats.mag*1.65+12)*scale*(h.job==='shrine'?1.15:1)*(1+boonCount(run,'spirit')*.1),actual=heal(run,p,amount);
     if(s.overflow){p.barrier=Math.min(Math.ceil(p.maxHp*.25),p.barrier+Math.max(0,Math.round(amount)-actual));log(run,`${p.name} 获得 ${p.barrier} 点余辉护盾。`,'special');}
   }else if(s.kind==='cleanse'){for(const p of targets){cleanseEntity(p);if(s.immunity)roundBuff(p,'immune');}log(run,'净铃解除了全队异常。','heal');}
   else if(s.kind==='revive'){
     const p=targets[0];if(p.hp<=0){p.hp=Math.min(p.maxHp,Math.ceil(p.maxHp*.35*scale));p.status={};run.fx.push({id:p.id,type:'heal',amount:p.hp});}else heal(run,p,p.maxHp*.35*scale);
-  }else if(s.kind==='sanctuary'){for(const p of targets){heal(run,p,(stats.mag+12)*scale*1.15);cleanseEntity(p);roundBuff(p,'immune');}}
+  }else if(s.kind==='sanctuary'){for(const p of targets){heal(run,p,(stats.mag+12)*scale*1.15*(1+boonCount(run,'spirit')*.1));cleanseEntity(p);roundBuff(p,'immune');}}
   else if(s.kind==='seal'){for(const e of targets)addStatus(run,e,'headbind',s.turns);}
   else if(s.kind==='phantom'){roundBuff(h,'dodge',2);roundBuff(h,'taunt');}
-  else if(s.kind==='haste'){for(const p of targets)addStatus(run,p,'haste',3);}
+  else if(s.kind==='haste'){for(const p of targets){reduceCooldowns(p,1,{round:b.round});addStatus(run,p,'haste',2);}}
   else if(s.kind==='dispel')dispel(run,targets[0],s.dispel);
   else if(s.kind==='delay'){
     const e=targets[0];if(e.boss){e.boss.pending.dueRound++;e.boss.pending.delayed=true;log(run,`预兆延至第 ${e.boss.pending.dueRound} 回合末，仍须完成解除条件。`,'special');}
@@ -480,27 +544,31 @@ export function act(run,skillId,targetId=null){
   }else if(s.kind==='focus')addStatus(run,h,'focus',99,1,{persistent:true});
   else if(s.kind==='echoTime')addStatus(run,targets[0],'echo',99,1,{persistent:true});
   else if(s.kind==='bloodpact'){
-    h.hp=Math.max(1,h.hp-Math.ceil(h.maxHp*.18));h.mp=Math.min(h.maxMp,h.mp+8+rank*2);addStatus(run,h,'fury',3);
+    h.hp=Math.max(1,h.hp-Math.ceil(h.maxHp*.18));reduceCooldowns(h,1,{round:b.round});addStatus(run,h,'fury',2);
     if(s.pierce)addStatus(run,h,'pierce',99,1,{persistent:true});
   }else if(s.kind==='laststand'){h.laststandUsed=true;roundBuff(h,'laststand');}
   else if(s.kind==='itemHeal')heal(run,targets[0],targets[0].maxHp*.35);
-  else if(s.kind==='itemMp')targets[0].mp=Math.min(targets[0].maxMp,targets[0].mp+14);
-  if(h.hp>0){
-    if(h.weapon.effect==='lifewell')heal(run,h,h.maxHp*.02);
-    if(h.weapon.effect==='mana')h.mp=Math.min(h.maxMp,h.mp+1);
-    if(h.weapon.effect==='chorus'){const p=live(run.party).sort((a,c)=>a.hp/a.maxHp-c.hp/c.maxHp)[0];if(p)heal(run,p,8);}
-  }
-  tickEnd(run,h);if(!checkFinish(run))nextActor(run);return {ok:true};
+  else if(s.kind==='itemCooldown')reduceCooldowns(targets[0],1,{round:b.round});
+  traceFrame(run,h,s.name,effectStyle(s));
+  checkFinish(run);return {ok:true};
 }
+export function useSupply(run,id,targetId){
+  if(run.phase==='battle')return act(run,id,targetId);
+  if(run.phase!=='explore'||id!=='tonic')return {ok:false,error:'探索中只有急救药可直接治疗；地图工具请使用战前工具。'};
+  const h=run.party.find(p=>p.id===targetId&&p.hp>0);
+  if(!h||h.hp>=h.maxHp||!(run.supplies.tonic>0))return {ok:false,error:'请选择受伤且存活的队友，并确认还有急救药。'};
+  run.supplies.tonic--;run.fx=[];run.frames=[];heal(run,h,h.maxHp*.35);log(run,`使用急救药治疗 ${h.name}；不推进时间。`,'heal');return {ok:true};
+}
+
 function escapeBattle(run,h){
   const b=run.battle;if(['guardian','boss'].includes(b.type))return {ok:false,error:'月门封闭，首领战不能撤退。'};
-  run.fx=[];b.escapeAttempts++;
+  run.fx=[];run.frames=[];b.escapeAttempts++;
   if(b.escapeAttempts>=2||next(run)<.7){
-    for(const p of run.dungeon.packs.filter(p=>b.packIds.includes(p.id))){p.members=b.enemies.filter(e=>e.packId===p.id);p.defeated=!live(p.members).length;p.engaged=false;p.cooldown=2;}
+    for(const p of run.dungeon.packs.filter(p=>b.packIds.includes(p.id))){p.members=b.enemies.filter(e=>e.packId===p.id);p.defeated=!live(p.members).length;p.engaged=false;p.cooldown=2;p.retryParty=Object.fromEntries(run.party.map(h=>[h.id,{cooldowns:{...h.cooldowns},phoenixUsed:h.phoenixUsed,laststandUsed:h.laststandUsed}]));}
     for(const p of run.party){p.status={};p.guard=false;p.barrier=0;}
-    run.battle=null;run.phase='explore';log(run,'成功撤退。敌人保留剩余生命，在原地整顿两次移动；现在应离开这一格。','muted');return {ok:true};
+    run.battle=null;run.phase='explore';log(run,'成功撤退。敌人保留剩余生命，在原地整顿两次移动；重返同一战斗不重置技能冷却或一次性保命。现在应离开这一格。','muted');return {ok:true};
   }
-  log(run,'撤退失败；下次撤退必定成功。','danger');tickEnd(run,h);nextActor(run);return {ok:true};
+  log(run,'撤退失败；失去本轮攻击机会，敌方行动。下次撤退必定成功。','danger');return attackRound(run,null,{retreat:true});
 }
 function finishBattle(run){
   const b=run.battle;run.battles++;
@@ -508,12 +576,12 @@ function finishBattle(run){
   const xp=18+run.floor*8+b.enemies.length*7+(b.type!=='normal'?25:0),coins=int(run,12,22)*run.floor;run.xp+=xp;run.gold+=coins;
   for(const p of run.party){
     if(p.hp<=0)p.hp=Math.ceil(p.maxHp*.1);
-    p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*(.02+boonCount(run,'victory')*.04)));p.mp=Math.min(p.maxMp,p.mp+1);p.status={};p.resists={};p.guard=false;p.barrier=0;
+    p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*(.02+boonCount(run,'victory')*.04)));p.status={};p.resists={};p.guard=false;p.barrier=0;
   }
   while(run.xp>=run.nextXp&&run.level<12){
     run.xp-=run.nextXp;run.level++;run.nextXp=65+run.level*35;
-    for(const p of run.party){p.maxHp+=5;p.hp=Math.min(p.maxHp,p.hp+5);p.maxMp+=2;p.mp=Math.min(p.maxMp,p.mp+2);p[JOBS[p.job].growth]++;if(p.job==='knight'&&run.level%2===0)p.def++;}
-    log(run,`Lv.${run.level}：职业主属性成长；不再大量回满生命与 MP。`,'special');
+    for(const p of run.party){p.maxHp+=5;p.hp=Math.min(p.maxHp,p.hp+5);p[JOBS[p.job].growth]++;if(p.job==='knight'&&run.level%2===0)p.def++;}
+    log(run,`Lv.${run.level}：职业主属性成长；仅补充新增生命上限。`,'special');
   }
   log(run,`战斗胜利 · 经验 +${xp} · 星砂 +${coins}`,'loot');
   if(b.origin&&run.dungeon.events[b.origin]&&['guardian','boss'].includes(b.type))run.guardianDefeated=true;
@@ -556,7 +624,7 @@ export function takeReward(run,index,heroId=null){
   if(r.type==='boon'){
     const boon=BOONS.find(b=>b.id===r.id);if(!boon||boonCount(run,boon.id)>=boon.cap)return {ok:false,error:'祝福已达到上限。'};
     run.boons[boon.id]=boonCount(run,boon.id)+1;
-    if(boon.type==='stat')for(const p of run.party){p[boon.stat]+=boon.value;if(boon.stat==='maxHp')p.hp=Math.min(p.maxHp,p.hp+boon.value);if(boon.stat==='maxMp')p.mp=Math.min(p.maxMp,p.mp+boon.value);}
+    if(boon.type==='stat')for(const p of run.party){p[boon.stat]+=boon.value;if(boon.stat==='maxHp')p.hp=Math.min(p.maxHp,p.hp+boon.value);}
     log(run,`获得祝福「${boon.name}」。`,'loot');
   }else if(['skill','learn','evolve'].includes(r.type)){
     const p=run.party.find(p=>p.id===r.heroId),allowed=p&&[...JOBS[p.job].skills,...JOBS[p.job].advanced].includes(r.skillId);
@@ -581,10 +649,10 @@ export function equipWeapon(run,heroId,uid){
   if(run.phase!=='explore')return false;const p=run.party.find(p=>p.id===heroId),i=run.inventory.findIndex(w=>w.uid===uid);
   if(!p||i<0)return false;[p.weapon,run.inventory[i]]=[run.inventory[i],p.weapon];log(run,`${p.name} 换上了「${p.weapon.name}」。`,'loot');return true;
 }
-export function serializeRun(run){return JSON.stringify(run);}
+export function serializeRun(run){const {fx,frames,...state}=run;return JSON.stringify(state);}
 export function restoreRun(text){
   let r;try{r=JSON.parse(text);}catch{throw new Error('存档无法读取。');}
-  if(r?.version!==VERSION)throw new Error('v0.2 战术规则需要新的一局；v0.1 存档未删除，但不兼容新规则。');
+  if(r?.version!==VERSION)throw new Error('v0.3 改用冷却制与双方回合，需要开始新局；旧版存档保留且未删除。');
   const fail=msg=>{throw new Error(`存档损坏：${msg}`);};
   if(!['explore','battle','reward','event','ended'].includes(r.phase)||!Array.isArray(r.party)||r.party.length<1||r.party.length>3||!Number.isInteger(r.floor)||r.floor<1||r.floor>MAX_FLOOR||!Number.isInteger(r.rng))fail('冒险结构');
   const d=r.dungeon;
@@ -597,8 +665,9 @@ export function restoreRun(text){
     if(!JOBS[p.job]||!WEAPONS[p.weapon?.id]||!Array.isArray(p.skills)||!p.ranks||!p.evolutions||!p.status||!p.resists)fail('角色');
     const allowed=[...JOBS[p.job].skills,...JOBS[p.job].advanced];
     if(new Set(p.skills).size!==p.skills.length||p.skills.some(id=>!allowed.includes(id))||Object.entries(p.ranks).some(([id,n])=>!p.skills.includes(id)||!Number.isInteger(n)||n<0||n>2)||Object.keys(p.evolutions).some(id=>!EVOLUTIONS[id]||!p.skills.includes(id)))fail('技能');
-    for(const k of ['hp','maxHp','mp','maxMp','atk','mag','def','spd','barrier'])if(!Number.isFinite(p[k])||p[k]<0)fail('角色数值');
-    if(p.maxHp<1||p.hp>p.maxHp||p.mp>p.maxMp)fail('角色上限');
+    for(const k of ['hp','maxHp','atk','mag','def','barrier'])if(!Number.isFinite(p[k])||p[k]<0)fail('角色数值');
+    if(p.maxHp<1||p.hp>p.maxHp)fail('角色上限');
+    if(!p.cooldowns||!p.usedRound||Object.entries(p.cooldowns).some(([id,n])=>!p.skills.includes(id)||!Number.isInteger(n)||n<0||n>30)||Object.entries(p.usedRound).some(([id,n])=>!p.skills.includes(id)||!Number.isInteger(n)||n<0))fail('技能冷却');
   }
   if(!r.supplies||['tonic','ether','salt'].some(k=>!Number.isInteger(r.supplies[k])||r.supplies[k]<0||r.supplies[k]>99))fail('补给');
   if(!Array.isArray(r.log)||!Array.isArray(r.inventory)||!Array.isArray(r.rewards)||!r.boons)fail('记录');
@@ -606,7 +675,7 @@ export function restoreRun(text){
   if(new Set(d.packs.map(p=>p.id)).size!==d.packs.length||d.packs.some(p=>!isFloor(d,p.x,p.y)||!Array.isArray(p.troop)||p.troop.some(id=>!ENEMY_TYPES[id])))fail('敌方小队');
   if(r.phase==='battle'){
     const b=r.battle;
-    if(!b||!Array.isArray(b.enemies)||!Array.isArray(b.queue)||!Number.isInteger(b.round)||b.round<1||!r.party.some(p=>p.id===b.active&&p.hp>0))fail('战斗');
+    if(!b||!Array.isArray(b.enemies)||b.stage!=='prepare'||!Array.isArray(b.queue)||!Number.isInteger(b.round)||b.round<1||!r.party.some(p=>p.id===b.active&&p.hp>0))fail('战斗');
     if(new Set(b.enemies.map(e=>e.id)).size!==b.enemies.length||b.enemies.some(e=>!ENEMY_TYPES[e.type]||!Number.isFinite(e.hp)||e.hp<0||e.hp>e.maxHp||!e.status||!e.resists))fail('敌人');
     const ids=[...r.party,...b.enemies].map(e=>e.id);if(b.queue.some(id=>!ids.includes(id)))fail('行动序列');
     for(const e of b.enemies)if(e.boss){const x=e.boss;if(!BOSS_SPECS[x.spec]||!Array.isArray(x.queued)||!Array.isArray(x.hpTriggered)||!Array.isArray(x.hpResolved))fail('首领');if(x.pending&&(!Number.isInteger(x.pending.dueRound)||x.pending.dueRound<x.pending.bornRound))fail('预兆');}
@@ -615,5 +684,13 @@ export function restoreRun(text){
   }
   if(r.phase==='event'&&(!r.event||!d.events[r.event.key]))fail('事件');
   if(r.phase==='reward'&&(r.rewards.length!==3||r.rewards.some(x=>!['boon','weapon','skill','learn','evolve'].includes(x.type))))fail('奖励');
-  r.fx=[];return r;
+  if(!r.fieldSupplies||['lure','sleep','hush'].some(id=>!Number.isInteger(r.fieldSupplies[id])||r.fieldSupplies[id]<0||r.fieldSupplies[id]>99)||!r.field||!Number.isInteger(r.field.hushUntil))fail('地图补给');
+  for(const p of d.packs){
+    if(!Array.isArray(p.route)||!p.route.length||p.route.some(q=>!isFloor(d,q.x,q.y))||!Number.isInteger(p.routeIndex)||p.routeIndex<0||p.routeIndex>=p.route.length)fail('巡逻路线');
+    for(let i=0;i<p.route.length;i++){const a=p.route[i],b=p.route[(i+1)%p.route.length];if(Math.abs(a.x-b.x)+Math.abs(a.y-b.y)>1)fail('巡逻连通性');}
+    for(const id of ['sleepUntil','sleepResistUntil','alertUntil','cooldown'])if(!Number.isInteger(p[id])||p[id]<0)fail('世界状态');
+    if(p.alarmTarget&&!isFloor(d,p.alarmTarget.x,p.alarmTarget.y))fail('报警坐标');
+    if(p.lure&&(!isFloor(d,p.lure.x,p.lure.y)||!Number.isInteger(p.lure.until)))fail('诱饵');
+  }
+  r.fx=[];r.frames=[];return r;
 }

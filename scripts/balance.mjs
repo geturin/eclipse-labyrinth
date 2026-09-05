@@ -1,29 +1,33 @@
-// Diagnostic only: 50 isolated, full-health level-one starts per scenario.
-// A fixed heuristic is not an optimal player and these are NOT human win rates.
-// No roaming packs, reward progression or rest stops are simulated here.
-import * as E from '../src/engine.js';
-import {SKILLS,STATUS} from '../src/data.js';
-function policy(r){
- const h=E.activeHero(r),es=r.battle.enemies.filter(e=>e.hp>0),boss=es.find(e=>e.boss),o=boss?.boss.pending;
- const have=id=>h.skills.includes(id)&&h.mp>=E.skillCost(h,id);
- const ally=r.party.filter(p=>p.hp>0).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0];
- if(o&&['dispel','seal'].includes(o.counter)&&boss.status.veil){if(have('ray'))return ['ray',boss.id];if(have('unweave'))return ['unweave',boss.id];if(r.supplies.salt)return ['salt',boss.id];if(o.counter==='seal'&&have('seal')&&!boss.status.headbind)return ['seal',boss.id];}
- if(have('mend')&&ally.hp/ally.maxHp<.65)return ['mend',ally.id];
- if(o&&o.dueRound===r.battle.round&&((o.counter==='guard')||(o.counter==='hits'&&o.hits<o.required)))return [have('aegis')?'aegis':'guard'];
- if(ally.hp/ally.maxHp<.26&&r.supplies.tonic)return ['tonic',ally.id];
- if(have('cleanse')&&r.party.filter(p=>p.hp>0).some(p=>p.status.poison||p.status.burn))return ['cleanse'];
- const target=es.find(e=>e.ritualFor)||es.find(e=>['revenant','caller'].includes(e.type))||es.reduce((a,b)=>a.hp<b.hp?a:b);
- if(h.job==='knight')return have('cleave')?['cleave',target.id]:['attack',target.id];
- if(h.job==='mage'){let id=target.status.burn?'frost':'fire';if(have(id))return[id,target.id];if(r.supplies.ether)return['ether',h.id];return['guard'];}
- if(h.job==='shrine')return['guard'];
- return['attack',target.id];
-}
-for(const mode of ['basic','tactical'])for(const scenario of ['normal','guardian']){
- let wins=0,deads=0,totalActs=0,sumHP=0;
- for(let i=0;i<50;i++){
- const r=E.createRun(['knight','mage','shrine'],`BENCH-${i}`);r.dungeon.packs=[];E.startBattle(r,scenario);
- let count=0;while(r.phase==='battle'&&count++<200){const [id,target]=mode==='basic'?['attack',r.battle.enemies.find(e=>e.hp>0).id]:policy(r);const result=E.act(r,id,target);if(!result.ok)throw new Error(result.error+id);}
- if(r.phase==='reward'){wins++;sumHP+=r.party.reduce((t,p)=>t+p.hp/p.maxHp,0)/3;}if(r.phase==='ended')deads++;totalActs+=count;
+import {createRun,startBattle,act,attackRound,cooldownLeft,intentOf,skillProblem} from '../src/engine.js';
+import {SKILLS} from '../src/data.js';
+// Isolated, fixed-policy diagnostics: not human win rates or complete five-floor balance.
+const reports=[];
+for(const type of ['normal','guardian'])for(const tactical of [false,true]){
+ let wins=0,rounds=0;
+ for(let seed=0;seed<40;seed++){
+  const r=createRun(['knight','mage','shrine'],`BENCH-${seed}`);r.dungeon.packs=[];startBattle(r,type);let turns=0;
+  while(r.phase==='battle'&&turns++<35){
+   if(tactical){
+    for(const h of r.party){
+     if(r.phase!=='battle'||h.hp<=0)continue;
+     const boss=r.battle.enemies.find(e=>e.hp>0&&e.boss),omen=boss?.boss.pending;
+     if(omen&&['dispel','seal'].includes(omen.counter)&&boss.status.veil&&r.supplies.salt>0)act(r,'salt',boss.id,h.id);
+     for(const id of h.skills){
+      if(r.phase!=='battle'||skillProblem(r,h,id))continue;
+      const target=r.battle.enemies.find(e=>e.hp>0&&intentOf(e)==='alarm')||r.battle.enemies.find(e=>e.hp>0);
+      const ally=r.party.filter(p=>p.hp>0).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0];
+      if(id==='mend'&&ally.hp/ally.maxHp>.65)continue;
+      if(id==='cleanse'&&!r.party.some(p=>Object.keys(p.status).some(id=>['poison','burn','marked','break'].includes(id))))continue;
+      if(id==='aegis'&&!omen&&turns%2===0)continue;
+      act(r,id,SKILLS[id].target==='ally'?ally.id:target.id,h.id);
+     }
+     if(r.phase==='battle'&&omen?.counter==='guard')act(r,'guard',null,h.id);
+    }
+   }
+   if(r.phase==='battle')attackRound(r);
+  }
+  if(r.phase==='reward'||r.ending==='victory')wins++;rounds+=turns;
  }
- console.log(mode,scenario,{wins,deads,acts:totalActs/50,hp:wins?sumHP/wins:0});
+ reports.push({encounter:type,policy:tactical?'fixed skills/counters':'normal attacks only',wins,samples:40,meanRound:rounds/40});
 }
+console.log(JSON.stringify({conditions:'Level 1, full fresh resources, default three jobs; each encounter isolated, no map packs, no reward growth. Not a human win rate or full-run validation.',reports},null,2));
