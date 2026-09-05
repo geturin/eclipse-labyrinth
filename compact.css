@@ -149,3 +149,19 @@
  .explore-mode .zone-badge{margin-top:56px}
  .explore-mode .explore-caption{max-width:calc(100% - 30px);font-size:11px}
 }
+
+/* English text is wider than Chinese. Preserve the compact layout without squeezing
+   long names into individual letters; full names remain available in Details/ARIA. */
+html[lang="en"] .skill-button strong{overflow-wrap:normal;word-break:normal;hyphens:none;letter-spacing:0}
+html[lang="en"] .floor-heading h2{letter-spacing:.3px}
+html[lang="en"] .enemy-caption strong{letter-spacing:0}
+html[lang="en"] .language-button{font-size:12px;letter-spacing:0}
+@media(max-width:600px){
+  html[lang="en"] .battle-mode .floor-heading{max-width:46%}
+  html[lang="en"] .battle-mode .floor-heading h2{font-size:17px;line-height:1.2}
+  html[lang="en"] .battle-mode .floor-heading .eyebrow{letter-spacing:.5px}
+  html[lang="en"] .battle-mode .round-label{left:62%}
+  html[lang="en"] .skill-button strong{font-size:12px;line-height:1.35}
+  html[lang="en"] .tactical-enemies .enemy-art{bottom:75px;min-height:62px}
+  html[lang="en"] .tactical-enemies .enemy-caption strong{font-size:12px;line-height:1.2;margin-bottom:3px}
+}

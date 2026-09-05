@@ -34,7 +34,7 @@ proto.makeTextures=function(...args){texBuilds++;return texture.apply(this,args)
 require('app');})();
 """
 def setup(browser,width=1200,mode=None,reduced='no-preference',**opts):
-    page=browser.new_page(viewport={'width':width,'height':950 if width>600 else 844},reduced_motion=reduced)
+    page=browser.new_page(locale='zh-CN',viewport={'width':width,'height':950 if width>600 else 844},reduced_motion=reduced)
     page.set_default_timeout(7000)
     page.on('pageerror',lambda e:errors.append(str(e)))
     page.on('request',lambda r:requests.append(r.url))

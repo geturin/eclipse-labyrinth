@@ -2,8 +2,11 @@
 
 ## Scope and invariants
 
-This is geturin's **private** browser DRPG. Do not change visibility, publish GitHub Pages,
-add telemetry, introduce a backend, or copy franchise assets without a separate request.
+This is geturin's browser DRPG. The owner authorized public GitHub source visibility on
+2026-09-05 and the README play link https://tool.kero.zone/. Visibility is a repository-admin
+operation: verify it separately and never equate a source push with deployment or visibility.
+Do not publish GitHub Pages, add telemetry, introduce a backend, or copy franchise assets
+without a separate request. Do not change the software license without authorization.
 Keep the original anime-inspired art, first-person grid exploration, 1–3 selectable jobs,
 five floors, fresh roguelike runs, and **one weapon slot / one fixed effect per weapon**.
 A consumable is not equipment. Do not add permanent combat power between runs.
@@ -63,7 +66,7 @@ locally. Read `docs/QA.md` for exactly what has been measured.
 v0.3 uses `eclipse-labyrinth.run.v3`. Older v1/v2 saves remain untouched and are not migrated.
 Read docs/V03.md as the current design; older QA/design documents are historical.
 Do not promise all party combinations/seeds can win; record balance changes in
-`CHANGELOG.md`. Keep user-facing documentation in Chinese.
+`CHANGELOG.md`. Keep the README bilingual and other user-facing documentation clear in Chinese or English.
 
 ## Compact UI invariants (v0.3.1)
 
@@ -85,3 +88,15 @@ committed outcome before presentation, and never allow hidden battle commands du
 encounter approach. Reduced motion overrides spatial travel. Keep the north-up inset and
 heading cues without expanding the compact HUD. Clip near-plane floor polygons instead
 of discarding whole tiles. Run `python tests/navigation_browser.py` with the other suites.
+
+## Localization (v0.3.3)
+
+`src/i18n.js` negotiates browser preferences and translates at presentation boundaries using
+`src/i18n-en.js`. First supported zh/en language wins; default English. Manual auto/zh/en
+preference is separate from v3 saves. Never translate state identifiers, map coordinates,
+seed input or gameplay data in place. Translate DOM text and accessible labels, not HTML.
+Canvas labels must be translated before text measurement; new UI/content must have English
+catalog entries. Keep full names and rules in touch-accessible Details and ARIA when short
+English labels are used in compact buttons. Do not reintroduce duplicate selector rows.
+Always use function replacements when embedding scripts/styles into HTML, to preserve
+literal `$` replacement sequences. Run `python tests/i18n_browser.py` with all other suites.

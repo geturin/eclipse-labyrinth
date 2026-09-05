@@ -35,7 +35,7 @@ def state(page):
     return page.evaluate('(k)=>JSON.parse(localStorage.getItem(k))', KEY)
 
 def setup(browser, viewport, saved=None):
-    page = browser.new_page(viewport=viewport, device_scale_factor=1, reduced_motion='reduce')
+    page = browser.new_page(locale='zh-CN',viewport=viewport, device_scale_factor=1, reduced_motion='reduce')
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.on('request', lambda request: requests.append(request.url))
     page.evaluate('''initial => {
