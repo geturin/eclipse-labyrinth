@@ -25,7 +25,7 @@ if(MODE!=='field'){
 const values={[LAB.SAVE_KEY]:LAB.serializeRun(r)};Object.defineProperty(window,'localStorage',{value:{getItem:k=>values[k]??null,setItem:(k,v)=>values[k]=String(v),removeItem:k=>delete values[k]},configurable:true});
 require('app');})();"""
 def launch(browser,mode='battle',width=1440,reduced='no-preference'):
-    page=browser.new_page(viewport={'width':width,'height':1000 if width>600 else 844},reduced_motion=reduced)
+    page=browser.new_page(locale='zh-CN',viewport={'width':width,'height':1000 if width>600 else 844},reduced_motion=reduced)
     page.set_default_timeout(6000)
     page.on('pageerror',lambda e:errors.append(str(e)))
     page.on('request',lambda r:requests.append(r.url))

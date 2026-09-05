@@ -1,59 +1,65 @@
-# 月蝕の迷宮 · Eclipse Labyrinth
+# Eclipse Labyrinth · 月蝕の迷宮
 
-**v0.3.2 — 可辨向步进、冷却制战斗与紧凑界面。** 原创日式幻想 DRPG：第一人称随机迷宫，1～3 人职业小队，五层 roguelike，每局武器、技能、觉醒和祝福从零开始。离线浏览器运行，无账号、后端、遥测或外部素材请求。
+**[Play in your browser / 在线试玩 → https://tool.kero.zone/](https://tool.kero.zone/)**
 
-## v0.3.2 探索移动
+**v0.3.3 — 中文 / English.** An original anime-inspired, first-person roguelike dungeon RPG. Form a party of 1–3 adventurers, explore five random floors, and build a new combination of weapons, abilities, awakenings, and blessings on every run.
 
-默认恢复短暂连续的格子移动与 90° 转向，固定时长、到点即停，不摇头或倾斜。菜单 → 探索视角
-可选标准步进、舒缓步进或淡入切换；系统减弱动态仍优先。北向固定小地图移到探索视野内，
-显示朝向、坐标与最近足迹。按键不堆积长队列，遇敌先完成走格再展示战斗，不增加游戏回合。
-沿用 v3 存档，原来的 comfort 标记不再强制瞬间切换。参考资料与验证见 `docs/MOVEMENT032.md`。
+## English
 
-## v0.3.1 界面精简
+### Language and saves
 
-点击人物状态卡直接切换技能，不再另设角色标签栏。技能与道具共用一排，完整说明放在「详情」；
-Boss 当前预兆仍常驻，敌情、动向与撤退集中到「战况」。保留 v0.3 存档和全部玩法规则。
-本次布局与验证见 `docs/UI031.md`；`compact.css` 单独管理精简布局，构建时同样内嵌到静态页。
+The game automatically selects **Chinese or English** from the browser's preferred languages. The first supported language wins: `zh-*` uses simplified Chinese, `en-*` uses English, and an unsupported language list falls back to English. Use the **EN / 中** button in the header to override the choice or return to **Automatic**. No translation service or network request is used.
 
-## 直接玩
+The v0.3 save format is unchanged. Switching languages changes presentation only: it does not reset the run or alter combat, cooldowns, random generation, or enemy movement. Language preference is saved separately. Saves from v0.1/v0.2 remain untouched and are not migrated. Different websites or offline file locations may not share browser storage.
 
-下载 **`dist/index.html`** 后用浏览器打开。这是完整的自包含静态页；根目录 `index.html` 是开发入口。私密仓库不是线上网站，本项目没有开启 Pages 或公开部署。
+### How to play
 
-**从 v0.3 更新无需新局。** 冷却制存档使用 `eclipse-labyrinth.run.v3`，旧 v2 存档原封保留但不迁移。不同离线文件位置能否读取同一份存储取决于浏览器。
+**Prepare → Attack → enemy turn.** Select an adventurer by clicking their HP/status card. Use multiple ready abilities and finite supplies, then press **Attack** to commit the round. Abilities have independent cooldowns, not MP costs. A CD 3 ability used in round 1 is ready in round 4. Guarding skips that adventurer's normal attack and reduces damage taken.
 
-## 这次怎么玩
+Only walking, waiting, and a committed combat round advance dungeon time. Ordinary packs follow fixed patrols; a successfully cast alarm draws nearby patrols to the battle. Elites track the party. Field tools can lure, briefly stop, or silence enemies before combat. Reinforcements begin acting on the next round.
 
-**我方准备 → 全队攻击 → 敌方行动 → 回合末结算。** 自由切换队员，连续释放不同的就绪技能；技能独立 CD，没有 MP，也不再按速度逐个行动。CD 3 在 R1 用过后，R4 就绪。最后点击「全队攻击」让未防御的存活队员各攻击一次，再轮到敌方。
+Each of six jobs starts with two abilities and can learn three advanced abilities during the run. Awakenings change mechanics rather than only increasing numbers. Equipment is **one weapon per adventurer**, with one fixed special effect per weapon; no armor or accessory slots. Bosses have turn- and HP-triggered omens with visible counterplay.
 
-药品、换人、防御姿态、地图工具不耗时。地图敌人只随走格、等待或完整战斗回合移动。物品数量仍有限；减 CD 不能无限刷新本回合刚用过的技能。
+Exploration uses short, finite grid movement and quarter turns, a north-up minimap, and heading cues. Movement style is configurable; reduced-motion preferences take priority. Combat animation can be skipped without skipping or repeating its result.
 
-普通怪固定巡逻：靠近和开战不会自动引来全层怪物。**鸣月哨祭实际发动警报**才把路径 8 格内普通怪引向警报地点；可以击杀、封头或提前用静音粉阻断。精英不需报警，会持续沿最短路径追踪，但每拍最多一格。新增援下一轮才行动。
+### Controls
 
-T 打开战前工具：**诱导铃**在当前格留下诱饵，**眠缚铃**暂时停住选定敌群，**静音粉**阻断未来警报。大地图可显示已探索区域的固定巡线。道具不改变装备限制：每人仍只有一把武器，每把一个固有效果。
+| Exploration | Combat |
+| --- | --- |
+| W / S: forward / back | Click a party card: select that hero or an ally target |
+| A / D: turn; Q / E: strafe | 3–7: use selected hero's abilities |
+| Space: wait; F: interact | 2: toggle Guard; [ / ]: switch hero |
+| M: map; I: inventory; T: field tools | 1 / Enter: Attack; Esc: skip presentation |
 
-战斗有分段出招、施法、受击、治疗、护盾、报警和预兆动画。演出过程中锁定输入，右下角按钮或 Esc 可跳过演出，不能跳过或重复结算。减弱动态关闭位移效果；地图物件动画是独立的默认关闭开关。
+Enter/Space retain normal button activation when a button is focused. Mouse and touch controls are also available. Full ability and item explanations are accessible from **Details**, not only by hovering.
 
-## 职业与成长
+### Offline play
 
-| 职业 | 初始职责 | 局内高阶方向 |
-|---|---|---|
-| 星刃骑士 | 破甲、保护，无治疗 | 反击、全队拦截、群体破甲 |
-| 焰咒魔导师 | 火冰融解，技能间有冷却空档 | 群攻、双重咏唱、三段雷锁 |
-| 祈星巫女 | 治疗、净化，非免费普攻回血 | 驱散攻击、复活、圣域 |
-| 影缝忍者 | 毒、封头，阻断警报与施法 | 封腕、多段追击、残影 |
-| 刻时术士 | 衰缓、冷却调节，无治疗 | 驱散、预兆延期、技能回声 |
-| 血誓剑士 | 技能吸血、换血减 CD | 收割、低血爆发、一次保命 |
+Download **[`dist/index.html`](dist/index.html)** and open it in a browser. This is the complete self-contained build; the root `index.html` is the development entry point. There is no backend, account, telemetry, or external asset download. The online play link above is the project owner's hosting; this repository does not configure GitHub Pages or deploy to that server.
 
-每职业 2 初始 + 3 局内高阶技能，12 种初始技能机制觉醒；三选一优先提供可学新技能或觉醒。18 把武器、有限祝福和熟练度上限。五套 Boss 保留回合/血线预兆与针对性反制，不是只打更厚的血条。
+## 中文
 
-## 操作
+### 语言与存档
 
-W/S 前后，A/D 转向，Q/E 平移，Space 等待，F 调查，M 地图，I 行囊，T 战前工具。
-战斗 Enter / 1 全队攻击，2 切换所选队员防御，3～7 释放其技能，[ / ] 换人；亦支持点击/触控。
+首次访问时按照浏览器的语言优先顺序，选择支持的**中文或英文**。`zh-*` 显示简体中文，`en-*` 显示英文；列表中没有支持的语言时使用英文。点击页头 **EN / 中** 可手动选择，也可恢复自动。两种语言都包含在离线静态页中，不调用翻译服务。
 
-## 开发与交付
+沿用 v0.3 存档，**无需新开一局**。切换语言只影响界面，不改变角色、回合、冷却、随机数或地图敌人；语言偏好独立保存。旧 v1/v2 存档不删除、不迁移。不同网站或离线文件位置能否共享存储取决于浏览器。
 
-Node.js 20+；无 npm 依赖。
+### 玩法
+
+第一人称探索五层随机地牢，六职业选择 1～3 人编队。每局武器、技能、觉醒和祝福从零开始。
+
+**我方准备 → 全队攻击 → 敌方行动。** 点击人物状态卡切换角色，自由使用就绪技能与有限物品，最后提交全队攻击。技能使用独立 CD，不消耗 MP；CD 3 在 R1 使用后 R4 就绪。防御、物品、换人和战前工具不耗回合。每人仅装备一把武器，每把一个固有效果。
+
+普通怪固定巡逻，报警怪成功施法才吸引附近敌群；精英持续寻路追踪。诱导铃、眠缚铃、静音粉可在战前控场，增援下一轮才行动。Boss 保留回合/血线预兆和驱散、封印、多段、清理侍从及防御等应对。
+
+W/S 前后、A/D 转向、Q/E 平移、Space 等待、F 调查、M 地图、I 行囊、T 战前工具。战斗 1/Enter 全队攻击、2 防御、3～7 技能、[ / ] 换人。焦点在按钮上时 Enter/Space 只操作该按钮，避免误提交回合。支持点击/触控。
+
+在线体验见页首链接；离线使用下载后的 `dist/index.html`。紧凑 UI、移动视角设置和北向地图均保留；完整说明在「详情」，首领当前预兆不会隐藏。
+
+## Development / 开发与交付
+
+Node.js **20+**, no npm dependencies. / 不需要安装 npm 依赖。
 
 ```sh
 npm test
@@ -62,17 +68,21 @@ npm run verify:dist
 npm run dev
 ```
 
-**每次改源码，必须把重新编译的 `dist/index.html` 一起提交推送。** `AGENTS.md` 规定此流程，GitHub CI 验证测试与构建，PR 拒绝陈旧静态页，分支推送有静态页补交兜底，不强推。
+**Every source change ships its rebuilt `dist/index.html` in the same commit.** 每次修改源码，都把重编译的静态页一起提交；CI 检查字节一致性，不强推。`package.json` 的 `private: true` 仅用于防止误发布到 npm，与 GitHub 仓库可见性无关。
+
+Browser suites require Python Playwright and Chromium. / 浏览器回归额外需要 Python Playwright 与 Chromium：
 
 ```sh
-npm run balance
 CHROMIUM_PATH=/usr/bin/chromium python tests/render_browser.py
 CHROMIUM_PATH=/usr/bin/chromium python tests/battle_browser.py
 CHROMIUM_PATH=/usr/bin/chromium python tests/browser_smoke.py
 CHROMIUM_PATH=/usr/bin/chromium python tests/compact_browser.py
 CHROMIUM_PATH=/usr/bin/chromium python tests/navigation_browser.py
+CHROMIUM_PATH=/usr/bin/chromium python tests/i18n_browser.py
 ```
 
-浏览器测试额外需要 Python Playwright；使用内存 Storage 替身，不等同于原生文件存储或真实 iPhone 验证。`npm run balance` 是隔离战斗固定策略诊断，不是玩家胜率。
+English text lives in `src/i18n-en.js`; locale selection and presentation-only translation live in `src/i18n.js`. Canonical content and existing saved logs remain language-independent. New UI/data text needs a catalog entry and bilingual tests. No runtime translation API is required.
 
-当前规则、参考 Wiki 与边界：**`docs/V03.md`**。旧 `docs/GAME_DESIGN.md`、`docs/QA.md`、`docs/VISUAL_V021.md` 保留对应版本历史，不代表当前数值。仍需真实长跑局、全职业组合、Safari 和低端设备验证。
+Current rules: [`docs/V03.md`](docs/V03.md). UI: [`docs/UI031.md`](docs/UI031.md). Movement: [`docs/MOVEMENT032.md`](docs/MOVEMENT032.md). Localization: [`docs/I18N033.md`](docs/I18N033.md). Earlier design/QA files are historical, not current balance claims.
+
+Tests use controlled scenarios and in-memory Storage. They do not establish real iPhone Safari support, native `file:` storage behavior, low-end performance, long-run balance, or freedom from motion sickness. Repository visibility does not grant a new software license; no license change is included in this update.

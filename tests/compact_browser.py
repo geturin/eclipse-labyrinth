@@ -4,7 +4,7 @@ UI_BASELINE_HTML optionally measures the old build on exactly the same fixtures 
 """
 import json, os
 from pathlib import Path
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 import battle_browser as ui
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -18,7 +18,11 @@ def stable(page):
     page.wait_for_function("!document.getElementById('combat-skip')",timeout=15000)
 def skip(page):
     button=page.locator('[data-action="skip-animation"]')
-    if button.count():button.click()
+    if button.count():
+        try:button.click(timeout=1500)
+        except PlaywrightTimeoutError:
+            # Presentation may finish between the visibility probe and the pointer click.
+            if button.count():raise
     stable(page)
 def card(page,index):return page.locator(f'[data-action="party"][data-id="hero-{index}"]')
 def stats(page):

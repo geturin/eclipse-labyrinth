@@ -1,3 +1,4 @@
+import { translate } from './i18n.js';
 import { SPRITE_KEYS, explorationSvg, rasterSprite } from './sprite-art.js';
 import { sceneObjects, sceneDecorations, projectSprite, visibleSpans, spriteMotion, placeLabels } from './sprite-scene.js';
 import { REGIONS, regionAt } from './world.js';
@@ -97,7 +98,7 @@ export class DungeonRenderer {
     const stage=this.canvas.closest('.stage');if(!stage)return;
     stage.dataset.travel=this.travel?'moving':'idle';this.canvas.setAttribute('aria-busy',String(!!this.travel));
     const dir=headingOf(pose.angle),heading=stage.querySelector('[data-facing]');
-    if(heading)heading.textContent=['北 N','东 E','南 S','西 W'][dir];
+    if(heading)heading.textContent=translate(['北 N','东 E','南 S','西 W'][dir]);
     for(const marker of document.querySelectorAll('.map-player')){
       marker.setAttribute('transform',`translate(${5+(pose.x-.5)*12+6} ${5+(pose.y-.5)*12+6}) rotate(${(pose.angle+Math.PI/2)*180/Math.PI})`);
     }
@@ -175,14 +176,14 @@ export class DungeonRenderer {
         // Nearer solid sprites take visual priority over markers for objects behind them.
         const hidden=sprites.some(n=>n.depth<s.depth-.1&&!n.decor&&Math.abs(n.center-s.center)<n.sw*.23&&s.top>n.top&&s.top<n.top+n.sh*.88);
         if(!hidden){
-          const far=s.depth>=4, text=far?({enemy:'敌群',elite:'强敌',gate:'守卫',stairs:'阶梯',chest:'宝箱',altar:'祭坛',shrine:'星灯',fountain:'泉水'}[s.icon]??s.label):s.label;
+          const far=s.depth>=4, text=translate(far?({enemy:'敌群',elite:'强敌',gate:'守卫',stairs:'阶梯',chest:'宝箱',altar:'祭坛',shrine:'星灯',fountain:'泉水'}[s.icon]??s.label):s.label);
           ctx.font=`600 ${12*this.uiScale}px sans-serif`;
           candidates.push({...s,top:top+(image.spriteBounds?.top??0)*sh,width:Math.ceil(ctx.measureText(text).width+41*this.uiScale),text,far});
         }
       }
     }
     this.lastLabels=placeLabels(candidates,w,h,this.uiScale,this.labelObstacles());
-    const description='第一人称迷宫'+(this.lastLabels.length?'；前方可见：'+this.lastLabels.map(l=>l.label).join('、'):'；前方暂无可见目标');
+    const description=translate('第一人称迷宫'+(this.lastLabels.length?'；前方可见：'+this.lastLabels.map(l=>l.label).join('、'):'；前方暂无可见目标'));
     if(this.canvas.getAttribute('aria-label')!==description)this.canvas.setAttribute('aria-label',description);
   }
   labelObstacles() {

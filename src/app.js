@@ -1,3 +1,4 @@
+import { actionLabel, initLanguage, getLanguage, getLanguagePreference, setLanguage, refreshBrowserLanguage, localizeDom, translate, syncDocumentLanguage } from './i18n.js';
 import { SAVE_KEY, FIELD_TOOLS, MAX_FLOOR, JOBS, SKILLS, EVOLUTIONS, STATUS, BOONS, INTENTS, RARITIES, DIRECTIONS, FLOORS } from './data.js';
 import { createRun, move, turn, interact, currentEvent, resolveEvent, activeHero, act, intentOf, takeReward, equipWeapon, heroStats, skillCooldown, cooldownLeft, selectHero, useSupply, serializeRun, restoreRun, cellKey, waitTurn, effectiveSkill, skillProblem, reinforcementInfo, bossWarnings, counterText } from './engine.js';
 import { icon, portraitUri, enemyUri, objectSvg, svgUri } from './art.js';
@@ -6,6 +7,8 @@ import { AudioSystem } from './audio.js';
 import { VIEW_MODES, NAV_ACTIONS, moveCue, viewMode } from './navigation.js';
 import { REGIONS, regionAt, visiblePacks, packMode, useFieldTool, paths } from './world.js';
 
+let languageStorage;try{languageStorage=window.localStorage;}catch{}
+initLanguage({navigator:window.navigator,storage:languageStorage});syncDocumentLanguage(document);
 const ROOT=document.getElementById('app'), MODAL=document.getElementById('modal-root');
 const AUDIO=new AudioSystem();
 const PORTRAITS=Object.fromEntries(Object.keys(JOBS).map(id=>[id,portraitUri(id)]));
@@ -16,11 +19,12 @@ let navigation=null,queuedMove=null,navigationTrail=[],lastNavigationCue='';
 const ui={selection:['knight','mage','shrine'],modal:null,modalData:null,rewardIndex:null,selectedEnemy:null,pendingSkill:null,busy:false,seedDraft:'',screen:'landing',lastMove:0,storageError:false,presentation:null,playback:null,animationToken:0,showPatrol:true,suppliesOpen:false};
 const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const e=escapeHtml;
-function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),3200);}
+function toast(message){const el=document.getElementById('toast');el.textContent=translate(message);el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),3200);}
 function readSave(){try{const text=localStorage.getItem(SAVE_KEY);return text?restoreRun(text):null;}catch(error){return null;}}
 function save(){if(!run)return;try{localStorage.setItem(SAVE_KEY,serializeRun(run));}catch(error){if(!ui.storageError){ui.storageError=true;toast('浏览器阻止了本地存档。此局仍可继续，但关闭页面会丢失进度。');}}}
 function seedCode(){try{const bytes=new Uint32Array(1);crypto.getRandomValues(bytes);return `MOON-${bytes[0].toString(36).toUpperCase().padStart(6,'0')}`;}catch{return `MOON-${Date.now().toString(36).toUpperCase()}`;}}
 function brand(){return `<div class="brand"><div class="brand-mark">${icon('moon',23)}</div><div><div class="brand-label">月蝕の迷宮</div><div class="brand-en">ECLIPSE LABYRINTH</div></div></div>`;}
+function languageButton(){return `<button class="icon-button language-button" data-action="language" aria-label="Language / 语言" title="Language / 语言">${getLanguage()==='en'?'EN':'中'}</button>`;}
 function soundButton(){return `<button class="icon-button" data-action="sound" aria-label="${AUDIO.enabled?'关闭音乐与音效':'开启音乐与音效'}" title="${AUDIO.enabled?'关闭声音':'开启声音（默认静音）'}">${icon(AUDIO.enabled?'sound':'mute',18)}</button>`;}
 function selectionDescription(){
   const ids=ui.selection;
@@ -38,7 +42,7 @@ function renderLanding(){
   ui.screen='landing';navigation=null;queuedMove=null;renderer?.destroy();renderer=null;
   const saved=readSave(),canResume=saved&&saved.phase!=='ended';
   const [line,sub]=selectionDescription();
-  ROOT.innerHTML=`<header class="page-head">${brand()}<div class="header-actions"><span class="edition"><i class="dot"></i>ROGUELIKE DRPG · 0.3.2</span>${soundButton()}<button class="icon-button" data-action="help" aria-label="游戏说明">${icon('help',18)}</button></div></header>
+  ROOT.innerHTML=`<header class="page-head">${brand()}<div class="header-actions"><span class="edition"><i class="dot"></i>ROGUELIKE DRPG · 0.3.3</span>${soundButton()}${languageButton()}<button class="icon-button" data-action="help" aria-label="游戏说明">${icon('help',18)}</button></div></header>
   <main class="landing">
     <section class="hero-intro">
       <div class="intro-copy"><div class="eyebrow">A NEW MOON. A NEW BEGINNING.</div><h1>月蝕の迷宮</h1><div class="intro-en">E C L I P S E　L A B Y R I N T H</div><div class="intro-sub">以微小的星火，<br>踏入无月之夜。</div><p>在不断重生的迷宫中，编织属于你的职业、武器与祝福。<br>每一次坠落，都是另一段故事的开端。</p><div class="feature-line"><span>${icon('eye',15)} 第一人称探索</span><span>${icon('sword',15)} 回合制战斗</span><span>${icon('star',15)} 随机构筑</span></div></div>
@@ -55,7 +59,7 @@ function renderLanding(){
 }
 function mountGame(){
   ui.suppliesOpen=false;ui.screen='game';navigation=null;queuedMove=null;navigationTrail=[{x:run.x,y:run.y,floor:run.floor}];lastNavigationCue='';renderer?.destroy();
-  ROOT.innerHTML=`<main class="game-shell"><header class="game-head">${brand()}<div id="top-stats" class="head-run"></div><div class="header-actions"><span id="sound-button">${soundButton()}</span><button class="icon-button" data-action="help" aria-label="游戏说明">${icon('help',18)}</button><button class="icon-button" data-action="menu" aria-label="冒险菜单">${icon('menu',18)}</button></div></header>
+  ROOT.innerHTML=`<main class="game-shell"><header class="game-head">${brand()}<div id="top-stats" class="head-run"></div><div class="header-actions"><span id="sound-button">${soundButton()}</span>${languageButton()}<button class="icon-button" data-action="help" aria-label="游戏说明">${icon('help',18)}</button><button class="icon-button" data-action="menu" aria-label="冒险菜单">${icon('menu',18)}</button></div></header>
     <div class="game-grid"><section class="viewport-panel" aria-label="第一人称迷宫视图"><div class="stage" id="stage"><canvas id="dungeon-canvas" aria-label="第一人称三维迷宫"></canvas><div id="stage-hud" class="stage-hud"></div></div><div id="stage-footer" class="stage-footer"></div></section><section class="hud-dock" aria-label="队伍与行动"><div id="battle-alerts" aria-live="polite"></div><div id="party-strip" class="party-strip" role="group" aria-label="选择队员或技能目标"></div><div id="command-panel" class="command-panel" aria-label="行动指令"></div></section><aside class="side-column"><section class="side-card map-card"><div class="card-title"><span>${icon('map',14)} 探索地图</span><small id="exploration-percent"></small></div><button class="map-wrapper" id="minimap" data-action="map" aria-label="展开已探索地图"></button><div class="map-legend"><span><i></i> 月门</span><span class="treasure"><i></i> 宝箱</span><span class="rest"><i></i> 休息</span><span class="foe-legend">◆ 明雷</span></div></section><section id="objective" class="side-card objective"></section><details class="side-card journal-card"><summary class="card-title"><span>${icon('moon',14)} 行动记录</span></summary><div id="journal" class="journal"></div></details><section class="side-card boon-card"><div class="card-title"><span>${icon('star',14)} 星之祝福</span><button class="ghost" data-action="inventory" aria-label="查看全部祝福">${icon('arrow',12)}</button></div><div id="boon-overview" class="boon-overview"></div></section><div class="side-foot">YOU ARE NOT LOST. NOT YET.</div></aside></div><footer id="game-foot" class="game-foot"></footer></main>`;
   renderer=new DungeonRenderer(document.getElementById('dungeon-canvas'),()=>navigation?.before||ui.presentation||run);
   updateGame();
@@ -136,9 +140,9 @@ function renderBattleCommands(){
   const hero=activeHero(run);if(!hero)return '';
   const ids=ui.suppliesOpen?['tonic','ether','salt']:hero.skills;
   const buttons=ids.map((id,i)=>{
-    const skill=effectiveSkill(hero,id),left=cooldownLeft(hero,id),problem=skillProblem(run,hero,id),rank=hero.ranks[id]||0;
-    const label=ui.suppliesOpen?`×${run.supplies[id]}`:left?`冷却 ${left}`:problem?'受限':`就绪`;
-    return `<button class="skill-button ${left?'cooling':''} ${hero.evolutions[id]?'evolved':''}" data-action="skill" data-skill="${id}" ${problem||ui.busy||ui.pendingSkill?'disabled':''} title="${ui.suppliesOpen?'即时道具':'CD '+skillCooldown(hero,id)} · ${e(skill.desc)}${problem?' · '+e(problem):''}" aria-label="${e(skill.name)}，${label}。${e(skill.desc)}"><span class="skill-top">${icon(skill.icon,16)}<span>${label}</span></span><strong>${e(skill.name)}${rank?`<span class="rank">+${rank}</span>`:''}${hero.evolutions[id]?'<span class="awakened-mark">✦</span>':''}</strong>${!ui.suppliesOpen?`<span class="hotkey">${i+3}</span>`:''}</button>`;
+    const skill=effectiveSkill(hero,id),left=cooldownLeft(hero,id),problem=translate(skillProblem(run,hero,id)),rank=hero.ranks[id]||0;
+    const label=translate(ui.suppliesOpen?`×${run.supplies[id]}`:left?`冷却 ${left}`:problem?'受限':`就绪`);
+    return `<button class="skill-button ${left?'cooling':''} ${hero.evolutions[id]?'evolved':''}" data-action="skill" data-skill="${id}" ${problem||ui.busy||ui.pendingSkill?'disabled':''} title="${ui.suppliesOpen?'即时道具':'CD '+skillCooldown(hero,id)} · ${e(skill.desc)}${problem?' · '+e(problem):''}" aria-label="${e(skill.name)}，${label}。${e(skill.desc)}"><span class="skill-top">${icon(skill.icon,16)}<span>${label}</span></span><strong>${e(actionLabel(id,skill.name))}${rank?`<span class="rank">+${rank}</span>`:''}${hero.evolutions[id]?'<span class="awakened-mark">✦</span>':''}</strong>${!ui.suppliesOpen?`<span class="hotkey">${i+3}</span>`:''}</button>`;
   }).join('');
   const prompt=ui.pendingSkill?`<div class="target-prompt" role="status"><span>${icon('heart',17)} ${e(effectiveSkill(hero,ui.pendingSkill).name)}：选择上方队友</span><button class="ghost" data-action="cancel-target">取消</button></div>`:'';
   const blocked=ui.busy||ui.pendingSkill?'disabled':'';
@@ -172,7 +176,7 @@ function drawGame(){
   ROOT.classList.toggle('navigation-busy',!!navigation);
   const focused=document.activeElement?.closest('.hud-dock [data-action]');
   const focusKey=focused?{action:focused.dataset.action,id:focused.dataset.id,skill:focused.dataset.skill}:null;
-  document.getElementById('top-stats').innerHTML=`<span class="level">${icon('star',15)} LV.<b>${run.level}</b></span><span class="gold">${icon('drop',14)} <b>${run.gold}</b> 星砂</span><span class="steps">${run.steps} 步</span><span class="seed">SEED ${e(run.seed)}</span>`;
+  document.getElementById('top-stats').innerHTML=`<span class="level">${icon('star',15)} LV.<b>${run.level}</b></span><span class="gold">${icon('drop',14)} <b>${run.gold}</b> 星砂</span><span class="steps">${run.steps} 步</span><span class="seed">SEED <bdi data-i18n-skip>${e(run.seed)}</bdi></span>`;
   ROOT.classList.toggle('comfort-mode',run.comfort!==false);document.getElementById('stage-hud').innerHTML=battle?renderBattleHud():renderExploreHud();
   const incoming=reinforcementInfo(run),event=currentEvent(run);
 
@@ -235,12 +239,12 @@ function eventModal(){
   const choices=data.choices.map(([choice,title,desc,cost,ico])=>`<button class="event-choice" data-action="event" data-choice="${choice}" ${choice==='offer'&&run.gold<35?'disabled':''}>${icon(ico,23)}<span class="choice-copy"><strong>${title}</strong><small>${desc}</small></span><span class="cost">${cost}</span></button>`).join('');
   return dialog(data.title,data.en,data.text,`<div class="event-art"><img src="${svgUri(objectSvg(type,'#c2b0e8'))}" alt="${data.title}"></div><div class="choice-stack">${choices}<button class="ghost" data-action="event" data-choice="leave">暂时离开 ${icon('arrow',14)}</button></div>`,{narrow:true,closable:false});
 }
-function endModal(){const win=run.ending==='victory';return dialog(win?'终有黎明。':'星灯，暂时熄灭了。',win?'THE END OF THE ECLIPSE':'EVERY END IS A BEGINNING',win?'你走过没有月亮的夜晚，也把星光带到了故事的尽头。':'迷宫会改变形状，而你会带着新的想法，再一次出发。',`<div class="result-icon">${win?'☼':'☾'}</div><div class="result-party">${run.party.map(p=>`<img src="${PORTRAITS[p.job]}" alt="${e(p.name)}">`).join('')}</div><div class="result-stats"><span><strong>B${run.floor}</strong><small>最深抵达</small></span><span><strong>${run.level}</strong><small>队伍等级</small></span><span><strong>${run.battles}</strong><small>战斗胜利</small></span><span><strong>${run.steps}</strong><small>探索步数</small></span></div><div class="center-actions"><button class="primary" data-action="again">重新点亮星灯 ${icon('arrow',18)}</button><button class="secondary" data-action="object-motion">${icon('star',18)} 物件动画：${run.objectMotion===true?'开启（系统减弱动态优先）':'关闭（静态舒适）'}</button><button class="secondary" data-action="return-title">回到序章</button></div><p class="modal-hint">SEED ${e(run.seed)} · 新一局将清空所有等级、武器、技能强化与祝福。</p>`,{closable:false,extra:win?'result-victory':''});}
-function helpModal(){return dialog('先布置，再出手','FIELD GUIDE / v0.3','独立 CD · 我方准备 → 全队攻击 → 敌方行动',`<div class="help-grid"><section class="help-block"><h3>01 / 准备阶段</h3><p>点击人物状态卡切换队员，连续使用不同的就绪技能。「详情」查看完整说明，「道具」切换到即时补给。同一回合可以先破甲、再火冰融解、再治疗。技能没有 MP，使用后进入独立冷却；冷却只随完整战斗回合减少。CD 3 的技能在 R1 用过后，R4 可再次使用。</p></section><section class="help-block"><h3>02 / 全队攻击</h3><p>按 Enter / 1 或点击全队攻击，未防御的存活队员各攻击一次，然后敌方按阵容顺序行动，不看速度。按 2 切换当前队员防御：本轮承伤 -65%，但不普通攻击；仍可释放技能。3～7 使用当前队员技能，[ / ] 切换队员。</p></section><section class="help-block"><h3>03 / 物品与时钟</h3><p>急救药、时砂滴、破咒盐都是有限即时补给，不会让怪物行动、移动或使状态过期。时砂和加速不能无限刷新：冷却操纵技能不互刷，本回合已经用过的技能最低保留 1 CD。武器的回合末治疗每轮只触发一次。</p></section><section class="help-block"><h3>04 / 巡逻与警报</h3><p>普通敌群沿固定路线前进，即使玩家靠近也不自动追击。只有鸣月哨祭的警报成功，路径 8 格内普通敌群才向警报地点移动 6 拍；杀死或封头可阻断。精英始终定位玩家，每拍追一格。巡逻路过战场也可能意外加入；新增援下一轮才行动。</p></section><section class="help-block"><h3>05 / 战前工具</h3><p>T 打开工具：诱导铃在当前格留 5 拍诱饵（普通怪 / 路径 6 格），眠缚铃停住已探明 4 格内的一队（普通 3 拍、精英 1 拍），静音粉阻断未来 6 拍警报。使用不耗时，但后续移动、等待、完整战斗回合消耗持续时间。精英免疫诱导。下层有限补充。</p></section><section class="help-block"><h3>06 / 预兆与舒适</h3><p>Boss 预兆保留完整准备窗口，按提示驱散、封头、清理侍从或多段命中。预兆取代该轮普通攻击；不能取消时防御止损。技能发生血线变化后，下一准备回合才预告。第 13 回合起逐渐暴走。战斗演出可跳过；系统减弱动态关闭位移动画，不影响结算。</p></section></div><div class="help-note">W/S 前后、A/D 转向、Q/E 平移、Space 等待、F 调查、M 地图（可显示已探索巡线）。1～3 人、五层、武器唯一装备槽与单一固有效果不变。探索菜单可选择标准 / 舒缓 / 淡入视角，北向地图保持固定。v0.3.2 沿用 v0.3 存档；v0.2 存档未删除。</div>`,{wide:true});}
+function endModal(){const win=run.ending==='victory';return dialog(win?'终有黎明。':'星灯，暂时熄灭了。',win?'THE END OF THE ECLIPSE':'EVERY END IS A BEGINNING',win?'你走过没有月亮的夜晚，也把星光带到了故事的尽头。':'迷宫会改变形状，而你会带着新的想法，再一次出发。',`<div class="result-icon">${win?'☼':'☾'}</div><div class="result-party">${run.party.map(p=>`<img src="${PORTRAITS[p.job]}" alt="${e(p.name)}">`).join('')}</div><div class="result-stats"><span><strong>B${run.floor}</strong><small>最深抵达</small></span><span><strong>${run.level}</strong><small>队伍等级</small></span><span><strong>${run.battles}</strong><small>战斗胜利</small></span><span><strong>${run.steps}</strong><small>探索步数</small></span></div><div class="center-actions"><button class="primary" data-action="again">重新点亮星灯 ${icon('arrow',18)}</button><button class="secondary" data-action="object-motion">${icon('star',18)} 物件动画：${run.objectMotion===true?'开启（系统减弱动态优先）':'关闭（静态舒适）'}</button><button class="secondary" data-action="return-title">回到序章</button></div><p class="modal-hint">SEED <bdi data-i18n-skip>${e(run.seed)}</bdi> · 新一局将清空所有等级、武器、技能强化与祝福。</p>`,{closable:false,extra:win?'result-victory':''});}
+function helpModal(){return dialog('先布置，再出手','FIELD GUIDE / v0.3','独立 CD · 我方准备 → 全队攻击 → 敌方行动',`<div class="help-grid"><section class="help-block"><h3>01 / 准备阶段</h3><p>点击人物状态卡切换队员，连续使用不同的就绪技能。「详情」查看完整说明，「道具」切换到即时补给。同一回合可以先破甲、再火冰融解、再治疗。技能没有 MP，使用后进入独立冷却；冷却只随完整战斗回合减少。CD 3 的技能在 R1 用过后，R4 可再次使用。</p></section><section class="help-block"><h3>02 / 全队攻击</h3><p>按 Enter / 1 或点击全队攻击，未防御的存活队员各攻击一次，然后敌方按阵容顺序行动，不看速度。按 2 切换当前队员防御：本轮承伤 -65%，但不普通攻击；仍可释放技能。3～7 使用当前队员技能，[ / ] 切换队员。</p></section><section class="help-block"><h3>03 / 物品与时钟</h3><p>急救药、时砂滴、破咒盐都是有限即时补给，不会让怪物行动、移动或使状态过期。时砂和加速不能无限刷新：冷却操纵技能不互刷，本回合已经用过的技能最低保留 1 CD。武器的回合末治疗每轮只触发一次。</p></section><section class="help-block"><h3>04 / 巡逻与警报</h3><p>普通敌群沿固定路线前进，即使玩家靠近也不自动追击。只有鸣月哨祭的警报成功，路径 8 格内普通敌群才向警报地点移动 6 拍；杀死或封头可阻断。精英始终定位玩家，每拍追一格。巡逻路过战场也可能意外加入；新增援下一轮才行动。</p></section><section class="help-block"><h3>05 / 战前工具</h3><p>T 打开工具：诱导铃在当前格留 5 拍诱饵（普通怪 / 路径 6 格），眠缚铃停住已探明 4 格内的一队（普通 3 拍、精英 1 拍），静音粉阻断未来 6 拍警报。使用不耗时，但后续移动、等待、完整战斗回合消耗持续时间。精英免疫诱导。下层有限补充。</p></section><section class="help-block"><h3>06 / 预兆与舒适</h3><p>Boss 预兆保留完整准备窗口，按提示驱散、封头、清理侍从或多段命中。预兆取代该轮普通攻击；不能取消时防御止损。技能发生血线变化后，下一准备回合才预告。第 13 回合起逐渐暴走。战斗演出可跳过；系统减弱动态关闭位移动画，不影响结算。</p></section></div><div class="help-note">W/S 前后、A/D 转向、Q/E 平移、Space 等待、F 调查、M 地图（可显示已探索巡线）。1～3 人、五层、武器唯一装备槽与单一固有效果不变。探索菜单可选择标准 / 舒缓 / 淡入视角，北向地图保持固定。v0.3.3 沿用 v0.3 存档；v0.2 存档未删除。</div>`,{wide:true});}
 function classesModal(){return dialog('六种星火，六种答案','JOB COMPENDIUM','明确分工，保留弱点。独行需要有限补给与局内技能弥补短板。',`<div class="choice-stack">${Object.values(JOBS).map(j=>`<button class="event-choice" data-action="class-detail" data-job="${j.id}"><span style="height:48px;width:48px;overflow:hidden;position:relative;border-radius:7px;background:${j.color}11;flex-shrink:0"><img src="${PORTRAITS[j.id]}" style="width:80px;max-width:none;position:absolute;left:-16px;top:-18px" alt=""></span><span class="choice-copy"><strong style="color:${j.color}">${j.name} · ${j.person}</strong><small>${j.role} / ${j.passiveDesc}</small></span>${icon('right',16)}</button>`).join('')}</div>`);}
 function heroModal(id,isClass=false){
   const hero=isClass?null:run.party.find(p=>p.id===id),job=JOBS[isClass?id:hero.job],stats=hero?heroStats(hero):job;
-  const header=`<div class="hero-detail"><div class="hero-detail-art"><img src="${PORTRAITS[job.id]}" alt="${job.person}"></div><div class="hero-detail-copy"><div class="eyebrow">${job.roman} / ${job.jp}</div><h2>${job.person}</h2><div class="job-title">${job.name} · ${job.role}</div><p>${job.synopsis}</p><div class="hero-stats">${[['生命',hero?`${hero.hp}/${hero.maxHp}`:job.hp],['攻击',Math.floor(stats.atk)],['魔力',Math.floor(stats.mag)],['防御',stats.def]].map(([label,value])=>`<span class="hero-stat">${label}<b>${value}</b></span>`).join('')}</div><div class="passive"><b>职业被动 · ${job.passive}</b>${job.passiveDesc}</div></div></div>`;
+  const header=`<div class="hero-detail"><div class="hero-detail-art"><img src="${PORTRAITS[job.id]}" alt="${job.person}"></div><div class="hero-detail-copy"><div class="eyebrow">${job.roman} / ${job.jp}</div><h2>${job.person}</h2><div class="job-title">${job.name} · ${job.role}</div><p>${job.synopsis}</p><div class="hero-stats">${[['生命',hero?`${hero.hp}/${hero.maxHp}`:job.hp],['攻击',Math.floor(stats.atk)],['魔力',Math.floor(stats.mag)],[getLanguage()==='en'?'DEF':'防御',stats.def]].map(([label,value])=>`<span class="hero-stat">${label}<b>${value}</b></span>`).join('')}</div><div class="passive"><b>职业被动 · ${job.passive}</b>${job.passiveDesc}</div></div></div>`;
   const currentStatus=hero?`<div class="detail-status"><b>当前状态</b>${statusHtml(hero)}${!hero.guard&&!hero.barrier&&!Object.keys(hero.status).length?'无异常':''}</div>`:'';
   const skills=[...job.skills,...job.advanced].map(id=>{const s=hero?effectiveSkill(hero,id):SKILLS[id],rank=hero?.ranks[id]||0;const learned=hero?hero.skills.includes(id):job.skills.includes(id);return `<div class="skill-detail ${!learned?'locked-art':''}">${icon(s.icon,21)}<span><strong>${s.name}${!learned?` <small>未习得 · B${SKILLS[id].minFloor||1} 起</small>`:hero?.evolutions[id]?'<small class="gold"> ✦觉醒</small>':''}${rank?` <span class="gold">+${rank}</span>`:''}</strong><p>${s.desc}${rank?` 当前强化 +${rank}。`:''}</p></span><span class="mp">CD ${hero?skillCooldown(hero,id):s.cd}</span></div>`;}).join('');
   return `<div class="modal-backdrop"><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1"><h2 id="dialog-title" class="sr-only">${job.person} 的职业信息</h2><button class="icon-button modal-close" data-action="close" aria-label="关闭">${icon('close',16)}</button>${header}${currentStatus}<div class="divider"></div>${skills}${hero?`<div class="help-note">当前武器：${e(hero.weapon.name)}<br>「${e(hero.weapon.effectName)}」${e(hero.weapon.desc)}</div>`:'<p class="modal-hint">以上为职业基础数值，不含起始武器和独行誓约加成。</p>'}</section></div>`;
@@ -264,14 +268,22 @@ function battleIntelModal(){
 }
 
 function viewSettingsModal(){return dialog('探索视角','VIEW & ORIENTATION','固定视线，不摇头、不倾斜。移动与转向使用同一种过渡。',`<div class="menu-choices view-modes">${Object.entries(VIEW_MODES).map(([id,m])=>`<button class="secondary" data-action="view-mode" data-mode="${id}" aria-pressed="${viewMode(run)===id}"><strong>${m.name}</strong><span>${m.desc}</span></button>`).join('')}</div><p class="tiny muted">系统开启“减弱动态”时，自动停用空间过渡，保留方向提示和北向地图。舒缓不一定适合每个人，可比较标准与淡入模式。</p>`,{narrow:true});}
-function menuModal(){return dialog('星灯仍在这里','PAUSE & REFLECT',`SEED ${e(run.seed)} · 第 ${run.floor} 层 · 本局已自动保存`,`<div class="menu-choices"><button class="secondary" data-action="close">${icon('arrow',18)} 继续探索</button><button class="secondary" data-action="inventory">${icon('bag',18)} 查看装备与祝福</button><button class="secondary" data-action="journal">${icon('clock',18)} 行动记录</button><button class="secondary" data-action="help">${icon('help',18)} 查看冒险指南</button><button class="secondary" data-action="view-settings">${icon('eye',18)} 探索视角 · ${VIEW_MODES[viewMode(run)]?.name||'标准步进'}</button><button class="secondary" data-action="object-motion">${icon('star',18)} 物件动画：${run.objectMotion===true?'开启（系统减弱动态优先）':'关闭（静态舒适）'}</button><button class="secondary" data-action="return-title">${icon('moon',18)} 返回序章（保留本局存档）</button><button class="secondary danger-text" data-action="restart-confirm">${icon('exit',18)} 放弃本局，重新编队</button></div>`,{narrow:true});}
+function languageModal(){return dialog('语言 / Language','LANGUAGE','跟随浏览器语言，也可以手动选择。',`<div class="menu-choices">${[['auto','自动 / Browser default'],['zh','简体中文'],['en','English']].map(([id,name])=>`<button class="secondary" data-action="set-language" data-language="${id}" aria-pressed="${getLanguagePreference()===id}">${name}</button>`).join('')}</div>`,{narrow:true});}
+function redrawLanguage(){
+  syncDocumentLanguage(document);modalKey='';
+  if(ui.screen==='landing'){ui.seedDraft=document.getElementById('seed-input')?.value??ui.seedDraft;renderLanding();}
+  else if(run)mountGame();
+}
+function menuModal(){return dialog('星灯仍在这里','PAUSE & REFLECT',`SEED <bdi data-i18n-skip>${e(run.seed)}</bdi> · 第 ${run.floor} 层 · 本局已自动保存`,`<div class="menu-choices"><button class="secondary" data-action="close">${icon('arrow',18)} 继续探索</button><button class="secondary" data-action="inventory">${icon('bag',18)} 查看装备与祝福</button><button class="secondary" data-action="journal">${icon('clock',18)} 行动记录</button><button class="secondary" data-action="help">${icon('help',18)} 查看冒险指南</button><button class="secondary" data-action="view-settings">${icon('eye',18)} 探索视角 · ${VIEW_MODES[viewMode(run)]?.name||'标准步进'}</button><button class="secondary" data-action="object-motion">${icon('star',18)} 物件动画：${run.objectMotion===true?'开启（系统减弱动态优先）':'关闭（静态舒适）'}</button><button class="secondary" data-action="return-title">${icon('moon',18)} 返回序章（保留本局存档）</button><button class="secondary danger-text" data-action="restart-confirm">${icon('exit',18)} 放弃本局，重新编队</button></div>`,{narrow:true});}
 function renderModal(){
+  localizeDom(ROOT);
   let html='',key='';
   if(run?.phase==='reward'){html=rewardModal();key=`reward-${run.rewards.map(r=>r.id||r.skillId||r.weapon?.uid).join('-')}-${ui.rewardIndex}`;}
   else if(run?.phase==='event'){html=eventModal();key=`event-${run.event.key}`;}
   else if(run?.phase==='ended'){html=endModal();key=`end-${run.ending}`;}
   else if(ui.modal){key=`${ui.modal}-${ui.modalData||''}`;
-    if(ui.modal==='help')html=helpModal();
+    if(ui.modal==='language')html=languageModal();
+    else if(ui.modal==='help')html=helpModal();
     else if(ui.modal==='classes')html=classesModal();
     else if(ui.modal==='class')html=heroModal(ui.modalData,true);
     else if(ui.modal==='hero'&&run)html=heroModal(ui.modalData);
@@ -294,7 +306,7 @@ function renderModal(){
   // Do not replace a dialog on every HUD update: preserve focused controls and scroll position.
   if(key===modalKey&&MODAL.innerHTML)return;
   if(!MODAL.innerHTML){lastFocus=document.activeElement;ROOT.setAttribute('inert','');document.body.style.overflow='hidden';}
-  MODAL.innerHTML=html;modalKey=key;MODAL.querySelector('.dialog')?.focus({preventScroll:true});
+  MODAL.innerHTML=html;localizeDom(MODAL);modalKey=key;MODAL.querySelector('.dialog')?.focus({preventScroll:true});
 }
 function beginRun(){
   run=createRun(ui.selection,ui.seedDraft.trim()||seedCode());ui.modal=null;ui.modalData=null;ui.rewardIndex=null;ui.pendingSkill=null;ui.selectedEnemy=null;ui.busy=false;ui.presentation=null;ui.playback=null;ui.animationToken++;modalKey='';
@@ -356,7 +368,7 @@ async function playFrames(before,frames){
   const actual=run,token=++ui.animationToken;
   ui.busy=true;ui.presentation=before;ui.presentation.phase='battle';ui.presentation.fx=[];
   document.getElementById('combat-skip')?.remove();
-  const skip=document.createElement('button');skip.id='combat-skip';skip.className='secondary combat-skip';skip.dataset.action='skip-animation';skip.textContent='跳过演出 · Esc';skip.setAttribute('aria-label','跳过演出，不跳过结算');document.body.appendChild(skip);
+  const skip=document.createElement('button');skip.id='combat-skip';skip.className='secondary combat-skip';skip.dataset.action='skip-animation';skip.textContent=translate('跳过演出 · Esc');skip.setAttribute('aria-label',translate('跳过演出，不跳过结算'));document.body.appendChild(skip);
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   try{
@@ -400,8 +412,10 @@ function handleAction(button){
     const saved=readSave();if(!saved){toast('未能读取存档。请开始新的冒险。');return;}run=saved;ui.modal=null;ui.rewardIndex=null;ui.pendingSkill=null;ui.busy=false;mountGame();return;
   }
   if(action==='sound'){
-    AUDIO.toggle().then(enabled=>{if(ui.screen==='landing')renderLanding();else document.getElementById('sound-button').innerHTML=soundButton();toast(enabled?'已开启原创合成音乐与音效。':'已关闭声音。');}).catch(()=>toast('当前浏览器未允许播放音频。'));return;
+    AUDIO.toggle().then(enabled=>{if(ui.screen==='landing')renderLanding();else document.getElementById('sound-button').innerHTML=soundButton();localizeDom(ROOT);toast(enabled?'已开启原创合成音乐与音效。':'已关闭声音。');}).catch(()=>toast('当前浏览器未允许播放音频。'));return;
   }
+  if(action==='language'){setModal('language');return;}
+  if(action==='set-language'){if(setLanguage(button.dataset.language))redrawLanguage();return;}
   if(action==='close'){closeModal();return;}
   if(action==='help'){setModal('help');return;}
   if(action==='classes'){setModal('classes');return;}
@@ -487,6 +501,7 @@ document.addEventListener('keydown',event=>{
   const action={w:'forward',arrowup:'forward',s:'back',arrowdown:'back',a:'turn-left',arrowleft:'turn-left',d:'turn-right',arrowright:'turn-right',q:'strafe-left',e:'strafe-right',f:'interact',enter:'interact',' ':'wait'}[key];
   if(action){event.preventDefault();const now=performance.now();if(now-ui.lastMove<140&&event.repeat)return;ui.lastMove=now;mutateExplore(action,{repeat:event.repeat});}
 });
+window.addEventListener('languagechange',()=>{if(refreshBrowserLanguage()){finishNavigation({discardQueue:true});if(ui.busy)finishPlayback();redrawLanguage();}});
 window.addEventListener('beforeunload',save);
 window.addEventListener('pagehide',save);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){finishNavigation({discardQueue:true});save();}});

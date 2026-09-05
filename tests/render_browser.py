@@ -18,7 +18,7 @@ def check(name,value):
     checks.append(name)
     print(name,flush=True)
 def rig(browser,width=1200,height=480,dpr=1,reduced='reduce'):
-    page=browser.new_page(viewport={'width':width,'height':height+20},device_scale_factor=dpr,reduced_motion=reduced)
+    page=browser.new_page(locale='zh-CN',viewport={'width':width,'height':height+20},device_scale_factor=dpr,reduced_motion=reduced)
     page.on('pageerror',lambda e:errors.append(str(e)))
     page.on('request',lambda r:requests.append(r.url))
     page.set_content(f'<style>body{{margin:0;background:#111c2e}}canvas{{display:block;width:{width}px;height:{height}px}}</style><canvas id="view"></canvas>')
@@ -116,7 +116,7 @@ with sync_playwright() as p:
     # Actual production UI, with a deterministic scene fixture and in-memory save.
     maker=rig(browser);saved=maker.evaluate("()=>{run.guardianDefeated=false;run.dungeon.events={'5,7':{type:'chest'},'6,7':{type:'altar'},'7,7':{type:'stairs'}};return run}");maker.close()
     for width,height in [(1440,1000),(390,844)]:
-        page=browser.new_page(viewport={'width':width,'height':height},reduced_motion='reduce')
+        page=browser.new_page(locale='zh-CN',viewport={'width':width,'height':height},reduced_motion='reduce')
         page.on('pageerror',lambda e:errors.append(str(e)))
         page.on('request',lambda r:requests.append(r.url))
         page.evaluate('''saved=>{const values={'eclipse-labyrinth.run.v3':JSON.stringify(saved)};Object.defineProperty(window,'localStorage',{value:{getItem:k=>values[k]??null,setItem:(k,v)=>values[k]=String(v),removeItem:k=>delete values[k]},configurable:true});}''',saved)
