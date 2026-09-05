@@ -48,6 +48,9 @@ jobs:
               else:
                   assert blob(path) == hashes['before'], path
           patch = data['patch'].encode('utf-8')
+          # difflib leaves an unterminated final added line without Git's EOF marker.
+          if not patch.endswith(b'\n'):
+              patch += b'\n\\ No newline at end of file\n'
           subprocess.run(['git','apply','--check','--whitespace=nowarn','-'], input=patch, check=True)
           subprocess.run(['git','apply','--whitespace=nowarn','-'], input=patch, check=True)
           for path, hashes in data['files'].items():
