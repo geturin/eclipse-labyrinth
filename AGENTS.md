@@ -30,6 +30,10 @@ that is a safety net, not a substitute for step 5. Concurrent pushes fail safely
 - `src/engine.js`: pure serializable game state, combat, rewards, saving.
 - `src/app.js`: DOM and controls; `src/renderer.js`: cosmetic raycasting only.
 - `src/art.js` and `src/audio.js`: original procedural assets, no external requests.
+- `src/sprite-art.js`: fixed-size exploration SVGs and raster cache.
+- `src/sprite-scene.js`: pure cosmetic placement, occlusion spans and marker layout.
+  Never slice source SVGs per ray column. Exploration changes must run
+  `npm run test:render` and the pixel suite `python tests/render_browser.py`.
 - `scripts/build.mjs`: deterministic closed-world ESM bundler.
 
 Do not advance RNG or world time from rendering/timers. Only successful movement/waiting

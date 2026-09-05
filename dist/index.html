@@ -1089,24 +1089,266 @@ function objectSvg(type,color='#bac0e9') {
 
 Object.assign(exports,{svgUri,icon,portraitSvg,portraitUri,enemySvg,enemyUri,objectSvg});
 };
+modules['sprite-art']=(exports,require)=>{
+const { enemySvg }=require('art');
+const { ENEMY_TYPES }=require('data');
+// Exploration assets have a fixed viewport and intrinsic size. Body feet end at y=300.
+// Battle/portrait art is deliberately untouched. Every asset is rasterized once before raycasting.
+const SPRITE_SIZE=320;
+const SPRITE_KEYS=[
+  'chest','stairs','gate','altar','shrine','shrine-flame','fountain',
+  ...Object.keys(ENEMY_TYPES).map(id=>'mob-'+id),
+  ...[0,1,2,3].flatMap(i=>['landmark-'+i,'decor-'+i]),
+];
+const zones=['#a8bcff','#a3e6bd','#d9b5fa','#eaca91'];
+const shell=(body,color='#cdd9f3')=>`<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320">
+<defs>
+ <linearGradient id="stone" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#aab9ce"/><stop offset=".45" stop-color="#627792"/><stop offset="1" stop-color="#26364e"/></linearGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#fff0b7"/><stop offset=".4" stop-color="#d6aa58"/><stop offset="1" stop-color="#79501f"/></linearGradient>
+ <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ad644d"/><stop offset="1" stop-color="#4e2c36"/></linearGradient>
+ <linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#cafff5"/><stop offset="1" stop-color="#2a8f9e"/></linearGradient>
+ <linearGradient id="veil" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${color}"/><stop offset="1" stop-color="#36334f"/></linearGradient>
+ <radialGradient id="aura"><stop stop-color="${color}" stop-opacity=".25"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></radialGradient>
+ <filter id="rim" x="-15%" y="-15%" width="130%" height="130%"><feMorphology in="SourceAlpha" operator="dilate" radius="1.6" result="edge"/><feFlood flood-color="${color}" flood-opacity=".82"/><feComposite in2="edge" operator="in"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>${body}</svg>`;
+const base=`<path d="m49 276 110-19 113 18-11 23H61Z" fill="#283348" stroke="#a1b3ce" stroke-width="3"/><path d="m49 276 109 9 114-10-112-19Z" fill="#8c9db3"/><path d="M159 285v13" stroke="#e1e4ef" stroke-width="2"/>`;
+
+function chest() {
+ return `<g stroke="#ffe2a2" stroke-width="3" stroke-linejoin="round">
+ <path d="m43 152 161-24 72 36v104l-163 31-70-46Z" fill="url(#wood)"/>
+ <path d="m43 152 70 41 163-29-70-36Z" fill="#e2bb75"/>
+ <path d="m113 193 163-29v104l-163 31Z" fill="#633b3b"/>
+ <path d="M43 152V119q0-43 42-53l108-19q42-6 58 39l25 78-163 29Z" fill="url(#wood)"/>
+ <path d="m43 150 70 43v-29q-2-38-26-63Q65 76 50 105Z" fill="#673f42"/>
+ <path d="m86 65 33-6q43 17 57 118l-29 5Q135 91 86 65Z" fill="url(#gold)"/>
+ <path d="m194 47 22 6q36 20 60 111l-24 5Q235 72 194 47Z" fill="url(#gold)"/>
+ <path d="m47 147 67 40 159-29v17l-160 29-66-40Z" fill="url(#gold)"/>
+ <path d="m174 188 35-7v47l-35 7Z" fill="url(#gold)"/><path d="m188 198 9-2v20l-9 2Z" fill="#322637"/>
+ <path d="m122 214 0 66m145-91v64" stroke="#dfa65f" stroke-width="8"/>
+ <path d="m49 232 18 10v16l-18-11Zm82 46 18-3v17l-18 3Zm125-26 17-3v16l-17 4Z" fill="url(#gold)"/>
+ </g><path d="m203 99 8 17 18 5-17 8-5 18-8-17-18-5 17-8Z" fill="#fff3bd"/>`;
+}
+function doorway(closed) {
+ const c=closed?'#eac083':'#9becee';
+ return `<path d="M39 296V100Q39 22 146 17Q247 18 261 97v193Z" fill="#253248" stroke="${c}" stroke-width="7"/>
+ <path d="M57 288V102q0-64 93-67 91 5 91 65v186Z" fill="url(#stone)"/>
+ <path d="M82 269V108q0-45 69-47 63 0 63 48v158Z" fill="#101d30" stroke="${c}" stroke-width="3"/>
+ <path d="m35 292 50-25 131 0 67 24-11 14H43Z" fill="url(#stone)" stroke="${c}" stroke-width="3"/>
+ ${closed?`<path d="M92 264V108q0-35 59-38 52 1 52 38v156Z" fill="#373448"/><path d="M116 86v176M145 74v188M174 81v181M88 142h116M88 204h116" stroke="#ccae79" stroke-width="7"/><path d="m151 102 19 31-19 32-19-32Z" fill="url(#gold)"/><circle cx="151" cy="211" r="18" fill="#584332" stroke="#f8d98e" stroke-width="3"/>`:
+ `<path d="M122 138h59v14h-69v18h81v21H102v24h100v26H90v29h126" fill="none" stroke="#a9dbe3" stroke-width="6"/><path d="m121 140-11 29-10 45-10 53m90-127 13 49 9 50 14 31" stroke="#46667f" stroke-width="3"/><path d="m136 91 15 17 15-17m-30 16 15 17 15-17" fill="none" stroke="#bafff6" stroke-width="6"/>`}
+ <path d="M60 115H78M58 169H79M59 229H78M219 116H239M220 171H241M219 228H242" stroke="#bbc7d6" stroke-width="3"/>
+ <path d="m151 21-16 18 16 14 15-14Z" fill="${c}"/>`;
+}
+function altar() {
+ return `${base}<g stroke="#e0c8ff" stroke-width="3" stroke-linejoin="round">
+ <path d="m110 252 9-109h80l10 109-50 28Z" fill="url(#stone)"/>
+ <path d="m132 160-16 90 44 28 40-28-14-91" fill="url(#veil)"/>
+ <path d="M121 140q-13-55 9-79 27-32 57-3 22 21 13 83l-40 28Z" fill="#a4a2c7"/>
+ <path d="M132 99q-5-43 28-44 30 0 29 44l-12 32h-33Z" fill="#e3ddec"/>
+ <path d="m122 93 10-56 28 21 27-21 11 55-37-18Z" fill="#9b8aaf"/>
+ <path d="m118 152-32 50 39 15 35-22 35 22 33-18-30-45-37 27Z" fill="url(#stone)"/>
+ <path d="m139 177 22 14 21-14-4 30-16 10-18-10Z" fill="#ebe0f3"/>
+ </g><path d="M180 28a60 60 0 1 0 0 117 50 50 0 0 1 0-117" fill="#d6b6ee" opacity=".65"/>
+ <circle cx="161" cy="228" r="17" fill="url(#aura)"/><path d="m161 211 8 16-8 16-8-16Z" fill="#ebd0ff"/>`;
+}
+function shrine() {
+ return `${base}<path d="m107 260 19-34h68l21 34-53 19Z" fill="url(#stone)" stroke="#c0d9fa" stroke-width="3"/><path d="M139 227V152h45v75l-23 14Z" fill="url(#stone)" stroke="#d1dfff" stroke-width="3"/><path d="m101 152 13-24h95l13 24-61 18Z" fill="#a4bcd5" stroke="#dae5ff" stroke-width="3"/><path d="M105 92 128 53h65l23 39-54 11Z" fill="url(#stone)" stroke="#d1def5" stroke-width="3"/><path d="M115 89v49m93-49v49" stroke="#a7bbd7" stroke-width="7"/><circle cx="161" cy="47" r="9" fill="#d8eafa"/>`;
+}
+function flame() {
+ return `<circle cx="161" cy="115" r="48" fill="url(#aura)"/><path d="M140 137q-14-15 3-33 14-13 17-34 27 20 19 37 20 18-2 32Z" fill="#72ccf6"/><path d="M149 134q-10-15 13-32-4 14 9 21 8 13-7 17Z" fill="#eeffff"/>`;
+}
+function fountain() {
+ return `<ellipse cx="160" cy="272" rx="116" ry="27" fill="#355771" stroke="#bbe9f1" stroke-width="4"/><path d="M44 249q4 52 116 51 114 0 116-51" fill="url(#stone)" stroke="#a0d7e5" stroke-width="3"/><ellipse cx="160" cy="247" rx="116" ry="36" fill="#8cb2c8" stroke="#ccf7ff" stroke-width="4"/><ellipse cx="160" cy="247" rx="99" ry="25" fill="url(#water)"/><path d="M146 240V149h28v91" fill="url(#stone)" stroke="#cce6ee" stroke-width="3"/><path d="M94 144q0 40 66 39 68 0 68-39" fill="url(#stone)" stroke="#b4e0e9" stroke-width="3"/><ellipse cx="160" cy="143" rx="67" ry="20" fill="#8ddede" stroke="#d8f4f1" stroke-width="4"/><path d="M151 137q-8-52 9-89 21 32 9 88M100 153v83m120-83v83" fill="none" stroke="#91eeee" stroke-width="5"/><path d="M125 248q34 13 71-2m-98 2q-5 19 54 23m42-35q33 5 27 18" fill="none" stroke="#e1fff9" stroke-width="3"/>`;
+}
+function beast() {
+ return `<g stroke="#c4e59e" stroke-width="3" stroke-linejoin="round"><path d="m52 217-14 63 34 9 30-64m105-4 17 65 34-7-12-77" fill="#4e6954"/><path d="m43 230 24-97 63-54 85 18 57 98-37 50-96 25Z" fill="#577866"/><path d="m74 155 19-53 34 22 27-64 26 56 44-14-5 48 47 26-43 28 7 44-58-13-42 19-15-46-55-16Z" fill="url(#veil)"/><path d="m114 192 78-2 28 44-23 43h-72l-31-40Z" fill="#354c49"/><path d="m108 217 32 9-10 11-17-5m80-15-29 9 9 11 17-5" fill="#f0da9a"/><path d="m131 256 14-6 16 7 18-7 13 7" fill="none" stroke="#d5dabc" stroke-width="4"/></g>`;
+}
+function prism() {
+ return `<circle cx="160" cy="153" r="112" fill="url(#aura)"/><g stroke="#b8fff2" stroke-width="3"><path d="m157 53 52 93-48 107-58-103Z" fill="#447e98"/><path d="m157 53 2 102-56-5Z" fill="#a1f0ee"/><path d="m157 53 52 93-50 9Z" fill="#66b4c5"/><path d="m159 155 2 98 48-107Z" fill="#2f526b"/><path d="m58 121 25 31-21 48-22-40Zm195-47 23 45-20 25-23-28Zm-35 140 15 17-12 34-16-27Z" fill="#82c7cc"/></g><ellipse cx="160" cy="156" rx="101" ry="30" fill="none" stroke="#98e5e1" stroke-width="4" transform="rotate(-22 160 156)"/><path d="m160 125 14 26-14 31-13-30Z" fill="#f5fff7"/>`;
+}
+function caller() {
+ return `<g stroke="#f5d5b0" stroke-width="3" stroke-linejoin="round"><path d="m123 142-47 146 67-14 47 21 52-18-32-146Z" fill="url(#veil)"/><path d="m141 149-9 108 43 23 7-136Z" fill="#d4bb92"/><path d="M115 131 111 73l47-41 49 41-2 60-42 32Z" fill="#68495d"/><path d="m137 92 48 0-6 43-22 11-19-14Z" fill="#f0dbc5"/><path d="m142 104 11 0m14 0h11" stroke="#553b59" stroke-width="5"/><path d="m132 162-50 37-21-12 55-48m67 22 36 29 16-8-36-43" fill="#a98989"/><path d="M65 273 51 75" stroke="#ddb775" stroke-width="8"/></g><path d="M64 25A33 33 0 1 0 64 85 28 28 0 0 1 64 25" fill="#fff0b8"/><circle cx="53" cy="58" r="10" fill="#cbd7ef"/>`;
+}
+function guardian() {
+ return `<g stroke="#f5d397" stroke-width="3" stroke-linejoin="round"><path d="m114 220-9 76h41l15-62 13 62h44l-18-81Z" fill="#475970"/><path d="m96 118-43 40 32 82 46-21 30 30 38-24 34 9 23-83-48-34Z" fill="url(#stone)"/><path d="m110 139 52 38 41-40-5 68-35 27-40-20Z" fill="#39556e"/><path d="M113 116 118 65l27-30 39 0 27 31-3 52-47 36Z" fill="url(#gold)"/><path d="m122 83 41 12 39-12-7 29-33 16-32-14Z" fill="#202d43"/><path d="m136 98 17 4m20 0 17-4" stroke="#effaff" stroke-width="5"/><path d="m145 37-14-26 31 16 34-16-12 26Z" fill="#f4deb0"/><path d="m218 137 59 25-10 87-45 36-36-44 5-86Z" fill="#445b79"/><path d="m225 160 29 14-5 64-25 23-20-28 3-63Z" fill="url(#gold)"/><path d="M48 293V89" stroke="#bcd4e3" stroke-width="8"/><path d="m48 35 18 46-18 36-20-36Z" fill="url(#gold)"/></g><path d="m162 177 14 17-14 22-13-22Z" fill="#d4f0f9"/>`;
+}
+function mob(id) {
+ if(id==='briar')return beast();if(id==='prism')return prism();if(id==='caller')return caller();if(id==='guardian')return guardian();
+ const data=ENEMY_TYPES[id]??ENEMY_TYPES.slime;
+ const inner=enemySvg(data.kind,data.tint).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'');
+ return `<g transform="translate(0 8)" filter="url(#rim)">${inner}</g>`;
+}
+function landmark(zone) {
+ const color=zones[zone],motifs=[
+ `<path d="m160 60 24 48 46 17-46 16-24 48-23-48-46-16 46-17Z" fill="${color}"/><path d="M160 85v81m-39-42h78" stroke="#eef7ff" stroke-width="4"/>`,
+ `<path d="M160 185C68 143 71 62 137 108Q153 25 210 65Q256 134 160 185" fill="${color}"/><path d="M160 202V93m0 64-45-43m45 15 45-39" stroke="#e6f7d9" stroke-width="4" fill="none"/>`,
+ `<path d="M77 99q39-22 83 4 40-26 83-4v94q-46-21-83 0-40-21-83 0Z" fill="${color}" stroke="#e9d9ff" stroke-width="4"/><path d="M160 108v81M94 121l43 6m-43 14 43 6m47-19 40-8m-40 29 40-8" stroke="#765189" stroke-width="4"/>`,
+ `<path d="M108 172q11-39 12-65a40 40 0 0 1 80 0q1 37 14 65Z" fill="url(#gold)" stroke="${color}" stroke-width="4"/><ellipse cx="160" cy="177" rx="57" ry="12" fill="#463541" stroke="${color}" stroke-width="4"/><path d="M160 64V43m-10 145q10 19 20 0" stroke="${color}" stroke-width="8" fill="none"/>`,
+ ];
+ return `${base}<path d="m109 214 103 0 10 54-62 16-62-16Z" fill="url(#stone)" stroke="${color}" stroke-width="3"/>${motifs[zone]}<text x="161" y="252" font-family="serif" font-size="27" text-anchor="middle" fill="#edf0ff">${['I','II','III','IV'][zone]}</text>`;
+}
+function decoration(zone) {
+ if(zone===0)return `<g stroke="#abbddb" stroke-width="3"><path d="m72 281 14-92 35-16 39 39-4 75Z" fill="url(#stone)"/><path d="m125 267 38-111 35 47 7 87Z" fill="#7086a6"/><path d="m196 283 26-59 35 27 9 40Z" fill="#526981"/></g><path d="m165 172 18 35-16 52-16-24Z" fill="#b6cbf3"/>`;
+ if(zone===1)return `<path d="m107 291 20-50h66l25 50Z" fill="#426a59"/><g fill="#79b29c" stroke="#bee5c1" stroke-width="3"><path d="M160 276Q31 223 83 139q77 26 77 137Z"/><path d="M162 277q-40-177 35-196 45 96-35 196Z"/><path d="M159 277q27-161 95-109-20 94-95 109Z"/></g><path d="M163 287V142m0 109-57-77m56 99 64-77" fill="none" stroke="#355d50" stroke-width="5"/>`;
+ if(zone===2)return `<g stroke="#d9bc9e" stroke-width="3"><path d="m64 263 135-13 60 26-127 22-68-16Z" fill="#846482"/><path d="m82 221 138-7 25 34-135 23-33-29Z" fill="#587d8c"/><path d="m104 185 116 6 17 23-119 12-25-22Z" fill="#aa806c"/></g><path d="M118 203 219 199m-118 43 119-17m-85 59 101-17" stroke="#edd7b5" stroke-width="7"/>`;
+ return `<path d="M139 167 130 128h60l-9 39q57 32 45 98-11 34-67 34-57-1-66-34-12-64 46-98Z" fill="url(#gold)" stroke="#dfbf98" stroke-width="4"/><path d="m118 183-37-11-9 44 29 21m103-53 37-14 13 39-24 29" fill="none" stroke="#bb926e" stroke-width="9"/><path d="m148 154 11 61-21 16 22 60" fill="none" stroke="#4d3e3b" stroke-width="4"/><path d="M112 250q46 21 97 0" fill="none" stroke="#ead4a6" stroke-width="5"/>`;
+}
+function explorationSvg(key) {
+ let body,color='#c3d7ef';
+ if(key.startsWith('mob-')){const id=key.slice(4);body=mob(id);color=ENEMY_TYPES[id]?.tint??color;}
+ else if(key.startsWith('landmark-')){const zone=Number(key.slice(-1))%4;body=landmark(zone);color=zones[zone];}
+ else if(key.startsWith('decor-')){const zone=Number(key.slice(-1))%4;body=decoration(zone);color=zones[zone];}
+ else {body=({chest,stairs:()=>doorway(false),gate:()=>doorway(true),altar,shrine,'shrine-flame':flame,fountain}[key]??chest)();color={chest:'#f3cf83',stairs:'#9ae9ed',gate:'#ffd49a',altar:'#dfc1ff',shrine:'#aed9ff','shrine-flame':'#88dfff',fountain:'#a0eee1'}[key];}
+ return shell(body,color);
+}
+
+/** Raster source has unambiguous pixel coordinates on every browser. An asset failure remains visible. */
+async function rasterSprite(svg,size=SPRITE_SIZE) {
+ const image=new Image(),canvas=document.createElement('canvas');canvas.width=canvas.height=size;
+ const ctx=canvas.getContext('2d');
+ const loaded=new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('Exploration SVG failed to load'));});
+ image.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+ await loaded;
+ // Five-argument full-image draw: do not slice an SVG in intrinsic/viewBox coordinates.
+ ctx.drawImage(image,0,0,size,size);
+ const pixels=ctx.getImageData(0,0,size,size).data;
+ let top=size,bottom=0,left=size,right=0;
+ for(let y=0;y<size;y++)for(let x=0;x<size;x++)if(pixels[(y*size+x)*4+3]>40){top=Math.min(top,y);bottom=Math.max(bottom,y);left=Math.min(left,x);right=Math.max(right,x);}
+ canvas.spriteBounds={top:top/size,bottom:bottom/size,left:left/size,right:right/size};
+ return canvas;
+}
+
+Object.assign(exports,{SPRITE_SIZE,SPRITE_KEYS,explorationSvg,rasterSprite});
+};
+modules['sprite-scene']=(exports,require)=>{
+const { ENEMY_TYPES }=require('data');
+/** Cosmetic scene descriptions. These functions never mutate the run or consume its RNG. */
+const SPRITE_COLORS = {enemy:'#ffb0c2',elite:'#ffcc81',chest:'#f3cf83',stairs:'#9ae9ed',gate:'#ffcf86',altar:'#dfc1ff',shrine:'#aed9ff',fountain:'#a0eee1',landmark:'#d1daed'};
+const LABELS = {chest:'宝箱',stairs:'下行阶梯',gate:'月门守卫',altar:'月之祭坛',shrine:'休息星灯',fountain:'月之泉'};
+const HEIGHTS = {chest:.63,stairs:1.06,gate:1.08,altar:.93,shrine:.85,fountain:.7};
+
+function packMembers(pack) {
+  return pack.members ? pack.members.filter(e=>e.hp>0).map(e=>e.type) : [...pack.troop];
+}
+
+function sceneObjects(run) {
+  const d=run.dungeon, objects=[];
+  for(const [key,event] of Object.entries(d.events)) {
+    if(event.used)continue;
+    const [x,y]=key.split(',').map(Number);
+    const closed=event.type==='stairs'&&!run.guardianDefeated;
+    const type=closed?'gate':event.type;
+    objects.push({x:x+.5,y:y+.5,key:`event:${key}`,image:type,height:HEIGHTS[type]??.8,
+      label:closed?(run.floor===5?'蚀月的圣女':'月门守卫'):LABELS[type],icon:type,color:SPRITE_COLORS[type],priority:closed?3:2,phase:x*13+y*7});
+    if(closed)objects.push({x:x+.5,y:y+.5,key:`guardian:${key}`,image:run.floor===5?'mob-sovereign':'mob-guardian',height:.77,depthBias:-.035,shadow:true,phase:0});
+  }
+  for(const l of d.landmarks??[]) {
+    // A landmark and an event can occupy the same floor cell. Do not stack two solid billboards.
+    if(d.events[`${l.x},${l.y}`]&&!d.events[`${l.x},${l.y}`].used)continue;
+    objects.push({x:l.x+.5,y:l.y+.5,key:`landmark:${l.x},${l.y}`,image:`landmark-${l.zone}`,height:.8,phase:0});
+  }
+  if(run.phase!=='battle')for(const pack of d.packs??[]) {
+    if(pack.defeated||pack.engaged)continue;
+    const members=packMembers(pack).filter(id=>ENEMY_TYPES[id]);if(!members.length)continue;
+    const elite=pack.kind==='elite',color=SPRITE_COLORS[elite?'elite':'enemy'];
+    // Companions sit behind the leader. Actual surviving members are used after a retreat.
+    members.slice(1,3).forEach((id,i)=>objects.push({x:pack.x+.5,y:pack.y+.5,key:`${pack.id}:${i}`,image:`mob-${id}`,height:.54,offset:i===0?-.22:.22,depthBias:.055,companion:true,phase:i+pack.x}));
+    objects.push({x:pack.x+.5,y:pack.y+.5,key:pack.id,image:`mob-${members[0]}`,height:elite?.86:.74,
+      label:`${elite?'强敌 · ':''}${ENEMY_TYPES[members[0]].name} ×${members.length}`,icon:elite?'elite':'enemy',
+      color,priority:elite?4:3,shadow:true,elite,phase:pack.x*7+pack.y*3});
+  }
+  return objects;
+}
+
+/** Stable wall-side dressing, excluded from events, landmarks and the start cell.
+ * World positions (not screen-space overlays) ensure they cannot reveal unseen corridors.
+ */
+function sceneDecorations(d) {
+  const result=[],reserved=new Set([...Object.keys(d.events),...(d.landmarks??[]).map(l=>`${l.x},${l.y}`),'1,1']);
+  for(let y=1;y<d.size-1;y++)for(let x=1;x<d.size-1;x++) {
+    if(d.tiles[y][x]!==0||reserved.has(`${x},${y}`))continue;
+    const n=(x*73856093^y*19349663)>>>0;if(n%7!==0)continue;
+    const walls=[[0,-1],[1,0],[0,1],[-1,0]].filter(([dx,dy])=>d.tiles[y+dy]?.[x+dx]===1);
+    if(!walls.length)continue;
+    const [dx,dy]=walls[n%walls.length],zone=d.zones?.[y]?.[x]??0;
+    result.push({x:x+.5+dx*.33,y:y+.5+dy*.33,key:`decor:${x},${y}`,image:`decor-${zone}`,height:.42,decor:true,phase:n%100});
+  }
+  return result;
+}
+
+/** Screen projection keeps the artwork's aspect ratio. No minimum-size enlargement through walls. */
+function projectSprite(object,camera,width,height) {
+  const dx=Math.cos(camera.angle),dy=Math.sin(camera.angle),x=object.x-camera.x,y=object.y-camera.y;
+  const depth=x*dx+y*dy+(object.depthBias??0);
+  if(!Number.isFinite(depth)||depth<=.18||depth>=11)return null;
+  const lateral=-x*dy+y*dx,sh=height/depth*object.height;
+  const sw=sh*(object.aspect??1),center=width/2*(1+lateral/(depth*.78))+(object.offset??0)*sh;
+  return {...object,depth,sh,sw,left:center-sw/2,top:height/2+height/depth/2-sh*.94,center,ground:height/2+height/depth/2};
+}
+
+/** Coalesce visible pixels into clip spans. Never sample/crop the source SVG per column. */
+function visibleSpans(depthBuffer,depth,left,width) {
+  if(!Number.isFinite(depth)||!Number.isFinite(left)||!Number.isFinite(width)||!(width>0))return [];
+  const first=Math.max(0,Math.floor(left)),last=Math.min(depthBuffer.length,Math.ceil(left+width)),spans=[];
+  let start=-1;
+  for(let col=first;col<last;col++) {
+    const visible=depth<depthBuffer[col]-1e-5;
+    if(visible&&start<0)start=col;
+    if(!visible&&start>=0){spans.push([start,col-start]);start=-1;}
+  }
+  if(start>=0)spans.push([start,last-start]);
+  return spans;
+}
+
+/** Animation is opt-in, independently of camera comfort; reduced-motion always wins. */
+function spriteMotion(object,time,enabled) {
+  if(!enabled)return {lift:0,stretch:1,light:1};
+  const t=time*.001+(object.phase??0),id=object.image;
+  if(/mob-(wisp|prism|moth|revenant|sovereign)/.test(id))return {lift:Math.sin(t*1.55)*.009,stretch:1,light:.98+Math.sin(t)*.02};
+  if(id.startsWith('mob-'))return {lift:0,stretch:1+Math.sin(t*1.6)*.007,light:1};
+  if(id==='shrine'||id==='fountain')return {lift:0,stretch:1,light:.97+Math.sin(t*2.1)*.03};
+  return {lift:0,stretch:1,light:1};
+}
+
+function placeLabels(candidates,width,height,scale=1,reserved=[]) {
+  const placed=[],occupied=[...reserved];
+  for(const item of [...candidates].sort((a,b)=>b.priority-a.priority||a.depth-b.depth)) {
+    const w=Math.min(width-12*scale,item.width),h=25*scale;
+    const x=Math.max(6*scale,Math.min(width-w-6*scale,item.center-w/2));
+    let y=Math.max(8*scale,Math.min(height-h-8*scale,item.top-30*scale));
+    let fit=false;
+    for(let attempt=0;attempt<3;attempt++) {
+      if(occupied.every(p=>x+w+3*scale<p.x||x>p.x+p.w+3*scale||y+h+3*scale<p.y||y>p.y+p.h+3*scale)){fit=true;break;}
+      y+=29*scale;if(y+h>height-8*scale)break;
+    }
+    if(fit){const label={...item,x,y,w,h};placed.push(label);occupied.push(label);}
+  }
+  return placed;
+}
+
+Object.assign(exports,{SPRITE_COLORS,packMembers,sceneObjects,sceneDecorations,projectSprite,visibleSpans,spriteMotion,placeLabels});
+};
 modules['renderer']=(exports,require)=>{
-const { FLOORS, ENEMY_TYPES }=require('data');
-const { objectSvg, enemySvg, svgUri }=require('art');
+const { FLOORS }=require('data');
+const { SPRITE_KEYS, explorationSvg, rasterSprite }=require('sprite-art');
+const { sceneObjects, sceneDecorations, projectSprite, visibleSpans, spriteMotion, placeLabels }=require('sprite-scene');
 const { REGIONS, regionAt }=require('world');
 /** First-person grid raycaster. Default comfort mode snaps movement and turns without camera bob. */
 class DungeonRenderer {
   constructor(canvas,getState) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});this.getState=getState;
     this.active=true;this.floor=0;this.x=1.5;this.y=1.5;this.angle=0;this.last=0;this.frame=0;this.images={};this.textures=[];this.flash=0;
-    for(const type of ['chest','stairs','shrine','fountain','altar','elite']) {
-      const img=new Image();img.src=svgUri(type==='elite'?enemySvg('sentinel','#c9a7bd'):objectSvg(type,type==='shrine'?'#bba7ec':'#b9cbea'));this.images[type]=img;
-    }
-    for(const [id,data] of Object.entries(ENEMY_TYPES)){const img=new Image();img.src=svgUri(enemySvg(data.kind,data.tint));this.images['mob-'+id]=img;}
-    for(let i=0;i<4;i++){
-      const z=REGIONS[i],img=new Image();
-      const motifs=[`<path d="M80 35 95 71 130 80 95 92 80 125 66 92 30 80 66 68Z" fill="${z.color}"/><path d="M80 48V112M48 80H112" stroke="#fff" opacity=".6"/>`,`<path d="M80 121C18 85 39 41 70 77Q81 21 112 40Q139 87 80 121" fill="${z.color}"/><path d="M80 142V65M80 105 51 75M80 89 112 59" fill="none" stroke="#c8ffe1" stroke-width="4"/>`,`<path d="M30 53Q54 41 80 57Q106 41 130 53V111Q103 99 80 116Q54 100 30 111Z" fill="${z.color}"/><path d="M80 59V110M41 65 67 67M41 78 67 80M93 67 118 65M93 80 118 78" stroke="#503b69" stroke-width="3"/>`,`<path d="M51 107Q52 91 57 68A23 23 0 0 1 103 68Q107 89 110 107Z" fill="${z.color}"/><ellipse cx="80" cy="108" rx="30" ry="6" fill="#5b472b"/><path d="M80 40V27M74 119Q80 128 87 119" fill="none" stroke="${z.color}" stroke-width="5"/>`];
-      img.src=svgUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 200"><ellipse cx="80" cy="184" rx="62" ry="12" fill="#000" opacity=".3"/><path d="M49 133H111L116 179H44Z" fill="#323844" stroke="${z.color}" stroke-width="2"/><path d="M39 177H121V186H39Z" fill="#4a505b"/>${motifs[i]}<text x="80" y="164" text-anchor="middle" fill="${z.color}" font-family="serif" font-size="23">${z.code}</text></svg>`);this.images['landmark-'+i]=img;
-    }
+    this.decorations=[];this.lastLabels=[];this.assetErrors=[];
+    this.reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+    this.ready=Promise.all(SPRITE_KEYS.map(async key=>{
+      try{this.images[key]=await rasterSprite(explorationSvg(key));}
+      catch(error){
+        this.assetErrors.push(key);console.error(`Exploration asset ${key}:`,error);
+        const c=document.createElement('canvas');c.width=c.height=320;const t=c.getContext('2d');
+        t.fillStyle='#26384c';t.fillRect(70,70,180,225);t.strokeStyle='#f5c889';t.lineWidth=7;t.strokeRect(70,70,180,225);
+        t.fillStyle='#ffe4bd';t.font='bold 120px sans-serif';t.textAlign='center';t.fillText('?',160,231);this.images[key]=c;
+      }
+    }));
     this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(canvas);this.resize();
     this.loop=this.loop.bind(this);this.request=requestAnimationFrame(this.loop);
   }
@@ -1114,10 +1356,11 @@ class DungeonRenderer {
     const rect=this.canvas.getBoundingClientRect();
     const ratio=Math.min(window.devicePixelRatio||1,1.5);
     const w=Math.max(320,Math.min(1200,Math.round(rect.width*ratio))),h=Math.max(220,Math.round(rect.height*w/Math.max(1,rect.width)));
+    this.uiScale=w/Math.max(1,rect.width);
     if(this.canvas.width!==w||this.canvas.height!==h){this.canvas.width=w;this.canvas.height=h;this.z=new Float32Array(w);}
   }
   destroy(){this.active=false;cancelAnimationFrame(this.request);this.resizeObserver.disconnect();}
-  pulse(){if(this.getState()?.comfort===false)this.flash=0.12;}
+  pulse(){if(this.getState()?.comfort===false&&!this.reducedMotion.matches)this.flash=0.12;}
   makeTextures(floor) {
     this.textures=[];
     for(const zone of REGIONS)for(let kind=0;kind<4;kind++){
@@ -1152,6 +1395,17 @@ class DungeonRenderer {
         t.fillStyle=zone.color;t.fillRect(59,36,10,22);t.fillStyle='#fff7e8';t.fillRect(62,37,4,18);
       }
       if(kind===3){t.fillStyle=zone.mortar;t.fillRect(44,36,40,53);t.strokeStyle=zone.color;t.lineWidth=2;t.strokeRect(44,36,40,53);t.fillStyle=zone.color;t.font='bold 30px serif';t.textAlign='center';t.fillText(zone.code,64,73);}
+      if(kind===0){
+        if(zone.style==='stone'){
+          t.fillStyle='#29354d';t.fillRect(46,18,37,58);t.strokeStyle=zone.color;t.lineWidth=2;
+          t.beginPath();t.moveTo(64,25);t.lineTo(75,43);t.lineTo(64,61);t.lineTo(53,43);t.closePath();t.stroke();
+        }else if(zone.style==='garden'){
+          t.fillStyle='#182e30';t.fillRect(14,84,32,26);t.strokeStyle='#78a796';t.lineWidth=2;
+          for(let x=19;x<46;x+=7){t.beginPath();t.moveTo(x,85);t.lineTo(x,108);t.stroke();}
+        }else if(zone.style==='arches'){
+          t.strokeStyle='#352e2c';t.lineWidth=2;t.beginPath();t.moveTo(100,5);t.lineTo(89,26);t.lineTo(105,46);t.lineTo(97,68);t.stroke();
+        }
+      }
       this.textures.push(c);
     }
   }
@@ -1159,15 +1413,99 @@ class DungeonRenderer {
     if(!this.active)return;this.request=requestAnimationFrame(this.loop);
     if(time-this.last<30||document.hidden)return;this.last=time;
     const run=this.getState();if(!run?.dungeon)return;
-    if(this.floor!==run.floor||this.dungeon!==run.dungeon){this.floor=run.floor;this.dungeon=run.dungeon;this.makeTextures(run.floor);this.x=run.x+.5;this.y=run.y+.5;this.angle=-Math.PI/2+run.dir*Math.PI/2;}
+    if(this.floor!==run.floor||this.dungeon!==run.dungeon){this.floor=run.floor;this.dungeon=run.dungeon;this.makeTextures(run.floor);this.decorations=sceneDecorations(run.dungeon);this.x=run.x+.5;this.y=run.y+.5;this.angle=-Math.PI/2+run.dir*Math.PI/2;}
     const target=-Math.PI/2+run.dir*Math.PI/2;
     let delta=((target-this.angle+Math.PI*3)%(Math.PI*2))-Math.PI;
-    if(run.comfort!==false){this.angle=target;this.x=run.x+.5;this.y=run.y+.5;this.flash=0;}else{this.angle+=delta*.38;this.x+=(run.x+.5-this.x)*.4;this.y+=(run.y+.5-this.y)*.4;}
+    if(run.comfort!==false||this.reducedMotion.matches){this.angle=target;this.x=run.x+.5;this.y=run.y+.5;this.flash=0;}else{this.angle+=delta*.38;this.x+=(run.x+.5-this.x)*.4;this.y+=(run.y+.5-this.y)*.4;}
     this.draw(run,time);
   }
   floorTile(ctx,w,h,points,fill){
     if(points.some(p=>p.z<.14))return;
     ctx.beginPath();points.forEach((p,i)=>{const x=w/2+p.lateral/p.z*w/.78/2,y=h/2+h/p.z/2;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle='#a1a2c011';ctx.lineWidth=1;ctx.stroke();
+  }
+  clipSpans(spans) {
+    const ctx=this.ctx;ctx.beginPath();
+    for(const [x,width] of spans)ctx.rect(x,0,width,this.canvas.height);
+    ctx.clip();
+  }
+  drawObjects(run,time) {
+    const ctx=this.ctx,w=this.canvas.width,h=this.canvas.height;
+    const animate=run.objectMotion===true&&!this.reducedMotion.matches&&run.phase==='explore';
+    const objects=[...this.decorations,...sceneObjects(run)];
+    const sprites=objects.map(o=>projectSprite(o,this,w,h)).filter(Boolean).sort((a,b)=>b.depth-a.depth);
+    const candidates=[];
+    for(const s of sprites) {
+      const image=this.images[s.image];if(!image)continue;
+      const spans=visibleSpans(this.z,s.depth,s.left,s.sw);if(!spans.length)continue;
+      const motion=spriteMotion(s,time,animate),lift=motion.lift*s.sh,sh=s.sh*motion.stretch;
+      const top=s.top+s.sh-sh-lift;
+      ctx.save();this.clipSpans(spans);
+      if(!s.companion){
+        // Ground contact is independent of breathing/hovering; shadows do not hover with the body.
+        const foot=s.ground,rx=s.sw*(s.shadow?.34:.29),ry=Math.max(1,h/(s.depth*s.depth)*.028);
+        ctx.fillStyle='#080d19';ctx.globalAlpha=s.decor?.22:.42;
+        ctx.beginPath();ctx.ellipse(s.center,foot-ry*.18,rx,ry,0,0,Math.PI*2);ctx.fill();
+        if(s.shadow){ctx.strokeStyle=s.color??'#c1cce5';ctx.globalAlpha=.45;ctx.lineWidth=1.5*this.uiScale;ctx.stroke();}
+      }
+      ctx.globalAlpha=Math.max(.44,1-s.depth*.043)*(s.companion?.65:s.decor?.8:1)*motion.light;
+      // Draw a COMPLETE cached raster through a screen-space occlusion mask. This fixes the SVG crop bug.
+      ctx.drawImage(image,s.left,top,s.sw,sh);
+      if(s.image==='shrine'&&this.images['shrine-flame']){
+        ctx.save();ctx.translate(s.center,s.top+s.sh*.43);
+        const wave=animate?Math.sin(time*.002+s.phase):0;
+        ctx.scale(1+wave*.03,1+wave*.055);ctx.translate(-s.center,-s.top-s.sh*.43);
+        ctx.drawImage(this.images['shrine-flame'],s.left,s.top,s.sw,s.sh);ctx.restore();
+      }
+      if(s.elite){
+        ctx.globalAlpha=.95;ctx.strokeStyle='#ffe3ac';ctx.fillStyle='#624028';ctx.lineWidth=2*this.uiScale;
+        const cy=top+sh*.12,r=Math.max(7*this.uiScale,sh*.065);
+        ctx.beginPath();ctx.moveTo(s.center-r,cy);ctx.lineTo(s.center-r*1.3,cy-r);ctx.lineTo(s.center,cy-r*.45);ctx.lineTo(s.center+r*1.3,cy-r);ctx.lineTo(s.center+r,cy);ctx.closePath();ctx.fill();ctx.stroke();
+      }
+      ctx.restore();
+      const center=Math.round(s.center),coverage=spans.reduce((n,[,v])=>n+v,0)/Math.max(1,Math.min(w,s.left+s.sw)-Math.max(0,s.left));
+      if(s.label&&coverage>.3&&center>=0&&center<w&&s.depth<this.z[center]-1e-5){
+        // Nearer solid sprites take visual priority over markers for objects behind them.
+        const hidden=sprites.some(n=>n.depth<s.depth-.1&&!n.decor&&Math.abs(n.center-s.center)<n.sw*.23&&s.top>n.top&&s.top<n.top+n.sh*.88);
+        if(!hidden){
+          const far=s.depth>=4, text=far?({enemy:'敌群',elite:'强敌',gate:'守卫',stairs:'阶梯',chest:'宝箱',altar:'祭坛',shrine:'星灯',fountain:'泉水'}[s.icon]??s.label):s.label;
+          ctx.font=`600 ${12*this.uiScale}px sans-serif`;
+          candidates.push({...s,top:top+(image.spriteBounds?.top??0)*sh,width:Math.ceil(ctx.measureText(text).width+41*this.uiScale),text,far});
+        }
+      }
+    }
+    this.lastLabels=placeLabels(candidates,w,h,this.uiScale,this.labelObstacles());
+    const description='第一人称迷宫'+(this.lastLabels.length?'；前方可见：'+this.lastLabels.map(l=>l.label).join('、'):'；前方暂无可见目标');
+    if(this.canvas.getAttribute('aria-label')!==description)this.canvas.setAttribute('aria-label',description);
+  }
+  labelObstacles() {
+    const stage=this.canvas.closest('.stage'),heading=stage?.querySelector('.floor-heading');
+    if(!stage)return [];
+    const signature=`${this.canvas.width}:${this.canvas.height}`;
+    if(this.hudHeading!==heading||this.hudSize!==signature){
+      this.hudHeading=heading;this.hudSize=signature;
+      const box=this.canvas.getBoundingClientRect(),s=this.uiScale;
+      this.hudObstacles=[...stage.querySelectorAll('.floor-heading,.floor-number,.compass,.interaction,.explore-caption,.position-label')].map(el=>{
+        const r=el.getBoundingClientRect();return {x:(r.left-box.left-3)*s,y:(r.top-box.top-3)*s,w:(r.width+6)*s,h:(r.height+6)*s};
+      });
+    }
+    return this.hudObstacles??[];
+  }
+  drawLabels() {
+    const ctx=this.ctx,scale=this.uiScale;
+    for(const item of this.lastLabels){
+      ctx.save();ctx.globalAlpha=.97;ctx.fillStyle='#111c2e';ctx.strokeStyle=item.color;ctx.lineWidth=scale;
+      ctx.beginPath();ctx.roundRect(item.x,item.y,item.w,item.h,5*scale);ctx.fill();ctx.stroke();
+      ctx.translate(item.x+14*scale,item.y+12.5*scale);ctx.scale(scale,scale);
+      ctx.lineWidth=1.8;ctx.strokeStyle=item.color;ctx.fillStyle=item.color;ctx.beginPath();
+      if(item.icon==='chest'){ctx.rect(-6,-3,12,8);ctx.moveTo(-6,-3);ctx.lineTo(-4,-6);ctx.lineTo(4,-6);ctx.lineTo(6,-3);ctx.moveTo(0,-2);ctx.lineTo(0,2);}
+      else if(item.icon==='stairs'){ctx.moveTo(-6,6);ctx.lineTo(-6,2);ctx.lineTo(-2,2);ctx.lineTo(-2,-2);ctx.lineTo(2,-2);ctx.lineTo(2,-6);ctx.lineTo(6,-6);}
+      else if(item.icon==='gate'||item.icon==='elite'){ctx.moveTo(-6,5);ctx.lineTo(-7,-5);ctx.lineTo(-2,-1);ctx.lineTo(0,-7);ctx.lineTo(3,-1);ctx.lineTo(7,-5);ctx.lineTo(6,5);ctx.closePath();}
+      else if(item.icon==='enemy'){ctx.moveTo(0,-7);ctx.lineTo(7,0);ctx.lineTo(0,7);ctx.lineTo(-7,0);ctx.closePath();ctx.moveTo(-3,-1);ctx.lineTo(-1,1);ctx.moveTo(3,-1);ctx.lineTo(1,1);}
+      else if(item.icon==='fountain'){ctx.moveTo(0,-7);ctx.bezierCurveTo(-12,5,-2,10,4,5);ctx.bezierCurveTo(8,2,2,-5,0,-7);}
+      else {ctx.moveTo(0,-7);ctx.lineTo(2,-2);ctx.lineTo(7,0);ctx.lineTo(2,2);ctx.lineTo(0,7);ctx.lineTo(-2,2);ctx.lineTo(-7,0);ctx.lineTo(-2,-2);ctx.closePath();}
+      ctx.stroke();ctx.restore();
+      ctx.save();ctx.fillStyle='#eef3ff';ctx.font=`600 ${12*scale}px sans-serif`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(item.text,item.x+29*scale,item.y+item.h/2,item.w-34*scale);ctx.restore();
+    }
   }
   draw(run,time) {
     const ctx=this.ctx,w=this.canvas.width,h=this.canvas.height;
@@ -1199,24 +1537,12 @@ class DungeonRenderer {
       ctx.fillStyle=`rgba(8,12,25,${Math.min(.76,dist*.06+(side===1?.08:0))})`;ctx.fillRect(col,top,2,height);
       if(dist<4){ctx.fillStyle=`rgba(167,163,207,${.035*(1-dist/4)})`;ctx.fillRect(col,top,2,height);}
     }
-    const objects=Object.entries(run.dungeon.events).filter(([,ev])=>!ev.used).map(([key,ev])=>{const [x,y]=key.split(',').map(Number);return {x,y,image:ev.type,scale:ev.type==='stairs'?.95:.65};});
-    for(const l of run.dungeon.landmarks||[])objects.push({x:l.x,y:l.y,image:'landmark-'+l.zone,scale:.9});
-    if(run.phase!=='battle')for(const mob of run.dungeon.packs.filter(p=>!p.defeated&&!p.engaged))objects.push({x:mob.x,y:mob.y,image:'mob-'+mob.troop[0],scale:mob.kind==='elite'?1.05:.8,mob});
-    const sprites=objects.map(object=>{const sx=object.x+.5-this.x,sy=object.y+.5-this.y;return {...object,z:sx*dx+sy*dy,lateral:-sx*dy+sy*dx};}).filter(s=>s.z>.2&&s.z<10).sort((a,b)=>b.z-a.z);
-    for(const s of sprites){
-      const image=this.images[s.image];if(!image?.complete||!image.naturalWidth)continue;
-      const scale=s.scale,sh=h/s.z*scale,sw=sh*(image.naturalWidth/image.naturalHeight);
-      const sx=w/2*(1+s.lateral/(s.z*.78))-sw/2,sy=h/2+h/s.z/2-sh;
-      ctx.globalAlpha=Math.max(.2,1-s.z*.065);
-      for(let col=Math.max(0,Math.floor(sx));col<Math.min(w,sx+sw);col+=2){if(s.z<this.z[col]+.08){const sourceX=Math.max(0,Math.min(image.naturalWidth-1,(col-sx)/sw*image.naturalWidth));const sourceW=Math.min(image.naturalWidth-sourceX,image.naturalWidth/sw*2.2);if(sourceW>0)ctx.drawImage(image,sourceX,0,sourceW,image.naturalHeight,col,sy,2.2,sh);}}
-      ctx.globalAlpha=1;
-      const center=Math.round(sx+sw/2);
-      if(s.mob&&center>=0&&center<w&&s.z<this.z[center]+.08){ctx.fillStyle=s.mob.kind==='elite'?'#ffca8d':'#ffadc1';ctx.font=`bold ${Math.max(11,Math.min(20,28/s.z))}px sans-serif`;ctx.textAlign='center';ctx.fillText(`${s.mob.kind==='elite'?'强敌':'敌群'} ×${s.mob.troop.length}`,center,Math.max(18,sy-4));}
-    }
+    this.drawObjects(run,time);
     const vignette=ctx.createRadialGradient(w/2,h*.48,h*.12,w/2,h*.5,Math.max(w*.67,h*.8));vignette.addColorStop(0,'#10142a00');vignette.addColorStop(.65,'#090d1830');vignette.addColorStop(1,run.comfort!==false?'#07091588':'#070915cc');ctx.fillStyle=vignette;ctx.fillRect(0,0,w,h);
     const haze=ctx.createLinearGradient(0,h*.25,0,h*.8);haze.addColorStop(0,'#aaa0d000');haze.addColorStop(.45,'#909bd20c');haze.addColorStop(1,'#aba9d300');ctx.fillStyle=haze;ctx.fillRect(0,0,w,h);
     ctx.fillStyle=FLOORS[run.floor-1].color;
-    for(let i=0;run.comfort===false&&i<12;i++){const px=((i*157.7+time*.002*(i%3+1))%w),py=((i*97.4-time*.006+100000)%h);ctx.globalAlpha=.15+(Math.sin(time*.001+i)*.5+.5)*.32;ctx.beginPath();ctx.arc(px,py,i%6===0?1.8:.7,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
+    for(let i=0;run.comfort===false&&!this.reducedMotion.matches&&i<12;i++){const px=((i*157.7+time*.002*(i%3+1))%w),py=((i*97.4-time*.006+100000)%h);ctx.globalAlpha=.15+(Math.sin(time*.001+i)*.5+.5)*.32;ctx.beginPath();ctx.arc(px,py,i%6===0?1.8:.7,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
+    if(run.phase!=='battle')this.drawLabels();
     if(run.phase==='battle'){ctx.fillStyle='#07091577';ctx.fillRect(0,0,w,h);}
     if(this.flash>0){ctx.fillStyle=`rgba(206,193,243,${this.flash})`;ctx.fillRect(0,0,w,h);this.flash*=.72;if(this.flash<.005)this.flash=0;}
   }
@@ -1294,7 +1620,7 @@ function renderLanding(){
   ui.screen='landing';renderer?.destroy();renderer=null;
   const saved=readSave(),canResume=saved&&saved.phase!=='ended';
   const [line,sub]=selectionDescription();
-  ROOT.innerHTML=`<header class="page-head">${brand()}<div class="header-actions"><span class="edition"><i class="dot"></i>ROGUELIKE DRPG · 0.2</span>${soundButton()}<button class="icon-button" data-action="help" aria-label="游戏说明">${icon('help',18)}</button></div></header>
+  ROOT.innerHTML=`<header class="page-head">${brand()}<div class="header-actions"><span class="edition"><i class="dot"></i>ROGUELIKE DRPG · 0.2.1</span>${soundButton()}<button class="icon-button" data-action="help" aria-label="游戏说明">${icon('help',18)}</button></div></header>
   <main class="landing">
     <section class="hero-intro">
       <div class="intro-copy"><div class="eyebrow">A NEW MOON. A NEW BEGINNING.</div><h1>月蝕の迷宮</h1><div class="intro-en">E C L I P S E　L A B Y R I N T H</div><div class="intro-sub">以微小的星火，<br>踏入无月之夜。</div><p>在不断重生的迷宫中，编织属于你的职业、武器与祝福。<br>每一次坠落，都是另一段故事的开端。</p><div class="feature-line"><span>${icon('eye',15)} 第一人称探索</span><span>${icon('sword',15)} 回合制战斗</span><span>${icon('star',15)} 随机构筑</span></div></div>
@@ -1446,7 +1772,7 @@ function eventModal(){
   const choices=data.choices.map(([choice,title,desc,cost,ico])=>`<button class="event-choice" data-action="event" data-choice="${choice}" ${choice==='offer'&&run.gold<35?'disabled':''}>${icon(ico,23)}<span class="choice-copy"><strong>${title}</strong><small>${desc}</small></span><span class="cost">${cost}</span></button>`).join('');
   return dialog(data.title,data.en,data.text,`<div class="event-art"><img src="${svgUri(objectSvg(type,'#c2b0e8'))}" alt="${data.title}"></div><div class="choice-stack">${choices}<button class="ghost" data-action="event" data-choice="leave">暂时离开 ${icon('arrow',14)}</button></div>`,{narrow:true,closable:false});
 }
-function endModal(){const win=run.ending==='victory';return dialog(win?'终有黎明。':'星灯，暂时熄灭了。',win?'THE END OF THE ECLIPSE':'EVERY END IS A BEGINNING',win?'你走过没有月亮的夜晚，也把星光带到了故事的尽头。':'迷宫会改变形状，而你会带着新的想法，再一次出发。',`<div class="result-icon">${win?'☼':'☾'}</div><div class="result-party">${run.party.map(p=>`<img src="${PORTRAITS[p.job]}" alt="${e(p.name)}">`).join('')}</div><div class="result-stats"><span><strong>B${run.floor}</strong><small>最深抵达</small></span><span><strong>${run.level}</strong><small>队伍等级</small></span><span><strong>${run.battles}</strong><small>战斗胜利</small></span><span><strong>${run.steps}</strong><small>探索步数</small></span></div><div class="center-actions"><button class="primary" data-action="again">重新点亮星灯 ${icon('arrow',18)}</button><button class="secondary" data-action="return-title">回到序章</button></div><p class="modal-hint">SEED ${e(run.seed)} · 新一局将清空所有等级、武器、技能强化与祝福。</p>`,{closable:false,extra:win?'result-victory':''});}
+function endModal(){const win=run.ending==='victory';return dialog(win?'终有黎明。':'星灯，暂时熄灭了。',win?'THE END OF THE ECLIPSE':'EVERY END IS A BEGINNING',win?'你走过没有月亮的夜晚，也把星光带到了故事的尽头。':'迷宫会改变形状，而你会带着新的想法，再一次出发。',`<div class="result-icon">${win?'☼':'☾'}</div><div class="result-party">${run.party.map(p=>`<img src="${PORTRAITS[p.job]}" alt="${e(p.name)}">`).join('')}</div><div class="result-stats"><span><strong>B${run.floor}</strong><small>最深抵达</small></span><span><strong>${run.level}</strong><small>队伍等级</small></span><span><strong>${run.battles}</strong><small>战斗胜利</small></span><span><strong>${run.steps}</strong><small>探索步数</small></span></div><div class="center-actions"><button class="primary" data-action="again">重新点亮星灯 ${icon('arrow',18)}</button><button class="secondary" data-action="object-motion">${icon('star',18)} 物件动画：${run.objectMotion===true?'开启（系统减弱动态优先）':'关闭（静态舒适）'}</button><button class="secondary" data-action="return-title">回到序章</button></div><p class="modal-hint">SEED ${e(run.seed)} · 新一局将清空所有等级、武器、技能强化与祝福。</p>`,{closable:false,extra:win?'result-victory':''});}
 function helpModal(){return dialog('这一次，带着战术前行','FIELD GUIDE / v0.2','战斗难在选择、资源与地形，不在猜测隐藏规则。',`<div class="help-grid"><section class="help-block"><h3>01 / 明雷与地形</h3><p>W/S 前后，A/D 转向，Q/E 平移，Space 等待，F 调查，M 地图。红色菱形是游荡小队，金色是强敌。每次成功移动或等待，它们也移动一格。转向、撞墙、查看地图不耗时。怪物只显示在已探索区域；脚步提示提供附近的最短路径距离。</p></section><section class="help-block"><h3>02 / 增援时钟</h3><p>每个战斗回合末，路径 8 格以内的游荡小队移动一格。来到战斗格子后加入，下一轮行动；场上最多 6 个敌人，满员时其他小队原地等待。击杀结束的最后一个未完整回合也结算一次移动。不要背靠多个敌人开战。</p></section><section class="help-block"><h3>03 / Boss 预兆</h3><p>首领有回合触发与血线触发。预兆会在回合开始给出完整应对窗口，在指定回合末发动。驱散仪式结界、封头、击杀仪式侍从或累计命中可以取消对应招式。无法取消时用防御和壁垒止损。血线有一次相位锁，不能一击跳过；最后 1 HP 受未结算的血线预兆保护。</p></section><section class="help-block"><h3>04 / 职业与成长</h3><p>每职业初始只有两个专精技能。奖励池可习得 3 个高阶技能；部分从第 2 / 3 层开放。初始技能熟练度 +1 后可抽取机制觉醒，带来群体化、驱散、连击、传播、溢出护盾等变化。熟练度最多 +2，祝福有层数上限。巫女没有免费攻击治疗，忍者和术士没有自疗。</p></section><section class="help-block"><h3>05 / 资源与操作</h3><p>按 1 普攻、2 防御、3～7 技能，也可点击。普攻只回 1 MP，防御回 3 MP 且承伤 -65%。有限急救药、以太滴、破咒盐为全队共享，使用消耗一次行动。每次下层补充 2 药、1 以太、2 盐，有携带上限。守护可叠加防御，骑士与巫女的时机分工很重要。</p></section><section class="help-block"><h3>06 / 反制与舒适视角</h3><p>封头压制法术、治疗与强化；封腕压制重击、猎杀等动作；解除后 2 回合抗性，不能无限续封。每个预兆只能延期一次。首领从第 13 回合起每轮叠加暴走，不能无限防御耗蓝。菜单的舒适视角默认开启：即时转向、固定镜头、关闭闪屏与漂浮粒子。</p></section></div><div class="help-note">仍是 1～3 人、五层、武器单装备槽、每局从零。每把武器只有一个固有效果。v0.1 存档与新规则不兼容，旧存档保留但不会当作新局读取。单人是高风险挑战，不保证所有编队与种子都能通关。</div>`,{wide:true});}
 function classesModal(){return dialog('六种星火，六种答案','JOB COMPENDIUM','明确分工，保留弱点。独行需要有限补给与局内技能弥补短板。',`<div class="choice-stack">${Object.values(JOBS).map(j=>`<button class="event-choice" data-action="class-detail" data-job="${j.id}"><span style="height:48px;width:48px;overflow:hidden;position:relative;border-radius:7px;background:${j.color}11;flex-shrink:0"><img src="${PORTRAITS[j.id]}" style="width:80px;max-width:none;position:absolute;left:-16px;top:-18px" alt=""></span><span class="choice-copy"><strong style="color:${j.color}">${j.name} · ${j.person}</strong><small>${j.role} / ${j.passiveDesc}</small></span>${icon('right',16)}</button>`).join('')}</div>`);}
 function heroModal(id,isClass=false){
@@ -1457,7 +1783,7 @@ function heroModal(id,isClass=false){
 }
 function weaponPanel(w,owner=null){const r=RARITIES[w.rarity];return `<${owner?'div':'button'} class="inventory-weapon" ${!owner?`data-action="choose-bag-weapon" data-uid="${e(w.uid)}" ${run.phase!=='explore'?'disabled':''}`:''}><span class="owner"><span style="color:${r.color}">${r.name} · ${e(w.type)}</span>${owner?`<b>${e(owner)} / 已装备</b>`:'<b>备用武器</b>'}</span><h3>${e(w.name)}</h3><span class="weapon-stats"><span>攻击 +${w.atk}</span><span>魔力 +${w.mag}</span></span><div class="weapon-effect"><b>固有效果 · ${e(w.effectName)}</b>${e(w.desc)}</div>${!owner?`<p>${run.phase==='explore'?'点击选择装备者':'战斗中不可更换武器'}</p>`:''}</${owner?'div':'button'}>`;}
 function inventoryModal(){return dialog('沿途拾起的星光','THE TRAVELER’S INVENTORY',`只有武器，没有护甲或饰品槽。现在拥有 ${run.gold} 星砂。`,`<div class="help-note">共享补给：急救药 ×${run.supplies.tonic} / 以太滴 ×${run.supplies.ether} / 破咒盐 ×${run.supplies.salt}。战斗中使用消耗行动。</div><div class="inventory-heading">当前武器 <small>每人只装备一把</small></div><div class="inventory-grid">${run.party.map(p=>weaponPanel(p.weapon,p.name)).join('')}</div><div class="inventory-heading">行囊中的武器 <small>${run.inventory.length} 把</small></div><div class="inventory-grid">${run.inventory.length?run.inventory.map(w=>weaponPanel(w)).join(''):'<p class="empty-note">旧武器会在更换装备后放入这里。</p>'}</div><div class="inventory-heading">本局祝福 <small>仅在这一次冒险中生效</small></div><div class="all-boons">${boonChips()}</div><div class="inventory-heading">技能觉醒</div>${run.party.map(p=>`<p class="small muted" style="margin-bottom:8px"><span style="color:${JOBS[p.job].color}">${e(p.name)}</span>　${p.skills.map(id=>`${effectiveSkill(p,id).name}${p.evolutions[id]?' ✦':p.ranks[id]?` +${p.ranks[id]}`:''}`).join(' / ')}</p>`).join('')}`,{wide:true});}
-function menuModal(){return dialog('星灯仍在这里','PAUSE & REFLECT',`SEED ${e(run.seed)} · 第 ${run.floor} 层 · 本局已自动保存`,`<div class="menu-choices"><button class="secondary" data-action="close">${icon('arrow',18)} 继续探索</button><button class="secondary" data-action="inventory">${icon('bag',18)} 查看装备与祝福</button><button class="secondary" data-action="help">${icon('help',18)} 查看冒险指南</button><button class="secondary" data-action="comfort">${icon('eye',18)} 舒适视角：${run.comfort!==false?'开启（即时转向 / 无闪屏）':'关闭（平滑移动）'}</button><button class="secondary" data-action="return-title">${icon('moon',18)} 返回序章（保留本局存档）</button><button class="secondary danger-text" data-action="restart-confirm">${icon('exit',18)} 放弃本局，重新编队</button></div>`,{narrow:true});}
+function menuModal(){return dialog('星灯仍在这里','PAUSE & REFLECT',`SEED ${e(run.seed)} · 第 ${run.floor} 层 · 本局已自动保存`,`<div class="menu-choices"><button class="secondary" data-action="close">${icon('arrow',18)} 继续探索</button><button class="secondary" data-action="inventory">${icon('bag',18)} 查看装备与祝福</button><button class="secondary" data-action="help">${icon('help',18)} 查看冒险指南</button><button class="secondary" data-action="comfort">${icon('eye',18)} 舒适视角：${run.comfort!==false?'开启（即时转向 / 无闪屏）':'关闭（平滑移动）'}</button><button class="secondary" data-action="object-motion">${icon('star',18)} 物件动画：${run.objectMotion===true?'开启（系统减弱动态优先）':'关闭（静态舒适）'}</button><button class="secondary" data-action="return-title">${icon('moon',18)} 返回序章（保留本局存档）</button><button class="secondary danger-text" data-action="restart-confirm">${icon('exit',18)} 放弃本局，重新编队</button></div>`,{narrow:true});}
 function renderModal(){
   let html='',key='';
   if(run?.phase==='reward'){html=rewardModal();key=`reward-${run.rewards.map(r=>r.id||r.skillId||r.weapon?.uid).join('-')}-${ui.rewardIndex}`;}
@@ -1548,6 +1874,7 @@ function handleAction(button){
   if(action==='abandon'){goTitle({clear:true});return;}
   if(['forward','back','turn-left','turn-right','strafe-left','strafe-right','interact','wait'].includes(action)){mutateExplore(action);return;}
   if(!run)return;
+  if(action==='object-motion'){run.objectMotion=run.objectMotion!==true;modalKey='';save();updateGame();return;}
   if(action==='comfort'){run.comfort=run.comfort===false;modalKey='';save();updateGame();return;}
   if(action==='target'){ui.selectedEnemy=button.dataset.id;AUDIO.sfx('select');updateGame();return;}
   if(action==='skill'){useSkill(button.dataset.skill);return;}
