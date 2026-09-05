@@ -1,0 +1,87 @@
+name: Apply verified compact UI v0.3.1
+on:
+  push:
+    branches: ['refactor/compact-hud-v031']
+    paths: ['.github/ui031-part-*.txt', '.github/workflows/ui031-apply.yml']
+permissions:
+  contents: write
+concurrency:
+  group: compact-ui031-staging
+  cancel-in-progress: false
+jobs:
+  apply:
+    if: github.repository == 'geturin/eclipse-labyrinth'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify and apply bounded source delta
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64, gzip, hashlib, json, os
+          from pathlib import Path
+          chunks = [Path(f'.github/ui031-part-{i}.txt').read_text().strip() for i in range(5)]
+          compressed = base64.b64decode(''.join(chunks), validate=True)
+          assert hashlib.sha256(compressed).hexdigest() == 'd137617c652c468e6ef691b3bcd91b9b7808d84a20a378231c8d37e24b5df631'
+          raw = gzip.decompress(compressed)
+          assert len(raw) == 66716
+          data = json.loads(raw)
+          assert data['base'] == '27f82328f919687b1439b5b22f4a3d748a4c6113'
+          assert data['dist'] == '433bd867cc345c4b3af530cc4602db55a577c7ff'
+          allowed = {'src/app.js','compact.css','index.html','scripts/build.mjs','package.json','tests/battle_browser.py','tests/browser_smoke.py','tests/compact_browser.py','README.md','AGENTS.md','CHANGELOG.md','docs/UI031.md','docs/ui031-results.json'}
+          assert set(data['files']) == allowed
+          def blob(b):
+              return hashlib.sha1(b'blob ' + str(len(b)).encode() + b'\0' + b).hexdigest()
+          prepared = {}
+          for path, change in data['files'].items():
+              p = Path(path)
+              if change['before'] is None:
+                  assert not p.exists(), path
+                  text = change['content']
+              else:
+                  original = p.read_bytes()
+                  assert blob(original) == change['before'], path
+                  lines = original.decode('utf-8').splitlines(keepends=True)
+                  previous = len(lines)
+                  for start, end, replacement in reversed(change['edits']):
+                      assert 0 <= start <= end <= previous, path
+                      lines[start:end] = replacement
+                      previous = start
+                  text = ''.join(lines)
+              b = text.encode('utf-8')
+              assert blob(b) == change['after'], path
+              prepared[path] = b
+          for path, b in prepared.items():
+              p = Path(path)
+              p.parent.mkdir(parents=True, exist_ok=True)
+              p.write_bytes(b)
+          temp = Path(os.environ['RUNNER_TEMP'])
+          (temp/'ui031-paths.json').write_text(json.dumps(sorted(allowed | {'dist/index.html'})))
+          print('All source preconditions and resulting Git blob hashes verified.')
+          PY
+      - run: npm test
+      - run: npm run build
+      - run: npm run verify:dist
+      - name: Commit source with exact tested static page
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.ref_name }}
+        run: |
+          test "$(git hash-object dist/index.html)" = '433bd867cc345c4b3af530cc4602db55a577c7ff'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          paths = json.loads((Path(os.environ['RUNNER_TEMP'])/'ui031-paths.json').read_text())
+          subprocess.run(['git','add','--',*paths], check=True)
+          PY
+          git commit -m 'refactor: unified compact HUD and compiled v0.3.1'
+          test "$(git ls-remote origin "refs/heads/$TARGET_BRANCH" | cut -f1)" = "$GITHUB_SHA"
+          git push origin "HEAD:$TARGET_BRANCH"
