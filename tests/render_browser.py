@@ -16,6 +16,7 @@ checks=[];errors=[];requests=[];metrics={}
 def check(name,value):
     assert value,name
     checks.append(name)
+    print(name,flush=True)
 def rig(browser,width=1200,height=480,dpr=1,reduced='reduce'):
     page=browser.new_page(viewport={'width':width,'height':height+20},device_scale_factor=dpr,reduced_motion=reduced)
     page.on('pageerror',lambda e:errors.append(str(e)))
@@ -118,14 +119,14 @@ with sync_playwright() as p:
         page=browser.new_page(viewport={'width':width,'height':height},reduced_motion='reduce')
         page.on('pageerror',lambda e:errors.append(str(e)))
         page.on('request',lambda r:requests.append(r.url))
-        page.evaluate('''saved=>{const values={'eclipse-labyrinth.run.v2':JSON.stringify(saved)};Object.defineProperty(window,'localStorage',{value:{getItem:k=>values[k]??null,setItem:(k,v)=>values[k]=String(v),removeItem:k=>delete values[k]},configurable:true});}''',saved)
+        page.evaluate('''saved=>{const values={'eclipse-labyrinth.run.v3':JSON.stringify(saved)};Object.defineProperty(window,'localStorage',{value:{getItem:k=>values[k]??null,setItem:(k,v)=>values[k]=String(v),removeItem:k=>delete values[k]},configurable:true});}''',saved)
         page.set_content(HTML,wait_until='load');page.locator('[data-action="resume"]').click();page.wait_for_timeout(600)
         check(f'{width}px production UI uses new identifiable sprites', '宝箱' in page.locator('#dungeon-canvas').get_attribute('aria-label'))
         check(f'{width}px production UI has no page overflow',page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'))
         page.screenshot(path=str(OUT/f'app-{width}.png'),full_page=True)
         page.locator('[data-action="menu"]').click()
         toggle=page.locator('[data-action="object-motion"]');check(f'{width}px local animation toggle is initially off','关闭' in toggle.inner_text());toggle.click()
-        check(f'{width}px animation preference saves independently from comfort',page.evaluate("(()=>{const r=JSON.parse(localStorage.getItem('eclipse-labyrinth.run.v2'));return r.objectMotion===true&&r.comfort===true;})()"))
+        check(f'{width}px animation preference saves independently from comfort',page.evaluate("(()=>{const r=JSON.parse(localStorage.getItem('eclipse-labyrinth.run.v3'));return r.objectMotion===true&&r.comfort===true;})()"))
         page.close()
     check('No browser JavaScript errors',not errors)
     check('Offline game performs no external resource requests',not [r for r in requests if r.startswith(('http:','https:'))])
