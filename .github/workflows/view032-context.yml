@@ -1,0 +1,20 @@
+name: Private movement baseline
+on:
+  push:
+    branches: ['fix/readable-movement-v032']
+    paths: ['.github/workflows/view032-context.yml']
+permissions:
+  contents: read
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 34450da374be12bf48edf230bd791fabc8a669ca
+      - run: git archive --format=zip HEAD -o /tmp/view032-baseline.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: private-view032-baseline
+          path: /tmp/view032-baseline.zip
+          retention-days: 1
