@@ -1,6 +1,6 @@
 {
   "name": "eclipse-labyrinth",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "description": "月蝕の迷宮 — a self-contained first-person roguelike dungeon RPG",
@@ -12,7 +12,9 @@
     "check": "npm test && npm run build",
     "publish:private": "node scripts/publish.mjs",
     "verify:dist": "node scripts/verify-dist.mjs",
-    "balance": "node scripts/balance.mjs"
+    "balance": "node scripts/balance.mjs",
+    "test:render": "node --test tests/rendering.test.mjs",
+    "test:visual": "python tests/render_browser.py"
   },
   "engines": {
     "node": ">=20"

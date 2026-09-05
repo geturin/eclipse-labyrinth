@@ -1,5 +1,6 @@
-import { FLOORS, ENEMY_TYPES } from './data.js';
-import { objectSvg, enemySvg, svgUri } from './art.js';
+import { FLOORS } from './data.js';
+import { SPRITE_KEYS, explorationSvg, rasterSprite } from './sprite-art.js';
+import { sceneObjects, sceneDecorations, projectSprite, visibleSpans, spriteMotion, placeLabels } from './sprite-scene.js';
 import { REGIONS, regionAt } from './world.js';
 
 /** First-person grid raycaster. Default comfort mode snaps movement and turns without camera bob. */
@@ -7,15 +8,17 @@ export class DungeonRenderer {
   constructor(canvas,getState) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});this.getState=getState;
     this.active=true;this.floor=0;this.x=1.5;this.y=1.5;this.angle=0;this.last=0;this.frame=0;this.images={};this.textures=[];this.flash=0;
-    for(const type of ['chest','stairs','shrine','fountain','altar','elite']) {
-      const img=new Image();img.src=svgUri(type==='elite'?enemySvg('sentinel','#c9a7bd'):objectSvg(type,type==='shrine'?'#bba7ec':'#b9cbea'));this.images[type]=img;
-    }
-    for(const [id,data] of Object.entries(ENEMY_TYPES)){const img=new Image();img.src=svgUri(enemySvg(data.kind,data.tint));this.images['mob-'+id]=img;}
-    for(let i=0;i<4;i++){
-      const z=REGIONS[i],img=new Image();
-      const motifs=[`<path d="M80 35 95 71 130 80 95 92 80 125 66 92 30 80 66 68Z" fill="${z.color}"/><path d="M80 48V112M48 80H112" stroke="#fff" opacity=".6"/>`,`<path d="M80 121C18 85 39 41 70 77Q81 21 112 40Q139 87 80 121" fill="${z.color}"/><path d="M80 142V65M80 105 51 75M80 89 112 59" fill="none" stroke="#c8ffe1" stroke-width="4"/>`,`<path d="M30 53Q54 41 80 57Q106 41 130 53V111Q103 99 80 116Q54 100 30 111Z" fill="${z.color}"/><path d="M80 59V110M41 65 67 67M41 78 67 80M93 67 118 65M93 80 118 78" stroke="#503b69" stroke-width="3"/>`,`<path d="M51 107Q52 91 57 68A23 23 0 0 1 103 68Q107 89 110 107Z" fill="${z.color}"/><ellipse cx="80" cy="108" rx="30" ry="6" fill="#5b472b"/><path d="M80 40V27M74 119Q80 128 87 119" fill="none" stroke="${z.color}" stroke-width="5"/>`];
-      img.src=svgUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 200"><ellipse cx="80" cy="184" rx="62" ry="12" fill="#000" opacity=".3"/><path d="M49 133H111L116 179H44Z" fill="#323844" stroke="${z.color}" stroke-width="2"/><path d="M39 177H121V186H39Z" fill="#4a505b"/>${motifs[i]}<text x="80" y="164" text-anchor="middle" fill="${z.color}" font-family="serif" font-size="23">${z.code}</text></svg>`);this.images['landmark-'+i]=img;
-    }
+    this.decorations=[];this.lastLabels=[];this.assetErrors=[];
+    this.reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+    this.ready=Promise.all(SPRITE_KEYS.map(async key=>{
+      try{this.images[key]=await rasterSprite(explorationSvg(key));}
+      catch(error){
+        this.assetErrors.push(key);console.error(`Exploration asset ${key}:`,error);
+        const c=document.createElement('canvas');c.width=c.height=320;const t=c.getContext('2d');
+        t.fillStyle='#26384c';t.fillRect(70,70,180,225);t.strokeStyle='#f5c889';t.lineWidth=7;t.strokeRect(70,70,180,225);
+        t.fillStyle='#ffe4bd';t.font='bold 120px sans-serif';t.textAlign='center';t.fillText('?',160,231);this.images[key]=c;
+      }
+    }));
     this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(canvas);this.resize();
     this.loop=this.loop.bind(this);this.request=requestAnimationFrame(this.loop);
   }
@@ -23,10 +26,11 @@ export class DungeonRenderer {
     const rect=this.canvas.getBoundingClientRect();
     const ratio=Math.min(window.devicePixelRatio||1,1.5);
     const w=Math.max(320,Math.min(1200,Math.round(rect.width*ratio))),h=Math.max(220,Math.round(rect.height*w/Math.max(1,rect.width)));
+    this.uiScale=w/Math.max(1,rect.width);
     if(this.canvas.width!==w||this.canvas.height!==h){this.canvas.width=w;this.canvas.height=h;this.z=new Float32Array(w);}
   }
   destroy(){this.active=false;cancelAnimationFrame(this.request);this.resizeObserver.disconnect();}
-  pulse(){if(this.getState()?.comfort===false)this.flash=0.12;}
+  pulse(){if(this.getState()?.comfort===false&&!this.reducedMotion.matches)this.flash=0.12;}
   makeTextures(floor) {
     this.textures=[];
     for(const zone of REGIONS)for(let kind=0;kind<4;kind++){
@@ -61,6 +65,17 @@ export class DungeonRenderer {
         t.fillStyle=zone.color;t.fillRect(59,36,10,22);t.fillStyle='#fff7e8';t.fillRect(62,37,4,18);
       }
       if(kind===3){t.fillStyle=zone.mortar;t.fillRect(44,36,40,53);t.strokeStyle=zone.color;t.lineWidth=2;t.strokeRect(44,36,40,53);t.fillStyle=zone.color;t.font='bold 30px serif';t.textAlign='center';t.fillText(zone.code,64,73);}
+      if(kind===0){
+        if(zone.style==='stone'){
+          t.fillStyle='#29354d';t.fillRect(46,18,37,58);t.strokeStyle=zone.color;t.lineWidth=2;
+          t.beginPath();t.moveTo(64,25);t.lineTo(75,43);t.lineTo(64,61);t.lineTo(53,43);t.closePath();t.stroke();
+        }else if(zone.style==='garden'){
+          t.fillStyle='#182e30';t.fillRect(14,84,32,26);t.strokeStyle='#78a796';t.lineWidth=2;
+          for(let x=19;x<46;x+=7){t.beginPath();t.moveTo(x,85);t.lineTo(x,108);t.stroke();}
+        }else if(zone.style==='arches'){
+          t.strokeStyle='#352e2c';t.lineWidth=2;t.beginPath();t.moveTo(100,5);t.lineTo(89,26);t.lineTo(105,46);t.lineTo(97,68);t.stroke();
+        }
+      }
       this.textures.push(c);
     }
   }
@@ -68,15 +83,99 @@ export class DungeonRenderer {
     if(!this.active)return;this.request=requestAnimationFrame(this.loop);
     if(time-this.last<30||document.hidden)return;this.last=time;
     const run=this.getState();if(!run?.dungeon)return;
-    if(this.floor!==run.floor||this.dungeon!==run.dungeon){this.floor=run.floor;this.dungeon=run.dungeon;this.makeTextures(run.floor);this.x=run.x+.5;this.y=run.y+.5;this.angle=-Math.PI/2+run.dir*Math.PI/2;}
+    if(this.floor!==run.floor||this.dungeon!==run.dungeon){this.floor=run.floor;this.dungeon=run.dungeon;this.makeTextures(run.floor);this.decorations=sceneDecorations(run.dungeon);this.x=run.x+.5;this.y=run.y+.5;this.angle=-Math.PI/2+run.dir*Math.PI/2;}
     const target=-Math.PI/2+run.dir*Math.PI/2;
     let delta=((target-this.angle+Math.PI*3)%(Math.PI*2))-Math.PI;
-    if(run.comfort!==false){this.angle=target;this.x=run.x+.5;this.y=run.y+.5;this.flash=0;}else{this.angle+=delta*.38;this.x+=(run.x+.5-this.x)*.4;this.y+=(run.y+.5-this.y)*.4;}
+    if(run.comfort!==false||this.reducedMotion.matches){this.angle=target;this.x=run.x+.5;this.y=run.y+.5;this.flash=0;}else{this.angle+=delta*.38;this.x+=(run.x+.5-this.x)*.4;this.y+=(run.y+.5-this.y)*.4;}
     this.draw(run,time);
   }
   floorTile(ctx,w,h,points,fill){
     if(points.some(p=>p.z<.14))return;
     ctx.beginPath();points.forEach((p,i)=>{const x=w/2+p.lateral/p.z*w/.78/2,y=h/2+h/p.z/2;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle='#a1a2c011';ctx.lineWidth=1;ctx.stroke();
+  }
+  clipSpans(spans) {
+    const ctx=this.ctx;ctx.beginPath();
+    for(const [x,width] of spans)ctx.rect(x,0,width,this.canvas.height);
+    ctx.clip();
+  }
+  drawObjects(run,time) {
+    const ctx=this.ctx,w=this.canvas.width,h=this.canvas.height;
+    const animate=run.objectMotion===true&&!this.reducedMotion.matches&&run.phase==='explore';
+    const objects=[...this.decorations,...sceneObjects(run)];
+    const sprites=objects.map(o=>projectSprite(o,this,w,h)).filter(Boolean).sort((a,b)=>b.depth-a.depth);
+    const candidates=[];
+    for(const s of sprites) {
+      const image=this.images[s.image];if(!image)continue;
+      const spans=visibleSpans(this.z,s.depth,s.left,s.sw);if(!spans.length)continue;
+      const motion=spriteMotion(s,time,animate),lift=motion.lift*s.sh,sh=s.sh*motion.stretch;
+      const top=s.top+s.sh-sh-lift;
+      ctx.save();this.clipSpans(spans);
+      if(!s.companion){
+        // Ground contact is independent of breathing/hovering; shadows do not hover with the body.
+        const foot=s.ground,rx=s.sw*(s.shadow?.34:.29),ry=Math.max(1,h/(s.depth*s.depth)*.028);
+        ctx.fillStyle='#080d19';ctx.globalAlpha=s.decor?.22:.42;
+        ctx.beginPath();ctx.ellipse(s.center,foot-ry*.18,rx,ry,0,0,Math.PI*2);ctx.fill();
+        if(s.shadow){ctx.strokeStyle=s.color??'#c1cce5';ctx.globalAlpha=.45;ctx.lineWidth=1.5*this.uiScale;ctx.stroke();}
+      }
+      ctx.globalAlpha=Math.max(.44,1-s.depth*.043)*(s.companion?.65:s.decor?.8:1)*motion.light;
+      // Draw a COMPLETE cached raster through a screen-space occlusion mask. This fixes the SVG crop bug.
+      ctx.drawImage(image,s.left,top,s.sw,sh);
+      if(s.image==='shrine'&&this.images['shrine-flame']){
+        ctx.save();ctx.translate(s.center,s.top+s.sh*.43);
+        const wave=animate?Math.sin(time*.002+s.phase):0;
+        ctx.scale(1+wave*.03,1+wave*.055);ctx.translate(-s.center,-s.top-s.sh*.43);
+        ctx.drawImage(this.images['shrine-flame'],s.left,s.top,s.sw,s.sh);ctx.restore();
+      }
+      if(s.elite){
+        ctx.globalAlpha=.95;ctx.strokeStyle='#ffe3ac';ctx.fillStyle='#624028';ctx.lineWidth=2*this.uiScale;
+        const cy=top+sh*.12,r=Math.max(7*this.uiScale,sh*.065);
+        ctx.beginPath();ctx.moveTo(s.center-r,cy);ctx.lineTo(s.center-r*1.3,cy-r);ctx.lineTo(s.center,cy-r*.45);ctx.lineTo(s.center+r*1.3,cy-r);ctx.lineTo(s.center+r,cy);ctx.closePath();ctx.fill();ctx.stroke();
+      }
+      ctx.restore();
+      const center=Math.round(s.center),coverage=spans.reduce((n,[,v])=>n+v,0)/Math.max(1,Math.min(w,s.left+s.sw)-Math.max(0,s.left));
+      if(s.label&&coverage>.3&&center>=0&&center<w&&s.depth<this.z[center]-1e-5){
+        // Nearer solid sprites take visual priority over markers for objects behind them.
+        const hidden=sprites.some(n=>n.depth<s.depth-.1&&!n.decor&&Math.abs(n.center-s.center)<n.sw*.23&&s.top>n.top&&s.top<n.top+n.sh*.88);
+        if(!hidden){
+          const far=s.depth>=4, text=far?({enemy:'敌群',elite:'强敌',gate:'守卫',stairs:'阶梯',chest:'宝箱',altar:'祭坛',shrine:'星灯',fountain:'泉水'}[s.icon]??s.label):s.label;
+          ctx.font=`600 ${12*this.uiScale}px sans-serif`;
+          candidates.push({...s,top:top+(image.spriteBounds?.top??0)*sh,width:Math.ceil(ctx.measureText(text).width+41*this.uiScale),text,far});
+        }
+      }
+    }
+    this.lastLabels=placeLabels(candidates,w,h,this.uiScale,this.labelObstacles());
+    const description='第一人称迷宫'+(this.lastLabels.length?'；前方可见：'+this.lastLabels.map(l=>l.label).join('、'):'；前方暂无可见目标');
+    if(this.canvas.getAttribute('aria-label')!==description)this.canvas.setAttribute('aria-label',description);
+  }
+  labelObstacles() {
+    const stage=this.canvas.closest('.stage'),heading=stage?.querySelector('.floor-heading');
+    if(!stage)return [];
+    const signature=`${this.canvas.width}:${this.canvas.height}`;
+    if(this.hudHeading!==heading||this.hudSize!==signature){
+      this.hudHeading=heading;this.hudSize=signature;
+      const box=this.canvas.getBoundingClientRect(),s=this.uiScale;
+      this.hudObstacles=[...stage.querySelectorAll('.floor-heading,.floor-number,.compass,.interaction,.explore-caption,.position-label')].map(el=>{
+        const r=el.getBoundingClientRect();return {x:(r.left-box.left-3)*s,y:(r.top-box.top-3)*s,w:(r.width+6)*s,h:(r.height+6)*s};
+      });
+    }
+    return this.hudObstacles??[];
+  }
+  drawLabels() {
+    const ctx=this.ctx,scale=this.uiScale;
+    for(const item of this.lastLabels){
+      ctx.save();ctx.globalAlpha=.97;ctx.fillStyle='#111c2e';ctx.strokeStyle=item.color;ctx.lineWidth=scale;
+      ctx.beginPath();ctx.roundRect(item.x,item.y,item.w,item.h,5*scale);ctx.fill();ctx.stroke();
+      ctx.translate(item.x+14*scale,item.y+12.5*scale);ctx.scale(scale,scale);
+      ctx.lineWidth=1.8;ctx.strokeStyle=item.color;ctx.fillStyle=item.color;ctx.beginPath();
+      if(item.icon==='chest'){ctx.rect(-6,-3,12,8);ctx.moveTo(-6,-3);ctx.lineTo(-4,-6);ctx.lineTo(4,-6);ctx.lineTo(6,-3);ctx.moveTo(0,-2);ctx.lineTo(0,2);}
+      else if(item.icon==='stairs'){ctx.moveTo(-6,6);ctx.lineTo(-6,2);ctx.lineTo(-2,2);ctx.lineTo(-2,-2);ctx.lineTo(2,-2);ctx.lineTo(2,-6);ctx.lineTo(6,-6);}
+      else if(item.icon==='gate'||item.icon==='elite'){ctx.moveTo(-6,5);ctx.lineTo(-7,-5);ctx.lineTo(-2,-1);ctx.lineTo(0,-7);ctx.lineTo(3,-1);ctx.lineTo(7,-5);ctx.lineTo(6,5);ctx.closePath();}
+      else if(item.icon==='enemy'){ctx.moveTo(0,-7);ctx.lineTo(7,0);ctx.lineTo(0,7);ctx.lineTo(-7,0);ctx.closePath();ctx.moveTo(-3,-1);ctx.lineTo(-1,1);ctx.moveTo(3,-1);ctx.lineTo(1,1);}
+      else if(item.icon==='fountain'){ctx.moveTo(0,-7);ctx.bezierCurveTo(-12,5,-2,10,4,5);ctx.bezierCurveTo(8,2,2,-5,0,-7);}
+      else {ctx.moveTo(0,-7);ctx.lineTo(2,-2);ctx.lineTo(7,0);ctx.lineTo(2,2);ctx.lineTo(0,7);ctx.lineTo(-2,2);ctx.lineTo(-7,0);ctx.lineTo(-2,-2);ctx.closePath();}
+      ctx.stroke();ctx.restore();
+      ctx.save();ctx.fillStyle='#eef3ff';ctx.font=`600 ${12*scale}px sans-serif`;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(item.text,item.x+29*scale,item.y+item.h/2,item.w-34*scale);ctx.restore();
+    }
   }
   draw(run,time) {
     const ctx=this.ctx,w=this.canvas.width,h=this.canvas.height;
@@ -108,24 +207,12 @@ export class DungeonRenderer {
       ctx.fillStyle=`rgba(8,12,25,${Math.min(.76,dist*.06+(side===1?.08:0))})`;ctx.fillRect(col,top,2,height);
       if(dist<4){ctx.fillStyle=`rgba(167,163,207,${.035*(1-dist/4)})`;ctx.fillRect(col,top,2,height);}
     }
-    const objects=Object.entries(run.dungeon.events).filter(([,ev])=>!ev.used).map(([key,ev])=>{const [x,y]=key.split(',').map(Number);return {x,y,image:ev.type,scale:ev.type==='stairs'?.95:.65};});
-    for(const l of run.dungeon.landmarks||[])objects.push({x:l.x,y:l.y,image:'landmark-'+l.zone,scale:.9});
-    if(run.phase!=='battle')for(const mob of run.dungeon.packs.filter(p=>!p.defeated&&!p.engaged))objects.push({x:mob.x,y:mob.y,image:'mob-'+mob.troop[0],scale:mob.kind==='elite'?1.05:.8,mob});
-    const sprites=objects.map(object=>{const sx=object.x+.5-this.x,sy=object.y+.5-this.y;return {...object,z:sx*dx+sy*dy,lateral:-sx*dy+sy*dx};}).filter(s=>s.z>.2&&s.z<10).sort((a,b)=>b.z-a.z);
-    for(const s of sprites){
-      const image=this.images[s.image];if(!image?.complete||!image.naturalWidth)continue;
-      const scale=s.scale,sh=h/s.z*scale,sw=sh*(image.naturalWidth/image.naturalHeight);
-      const sx=w/2*(1+s.lateral/(s.z*.78))-sw/2,sy=h/2+h/s.z/2-sh;
-      ctx.globalAlpha=Math.max(.2,1-s.z*.065);
-      for(let col=Math.max(0,Math.floor(sx));col<Math.min(w,sx+sw);col+=2){if(s.z<this.z[col]+.08){const sourceX=Math.max(0,Math.min(image.naturalWidth-1,(col-sx)/sw*image.naturalWidth));const sourceW=Math.min(image.naturalWidth-sourceX,image.naturalWidth/sw*2.2);if(sourceW>0)ctx.drawImage(image,sourceX,0,sourceW,image.naturalHeight,col,sy,2.2,sh);}}
-      ctx.globalAlpha=1;
-      const center=Math.round(sx+sw/2);
-      if(s.mob&&center>=0&&center<w&&s.z<this.z[center]+.08){ctx.fillStyle=s.mob.kind==='elite'?'#ffca8d':'#ffadc1';ctx.font=`bold ${Math.max(11,Math.min(20,28/s.z))}px sans-serif`;ctx.textAlign='center';ctx.fillText(`${s.mob.kind==='elite'?'强敌':'敌群'} ×${s.mob.troop.length}`,center,Math.max(18,sy-4));}
-    }
+    this.drawObjects(run,time);
     const vignette=ctx.createRadialGradient(w/2,h*.48,h*.12,w/2,h*.5,Math.max(w*.67,h*.8));vignette.addColorStop(0,'#10142a00');vignette.addColorStop(.65,'#090d1830');vignette.addColorStop(1,run.comfort!==false?'#07091588':'#070915cc');ctx.fillStyle=vignette;ctx.fillRect(0,0,w,h);
     const haze=ctx.createLinearGradient(0,h*.25,0,h*.8);haze.addColorStop(0,'#aaa0d000');haze.addColorStop(.45,'#909bd20c');haze.addColorStop(1,'#aba9d300');ctx.fillStyle=haze;ctx.fillRect(0,0,w,h);
     ctx.fillStyle=FLOORS[run.floor-1].color;
-    for(let i=0;run.comfort===false&&i<12;i++){const px=((i*157.7+time*.002*(i%3+1))%w),py=((i*97.4-time*.006+100000)%h);ctx.globalAlpha=.15+(Math.sin(time*.001+i)*.5+.5)*.32;ctx.beginPath();ctx.arc(px,py,i%6===0?1.8:.7,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
+    for(let i=0;run.comfort===false&&!this.reducedMotion.matches&&i<12;i++){const px=((i*157.7+time*.002*(i%3+1))%w),py=((i*97.4-time*.006+100000)%h);ctx.globalAlpha=.15+(Math.sin(time*.001+i)*.5+.5)*.32;ctx.beginPath();ctx.arc(px,py,i%6===0?1.8:.7,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
+    if(run.phase!=='battle')this.drawLabels();
     if(run.phase==='battle'){ctx.fillStyle='#07091577';ctx.fillRect(0,0,w,h);}
     if(this.flash>0){ctx.fillStyle=`rgba(206,193,243,${this.flash})`;ctx.fillRect(0,0,w,h);this.flash*=.72;if(this.flash<.005)this.flash=0;}
   }
