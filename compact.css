@@ -126,3 +126,26 @@
   .hud-dock .team-attack kbd { display: none; }
   .hud-dock .target-prompt { grid-column: 1 / -1; padding-bottom: 0; }
 }
+
+/* v0.3.2: keep orientation inside the scene, not another permanent control panel. */
+.navigation-compass.compass{top:18px;min-width:145px;display:flex;flex-direction:column;gap:4px;padding:8px 14px;border-radius:10px;background:#101b2ce8;pointer-events:none}
+.navigation-compass strong{color:#ede8fb;font-size:17px;letter-spacing:.12em;font-weight:600;line-height:1.25}
+.navigation-compass .move-cue{color:#c1cddd;font-size:12px;white-space:nowrap;line-height:1.25;letter-spacing:0}
+.navigation-map{position:absolute;right:18px;top:104px;width:128px;padding:7px 7px 4px;background:#111c2de8;border:1px solid #8393b555;border-radius:8px;box-shadow:0 4px 18px #040a1740;color:#c6d2e4;pointer-events:auto;display:grid;gap:0;text-align:center}
+.navigation-map>span{font-size:11px;line-height:14px;text-align:right;letter-spacing:.05em}
+.navigation-map>svg{display:block;width:100%;height:auto}
+.navigation-map>small{font-size:11px;font-variant-numeric:tabular-nums;line-height:16px;letter-spacing:.1em}
+.navigation-map:focus-visible{outline:2px solid #e9d7fa;outline-offset:3px}
+.explore-mode .side-column .map-card{display:none}
+.explore-mode .position-label{display:none}
+.view-modes button{display:flex;flex-direction:column;align-items:flex-start;gap:5px;white-space:normal;height:auto;min-height:60px;padding:12px 16px;text-align:left}
+.view-modes button strong{font-size:15px}.view-modes button span{font-size:12px;color:#bdc6d7;line-height:1.5}
+.view-modes button[aria-pressed=true]{border-color:#c6b0ec;background:#2c2c48}
+@media(max-width:600px){
+ .navigation-compass.compass{top:68px;left:14px;transform:none;min-width:130px;padding:6px 10px;align-items:flex-start}
+ .navigation-compass strong{font-size:15px}.navigation-compass .move-cue{font-size:11px}
+ .navigation-map{right:12px;top:72px;width:99px;padding:4px 5px 3px}
+ .navigation-map>span,.navigation-map>small{font-size:10px;line-height:12px}
+ .explore-mode .zone-badge{margin-top:56px}
+ .explore-mode .explore-caption{max-width:calc(100% - 30px);font-size:11px}
+}

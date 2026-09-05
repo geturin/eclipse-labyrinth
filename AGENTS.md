@@ -74,3 +74,14 @@ Keep full skill/item details accessible on touch devices, not hover-only. Preser
 keyboard activation and focus when rerendering the dock. Optional UI does not spend turns.
 `compact.css` is bundled along with `style.css`; ship both edits with rebuilt static HTML.
 Run `python tests/compact_browser.py` alongside the three existing browser suites.
+
+## Readable grid travel (v0.3.2)
+
+`src/navigation.js` is pure, finite camera interpolation, never gameplay movement. Default
+step mode must show a complete cell/quarter-turn before another segment; no spring follow,
+diagonal corner cutting, camera bob, roll, FOV pumping or unbounded key-repeat queues.
+At most one deliberate tap can wait. Menus/focus loss discard that queue. Persist the
+committed outcome before presentation, and never allow hidden battle commands during an
+encounter approach. Reduced motion overrides spatial travel. Keep the north-up inset and
+heading cues without expanding the compact HUD. Clip near-plane floor polygons instead
+of discarding whole tiles. Run `python tests/navigation_browser.py` with the other suites.

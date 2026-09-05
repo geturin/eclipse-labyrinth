@@ -138,11 +138,12 @@ with sync_playwright() as p:
     page.locator('[data-action="equip-bag"]').first.click()
     check('Inventory weapon can be swapped',page.locator('.inventory-weapon').count()==4)
     page.keyboard.press('Escape')
-    check('Comfort mode defaults on',state(page)['comfort'] is True)
+    check('Navigation defaults to continuous steps',state(page).get('viewMode','step')=='step')
     page.locator('[data-action="menu"]').click()
-    page.locator('[data-action="comfort"]').click()
-    check('Comfort toggle persists',state(page)['comfort'] is False)
-    page.locator('[data-action="comfort"]').click()
+    page.locator('[data-action="view-settings"]').click()
+    page.locator('[data-mode="deliberate"]').click()
+    check('View mode preference persists',state(page)['viewMode']=='deliberate')
+    page.locator('[data-mode="step"]').click()
     page.keyboard.press('Escape')
     before=state(page)['dungeon']['elapsed']
     page.evaluate('document.activeElement?.blur()')  # global wait shortcut, not native button activation

@@ -1,6 +1,13 @@
 # 月蝕の迷宮 · Eclipse Labyrinth
 
-**v0.3.1 — 冷却制、双方回合与战前控场。** 原创日式幻想 DRPG：第一人称随机迷宫，1～3 人职业小队，五层 roguelike，每局武器、技能、觉醒和祝福从零开始。离线浏览器运行，无账号、后端、遥测或外部素材请求。
+**v0.3.2 — 可辨向步进、冷却制战斗与紧凑界面。** 原创日式幻想 DRPG：第一人称随机迷宫，1～3 人职业小队，五层 roguelike，每局武器、技能、觉醒和祝福从零开始。离线浏览器运行，无账号、后端、遥测或外部素材请求。
+
+## v0.3.2 探索移动
+
+默认恢复短暂连续的格子移动与 90° 转向，固定时长、到点即停，不摇头或倾斜。菜单 → 探索视角
+可选标准步进、舒缓步进或淡入切换；系统减弱动态仍优先。北向固定小地图移到探索视野内，
+显示朝向、坐标与最近足迹。按键不堆积长队列，遇敌先完成走格再展示战斗，不增加游戏回合。
+沿用 v3 存档，原来的 comfort 标记不再强制瞬间切换。参考资料与验证见 `docs/MOVEMENT032.md`。
 
 ## v0.3.1 界面精简
 
@@ -62,6 +69,8 @@ npm run balance
 CHROMIUM_PATH=/usr/bin/chromium python tests/render_browser.py
 CHROMIUM_PATH=/usr/bin/chromium python tests/battle_browser.py
 CHROMIUM_PATH=/usr/bin/chromium python tests/browser_smoke.py
+CHROMIUM_PATH=/usr/bin/chromium python tests/compact_browser.py
+CHROMIUM_PATH=/usr/bin/chromium python tests/navigation_browser.py
 ```
 
 浏览器测试额外需要 Python Playwright；使用内存 Storage 替身，不等同于原生文件存储或真实 iPhone 验证。`npm run balance` 是隔离战斗固定策略诊断，不是玩家胜率。
