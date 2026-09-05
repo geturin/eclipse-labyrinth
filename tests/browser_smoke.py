@@ -58,9 +58,10 @@ def act(page, skill, target=None):
     page.locator(f'[data-action="skill"][data-skill="{skill}"]').click()
     if target:
         page.locator(f'[data-action="party"][data-id="{target}"]').click()
-    page.wait_for_timeout(120)
-    if page.locator('[data-action="skip-animation"]').count():page.keyboard.press('Escape')
-    page.wait_for_timeout(50)
+    # Wait for presentation completion rather than race a disappearing Skip control.
+    # Escape opens the pause menu when playback finishes before the key event.
+    # Dedicated battle_browser tests exercise actual Skip button behavior.
+    page.locator('#combat-skip').wait_for(state='hidden', timeout=15000)
 
 def shortest_path(run, destination):
     start = (run['x'], run['y'])
