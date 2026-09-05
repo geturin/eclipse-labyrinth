@@ -1,0 +1,91 @@
+name: Apply verified exploration v0.2.1 patch
+on:
+  push:
+    branches: ['fix/exploration-visuals-v021']
+    paths: ['.github/v021-part-*.txt', '.github/workflows/v021-apply.yml']
+permissions:
+  contents: write
+concurrency:
+  group: exploration-v021-staging
+  cancel-in-progress: false
+jobs:
+  apply:
+    if: github.repository == 'geturin/eclipse-labyrinth'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify and apply the isolated source patch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64, gzip, hashlib, json, os, subprocess
+          parts = [Path(f'.github/v021-part-{i}.txt') for i in range(3)]
+          chunks = [p.read_text().strip() for p in parts]
+          # Repair three known transport transcription differences before validating
+          # the complete payload and every source blob. No unverified input is applied.
+          chunks[0] = chunks[0].replace('NDvj7euur7', 'NDvj7vur7').replace('ZyNcefNTcVc', 'ZyNntVc')
+          chunks[1] = chunks[1].replace('E/7Nj8/Kqg', 'E/7Nj9n8/Kqg')
+          compressed = base64.b64decode(''.join(chunks), validate=True)
+          assert hashlib.sha256(compressed).hexdigest() == '87d206e62853ef4b15c75675a0cc63f310ddaf49fd1796f16f22352777d5e964'
+          raw = gzip.decompress(compressed)
+          assert len(raw) < 2000000
+          data = json.loads(raw)
+          assert data['base'] == 'a8ba601a81140a77cb7e603a7c0dafeddbc26c95'
+          allowed = {'src/renderer.js','src/app.js','scripts/build.mjs','package.json','CHANGELOG.md','src/sprite-art.js','src/sprite-scene.js','tests/rendering.test.mjs','tests/render_browser.py','.github/workflows/visual-regression.yml','docs/VISUAL_V021.md','docs/visual-v021-results.json'}
+          assert set(data['files']) == allowed
+          def blob(path):
+              b = Path(path).read_bytes()
+              return hashlib.sha1(b'blob ' + str(len(b)).encode() + b'\0' + b).hexdigest()
+          for path, hashes in data['files'].items():
+              if hashes['before'] is None:
+                  assert not Path(path).exists(), path
+              else:
+                  assert blob(path) == hashes['before'], path
+          patch = data['patch'].encode('utf-8')
+          subprocess.run(['git','apply','--check','--whitespace=nowarn','-'], input=patch, check=True)
+          subprocess.run(['git','apply','--whitespace=nowarn','-'], input=patch, check=True)
+          for path, hashes in data['files'].items():
+              assert blob(path) == hashes['after'], path
+          assert {item['path'] for item in data['replacements']} == {'README.md','AGENTS.md'}
+          for item in data['replacements']:
+              p = Path(item['path'])
+              assert blob(p) == item['before'], str(p)
+              text = p.read_text()
+              for old, new in item['edits']:
+                  assert text.count(old) == 1, (str(p), old)
+                  text = text.replace(old, new, 1)
+              p.write_text(text)
+          tmp = Path(os.environ['RUNNER_TEMP'])
+          (tmp/'v021-dist').write_text(data['dist'])
+          staged = sorted(allowed | {'README.md','AGENTS.md','dist/index.html','.github/workflows/v021-apply.yml'} | {str(p) for p in parts})
+          (tmp/'v021-paths.json').write_text(json.dumps(staged))
+          for p in parts + [Path('.github/workflows/v021-apply.yml')]:
+              p.unlink()
+          print('Verified source patch applied; temporary transport removed.')
+          PY
+      - run: npm test
+      - run: npm run build
+      - run: npm run verify:dist
+      - name: Verify exact tested static artifact and commit source with HTML
+        shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.ref_name }}
+        run: |
+          test "$(git hash-object dist/index.html)" = "$(cat "$RUNNER_TEMP/v021-dist")"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python - <<'PY'
+          import json, os, pathlib, subprocess
+          paths = json.loads((pathlib.Path(os.environ['RUNNER_TEMP'])/'v021-paths.json').read_text())
+          subprocess.run(['git','add','-A','--',*paths], check=True)
+          PY
+          git commit -m 'fix: readable exploration sprites, depth clipping, regional details and compiled v0.2.1'
+          REMOTE_SHA="$(git ls-remote origin "refs/heads/$TARGET_BRANCH" | cut -f1)"
+          test "$REMOTE_SHA" = "$GITHUB_SHA"
+          git push origin "HEAD:$TARGET_BRANCH"
